@@ -1,0 +1,2 @@
+django==2.0
+virtualenv==15.1.0
