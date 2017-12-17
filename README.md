@@ -22,3 +22,14 @@ Then :
 ```
 
 This will create a new virtualenv named `yatdlm` with a python 3.6 interpreter and then install the requirements specified in the requirements file.
+
+Except for the first time, you will need to activate the virtualenv each time you want to launch the developement webserver or make your migration. You will have to do the following :
+```bash
+    $ source /usr/local/bin/virtualenvwrapper.sh
+    $ workon yatdlm
+```
+
+Once you're in the virtualenv you can use pip as you want in order to manage the packages that are *inside* the virtualenv. When you are finished, you can deactivate the virtualenv simply by using :
+```bash
+    $ deactivate
+```
