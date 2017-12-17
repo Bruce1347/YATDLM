@@ -1,0 +1,4 @@
+*.pdf
+*.sqlite3
+*.o
+*.pyc
