@@ -1,0 +1,16 @@
+{% if lists %}
+<ul>
+    {% for list in lists %}
+    <li>{{ list.title }}
+        <ul>
+        {% for task in tasks|get_value:list.id %}
+            <li>
+                {{ task.title }}
+            </li>
+        {% endfor %}        
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endif %}
