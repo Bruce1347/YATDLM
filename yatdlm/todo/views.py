@@ -14,7 +14,7 @@ def index(request):
     tasks = {}
     for todo in todo_lists:
         # Fetch the tasks that have `todo` as a parent
-        children_tasks = Task.objects.filter(id=todo.id)
+        children_tasks = Task.objects.filter(parent_list=todo.id)
         tasks[todo.id] = []
         for task in children_tasks:
             tasks[todo.id].append(task)
