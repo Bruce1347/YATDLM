@@ -19,10 +19,22 @@ def index(request):
         for task in children_tasks:
             tasks[todo.id].append(task)
 
-    print(tasks)
-
     context = {
         'lists' : todo_lists,
         'tasks' : tasks,
     }
     return render(request, 'todo/index.html', context)
+
+def list(request, list_id=-1):
+    # Retrieve the list
+    todo_list = TodoList.objects.get(id=list_id)
+    # Retrieve the subsequent tasks
+    tasks_filter = Task.objects.filter(parent_list=list_id)
+    tasks = [task for task in tasks_filter]
+
+    # Create the context
+    context = {
+        'list'  : todo_list,
+        'tasks' : tasks,
+    }
+    return render(request, 'todo/list.html', context)

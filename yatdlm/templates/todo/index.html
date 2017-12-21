@@ -1,7 +1,14 @@
+<h1 style="text-align: center">
+    YATDLM
+</h1>
+
 {% if lists %}
 <ul>
     {% for list in lists %}
-    <li>{{ list.title }}
+    <li>
+        <a href="/todo/lists/{{ list.id }}">
+            {{ list.title }}
+        </a> 
         <ul>
         {% for task in tasks|get_value:list.id %}
             <li>
@@ -12,5 +19,4 @@
     </li>
     {% endfor %}
 </ul>
-
 {% endif %}
