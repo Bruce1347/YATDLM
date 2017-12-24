@@ -16,8 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    # Django admin urls (TODO: enable/disable it through configuration variables)
     path('admin/', admin.site.urls),
-    path('todo/', include('todo.urls'))
+    # Urls linked to the todo app
+    path('todo/', include('todo.urls')),
+    # Redirection from <url>/ to <url>/todo
+    path(r'', RedirectView.as_view(url='/todo'))
 ]
