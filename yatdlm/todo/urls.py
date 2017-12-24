@@ -9,4 +9,6 @@ urlpatterns = [
     path('lists', views.index),
     # Specific todo list page
     path('lists/<int:list_id>/', views.list),
+    # Create a new task
+    path('lists/<int:list_id>/add_task', views.add_task)
 ]

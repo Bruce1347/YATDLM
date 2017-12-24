@@ -25,7 +25,7 @@ def index(request):
     }
     return render(request, 'todo/index.html', context)
 
-def list(request, list_id=-1):
+def list(request, list_id=-1, xhr=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
     # Retrieve the subsequent tasks
@@ -37,4 +37,16 @@ def list(request, list_id=-1):
         'list'  : todo_list,
         'tasks' : tasks,
     }
-    return render(request, 'todo/list.html', context)
+    if not xhr:
+        return render(request, 'todo/list.html', context)
+    else:
+        return render(request, 'todo/xhr/tasks.html', context)
+
+def add_task(request, list_id=-1):
+    title = request.POST['title']
+    descr = request.POST['descr']
+
+    new_task = Task(title=title, description=descr, parent_list_id=list_id)
+    new_task.save()
+
+    return list(request, list_id=list_id, xhr=True)

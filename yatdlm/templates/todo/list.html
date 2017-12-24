@@ -1,30 +1,64 @@
+{% load static %}
+{% csrf_token %}
+<script type="text/javascript" src="{% static 'xhr.js' %}"></script>
+<script type="text/javascript" src="{% static 'list.js' %}"></script>
+<script type="text/javascript" src="{% static 'functions.js' %}"></script>
+
+
 <h1 style="text-align: center">{{ list.title }}</h1>
 
-<table style="border-collapse: collapse; width: 100%">
-    <thead>
-        <th style="border: 1px solid; text-align: left;">
-            Tâche
-        </th>
-        <th style="border: 1px solid; text-align: left;">
-            Date de création
-        </th>
-        <th style="border: 1px solid; text-align: left;">
-            Date d'échéance
-        </th>
-    </thead>
-    <tbody>
-        {% for task in tasks %}
-            <tr>
-                <td style="border: 1px solid; text-align: left;">
-                    {{ task.title }}
-                </td>
-                <td style="border: 1px solid; text-align: left;">
-                    {{ task.creation_date }}
-                </td>
-                <td style="border: 1px solid; text-align: left;">
-                    {{ task.due_date }}
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div style="max-width: 800px; margin:auto;">
+    <form>
+        <h2>Ajouter une tâche :</h2>
+        <label for="new_task_title">Titre :</label>
+        <br>
+        <br>
+        <input type="text" id="new_task_title" style="width: 100%">
+        <br>
+        <br>
+        <label for="new_task_descr">Description :</label>
+        <br>
+        <br>
+        <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
+        <br>
+        <br>
+        <label for="new_task_due_date">Date de fin :</label>
+        <input type="text" id="new_task_due_date" style="width: 100%">
+        <br>
+        <br>
+        <button type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>
+    </form>
+    <br>
+    <br>
+    <div id="list-container">
+        <table style="border-collapse: collapse; width: 100%">
+            <thead>
+                <th style="border: 1px solid; text-align: left;">
+                    Tâche
+                </th>
+                <th style="border: 1px solid; text-align: left;">
+                    Date de création
+                </th>
+                <th style="border: 1px solid; text-align: left;">
+                    Date d'échéance
+                </th>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td style="border: 1px solid; text-align: left;">
+                            {{ task.title }}
+                        </td>
+                        <td style="border: 1px solid; text-align: left;">
+                            {{ task.creation_date }}
+                        </td>
+                        <td style="border: 1px solid; text-align: left;">
+                            {{ task.due_date }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -25,12 +25,15 @@ class Task(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     # The user may want to complete the task within a certain time (optional)
-    due_date = models.DateTimeField(auto_now=False, default=timezone.now, null=True, blank=True)
+    due_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
 
     # A short description of the task (mandatory)
     title = models.CharField(max_length=100, blank=False)
     # Its full description (optional)
     description = models.TextField(max_length=300, blank=True)
+
+    # Value that indicates if the task was completed or not
+    is_done = models.BooleanField(blank=False, null=False, default=False)
 
     # Identify the task with its title
     def __str__(self):
