@@ -21,3 +21,17 @@ function add_task(url)
 
     submit(url, postdata, "list-container");
 }
+
+/**
+ * Function that creates the adequate post data then sends it to the server in order to delete a specified task
+ * 
+ * url : the specific needed url
+ */
+function del_task(url)
+{
+    if (!confirm("Voulez-vous supprimer cette tâche ?"))
+        return;
+    
+    postdata = "";
+    submit(url, postdata, "list-container");
+}

@@ -1,14 +1,15 @@
 {% load static %}
 {% csrf_token %}
-<script type="text/javascript" src="{% static 'xhr.js' %}"></script>
-<script type="text/javascript" src="{% static 'list.js' %}"></script>
-<script type="text/javascript" src="{% static 'functions.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/xhr.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/list.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/functions.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
 
 
+{% if not xhr %}
 <h1 style="text-align: center">{{ list.title }}</h1>
 
-
-<div style="max-width: 800px; margin:auto;">
+<div style="max-width: 60%; margin: auto">
     <form>
         <h2>Ajouter une tâche :</h2>
         <label for="new_task_title">Titre :</label>
@@ -29,36 +30,45 @@
         <br>
         <button type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>
     </form>
-    <br>
-    <br>
+</div>
+
+<div style="max-width: 80%; margin:auto;">
     <div id="list-container">
+{% endif %}
         <table style="border-collapse: collapse; width: 100%">
             <thead>
-                <th style="border: 1px solid; text-align: left;">
+                <th class="cell l-align">
                     Tâche
                 </th>
-                <th style="border: 1px solid; text-align: left;">
+                <th class="cell l-align">
                     Date de création
                 </th>
-                <th style="border: 1px solid; text-align: left;">
+                <th class="cell l-align">
                     Date d'échéance
+                </th>
+                <th class="cell" style="background: #EEEEEE">
                 </th>
             </thead>
             <tbody>
                 {% for task in tasks %}
                     <tr>
-                        <td style="border: 1px solid; text-align: left;">
+                        <td class="cell l-align">
                             {{ task.title }}
                         </td>
-                        <td style="border: 1px solid; text-align: left;">
-                            {{ task.creation_date }}
+                        <td class="cell l-align">
+                            {{ task.creation_date|date:"d/m/Y — H:m" }}
                         </td>
-                        <td style="border: 1px solid; text-align: left;">
-                            {{ task.due_date }}
+                        <td class="cell l-align">
+                            {{ task.due_date|date:"d/m/Y — H:m" }}
+                        </td>
+                        <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                            X
                         </td>
                     </tr>
                 {% endfor %}
+{% if not xhr %}
             </tbody>
         </table>
     </div>
 </div>
+{% endif %}

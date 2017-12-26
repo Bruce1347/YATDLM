@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from django.shortcuts import render
 
 from .models import TodoList
@@ -36,11 +37,9 @@ def list(request, list_id=-1, xhr=False):
     context = {
         'list'  : todo_list,
         'tasks' : tasks,
+        'xhr'   : xhr,
     }
-    if not xhr:
-        return render(request, 'todo/list.html', context)
-    else:
-        return render(request, 'todo/xhr/tasks.html', context)
+    return render(request, 'todo/list.html', context)
 
 def add_task(request, list_id=-1):
     title = request.POST['title']
@@ -49,4 +48,12 @@ def add_task(request, list_id=-1):
     new_task = Task(title=title, description=descr, parent_list_id=list_id)
     new_task.save()
 
+    return list(request, list_id=list_id, xhr=True)
+
+def del_task(request, list_id=-1, task_id=-1):
+    if task_id != -1:
+        task = Task.objects.get(id=task_id)
+        task.delete()
+    else: # If the task does not exists in DB, raises a 404
+        raise HttpResponseNotFound("Task does not exists")
     return list(request, list_id=list_id, xhr=True)
