@@ -35,3 +35,9 @@ function del_task(url)
     postdata = "";
     submit(url, postdata, "list-container");
 }
+
+function mark_task_as_done(url)
+{
+    postdata = "";
+    submit(url, postdata, "list-container");
+}

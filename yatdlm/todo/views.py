@@ -57,3 +57,12 @@ def del_task(request, list_id=-1, task_id=-1):
     else: # If the task does not exists in DB, raises a 404
         raise HttpResponseNotFound("Task does not exists")
     return list(request, list_id=list_id, xhr=True)
+
+def mark_as_done(request, list_id=-1, task_id=-1):
+    if task_id != -1:
+        task = Task.objects.get(id=task_id)
+        task.is_done = not task.is_done
+        task.save()
+    else: # Raise a 404 if the task does not exists
+        raise HttpResponseNotFound("Task does not exists")
+    return list(request, list_id=list_id, xhr=True)

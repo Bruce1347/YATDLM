@@ -47,6 +47,9 @@
                     Date d'échéance
                 </th>
                 <th class="cell" style="background: #EEEEEE">
+                    Complété
+                </th>
+                <th class="cell" style="background: #EEEEEE">
                 </th>
             </thead>
             <tbody>
@@ -56,10 +59,17 @@
                             {{ task.title }}
                         </td>
                         <td class="cell l-align">
-                            {{ task.creation_date|date:"d/m/Y — H:m" }}
+                            {{ task.creation_date|date:"d/m/Y — H:i" }}
                         </td>
                         <td class="cell l-align">
-                            {{ task.due_date|date:"d/m/Y — H:m" }}
+                            {{ task.due_date|date:"d/m/Y — H:i" }}
+                        </td>
+                        <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
+                            {% if task.is_done %}
+                                &#10004;
+                            {% else %}
+                                &#10008;
+                            {% endif %}
                         </td>
                         <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
                             X

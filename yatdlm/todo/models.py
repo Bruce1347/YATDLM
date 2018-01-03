@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib import admin
 
 class TodoList(models.Model):
     # A short description of the todo list (mandatory)
@@ -15,7 +16,13 @@ class TodoList(models.Model):
     def __str__(self):
         return self.title
 
+class TodoListAdmin(admin.ModelAdmin):
+    readonly_fields=('creation_date',)
+
 class Task(models.Model):
+    # Admin definitions
+    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'title', 'description', 'is_done']
+
     # The primary key to the list that contains this task
     parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
     # The primary key to the parent task, since a task can have subtasks, this is a recursive relationship
@@ -38,3 +45,6 @@ class Task(models.Model):
     # Identify the task with its title
     def __str__(self):
         return self.title
+
+class TaskAdmin(admin.ModelAdmin):
+    readonly_fields=('creation_date',)
