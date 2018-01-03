@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
@@ -7,7 +8,7 @@ from .models import TodoList
 from .models import Task
 
 # Create your views here.
-
+@login_required()
 def index(request):
     # Fetch all the lists
     todo_lists = TodoList.objects.all()
@@ -25,7 +26,7 @@ def index(request):
         'tasks' : tasks,
     }
     return render(request, 'todo/index.html', context)
-
+@login_required()
 def list(request, list_id=-1, xhr=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
@@ -40,7 +41,7 @@ def list(request, list_id=-1, xhr=False):
         'xhr'   : xhr,
     }
     return render(request, 'todo/list.html', context)
-
+@login_required()
 def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']
@@ -49,7 +50,7 @@ def add_task(request, list_id=-1):
     new_task.save()
 
     return list(request, list_id=list_id, xhr=True)
-
+@login_required()
 def del_task(request, list_id=-1, task_id=-1):
     if task_id != -1:
         task = Task.objects.get(id=task_id)
@@ -57,7 +58,7 @@ def del_task(request, list_id=-1, task_id=-1):
     else: # If the task does not exists in DB, raises a 404
         raise HttpResponseNotFound("Task does not exists")
     return list(request, list_id=list_id, xhr=True)
-
+@login_required()
 def mark_as_done(request, list_id=-1, task_id=-1):
     if task_id != -1:
         task = Task.objects.get(id=task_id)
