@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.utils.timezone import make_aware
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -66,6 +68,8 @@ def mark_as_done(request, list_id=-1, task_id=-1):
     if task_id != -1:
         task = Task.objects.get(id=task_id)
         task.is_done = not task.is_done
+        if task.is_done:
+            task.due_date = make_aware(datetime.now())
         task.save()
     else: # Raise a 404 if the task does not exists
         raise HttpResponseNotFound("Task does not exists")
