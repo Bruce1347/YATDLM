@@ -1,22 +1,26 @@
-<h1 style="text-align: center">
-    YATDLM
-</h1>
+{% extends 'todo/base.html' %}
 
-{% if lists %}
-<ul>
-    {% for list in lists %}
-    <li>
-        <a href="/todo/lists/{{ list.id }}">
-            {{ list.title }}
-        </a> 
-        <ul>
-        {% for task in tasks|get_value:list.id %}
-            <li>
-                {{ task.title }}
-            </li>
-        {% endfor %}        
-        </ul>
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
+{% block content %}
+    <h1 style="text-align: center">
+        YATDLM
+    </h1>
+
+    {% if lists %}
+    <ul>
+        {% for list in lists %}
+        <li>
+            <a href="/todo/lists/{{ list.id }}">
+                {{ list.title }}
+            </a> 
+            <ul>
+            {% for task in tasks|get_value:list.id %}
+                <li>
+                    {{ task.title }}
+                </li>
+            {% endfor %}        
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endblock %}

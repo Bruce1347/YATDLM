@@ -25,6 +25,7 @@ def index(request):
     context = {
         'lists' : todo_lists,
         'tasks' : tasks,
+        'title_page' : 'Mes listes',
     }
     return render(request, 'todo/index.html', context)
 
@@ -33,7 +34,7 @@ def list(request, list_id=-1, xhr=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
     # Retrieve the subsequent tasks
-    tasks_filter = Task.objects.filter(parent_list=list_id)
+    tasks_filter = Task.objects.filter(parent_list=list_id).order_by('is_done', 'creation_date')
     tasks = [task for task in tasks_filter]
 
     # Create the context
@@ -41,6 +42,7 @@ def list(request, list_id=-1, xhr=False):
         'list'  : todo_list,
         'tasks' : tasks,
         'xhr'   : xhr,
+        'title_page' : todo_list.title,
     }
     return render(request, 'todo/list.html', context)
 
