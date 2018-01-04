@@ -46,6 +46,9 @@
                 <th class="cell l-align">
                     Date d'échéance
                 </th>
+                <th class="cell">
+                    Priorité
+                </th>
                 <th class="cell" style="background: #EEEEEE">
                     Complété
                 </th>
@@ -63,6 +66,9 @@
                         </td>
                         <td class="cell l-align">
                             {{ task.due_date|date:"d/m/Y — H:i" }}
+                        </td>
+                        <td class="cell c-align">
+                            {{ task.get_priority_display }}
                         </td>
                         <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
                             {% if task.is_done %}

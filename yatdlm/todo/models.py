@@ -21,7 +21,7 @@ class TodoListAdmin(admin.ModelAdmin):
 
 class Task(models.Model):
     # Admin definitions
-    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'title', 'description', 'is_done']
+    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'title', 'description', 'is_done', 'priority']
 
     # The primary key to the list that contains this task
     parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
@@ -41,6 +41,14 @@ class Task(models.Model):
 
     # Value that indicates if the task was completed or not
     is_done = models.BooleanField(blank=False, null=False, default=False)
+
+    # Priority of the task
+    priority = models.IntegerField(choices=((1, "Urgent"),
+                                            (2, "Pressé"),
+                                            (3, "Normal"),
+                                            (4, "Y a le temps"),
+                                            (5, "Y a vraiment le temps"),
+                                            (6, "A considérer")), default=3)
 
     # Identify the task with its title
     def __str__(self):
