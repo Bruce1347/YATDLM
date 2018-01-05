@@ -20,6 +20,14 @@ class TodoListAdmin(admin.ModelAdmin):
     readonly_fields=('creation_date',)
 
 class Task(models.Model):
+    # Priority levels
+    priority_levels = ( (1, "Urgent"),
+                        (2, "Pressé"),
+                        (3, "Normal"),
+                        (4, "Y a le temps"),
+                        (5, "Y a vraiment le temps"),
+                        (6, "A considérer"))
+
     # Admin definitions
     fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'resolution_date', 'title', 'description', 'is_done', 'priority']
 
@@ -45,12 +53,7 @@ class Task(models.Model):
     is_done = models.BooleanField(blank=False, null=False, default=False)
 
     # Priority of the task
-    priority = models.IntegerField(choices=((1, "Urgent"),
-                                            (2, "Pressé"),
-                                            (3, "Normal"),
-                                            (4, "Y a le temps"),
-                                            (5, "Y a vraiment le temps"),
-                                            (6, "A considérer")), default=3)
+    priority = models.IntegerField(choices=priority_levels, default=3)
 
     # Identify the task with its title
     def __str__(self):

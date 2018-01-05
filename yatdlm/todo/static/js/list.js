@@ -13,11 +13,14 @@ function add_task(url)
     var task_title = document.getElementById('new_task_title').value;
     var task_descr = document.getElementById('new_task_descr').value;
     var task_due   = document.getElementById('new_task_due_date').value;
+    var task_priority = document.getElementById('new_task_priority').value;
+
     
     postdata  = "action=add";
     postdata += "&title="+encodeURIComponent(task_title);
     postdata += "&descr="+encodeURIComponent(task_descr);
     postdata += "&due="+encodeURIComponent(task_due);
+    postdata += "&priority="+encodeURIComponent(task_priority);
 
     submit(url, postdata, "list-container");
 }

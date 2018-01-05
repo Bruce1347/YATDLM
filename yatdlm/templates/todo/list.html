@@ -3,7 +3,7 @@
 {% block content %}
     {% csrf_token %}
     {% if not xhr %}
-    <h1 style="text-align: center">{{ list.title }}</h1>
+    <h1 style="text-align: center">{{ list.title }} </h1>
 
     <hr>
     <div>
@@ -18,8 +18,20 @@
                 <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
                 <br>
                 <br>
-                <label for="new_task_due_date">Date de fin :</label>
-                <input type="text" id="new_task_due_date" style="width: 100%">
+                <div style="display: flex;">
+                    <div style="flex: 1; margin-right: 10px;">
+                        <label for="new_task_due_date">Date de fin :</label>
+                        <input type="text" id="new_task_due_date" style="width: 100%">
+                    </div>
+                    <div style="flex: 1; margin-left: 10px;">
+                        <label for="new_task_priority">Priorité :</label>
+                        <select id="new_task_priority" style="width: 100%;">
+                            {% for choice in priority_levels %}
+                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
                 <br>
                 <br>
                 <button class="pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>

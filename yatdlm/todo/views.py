@@ -43,6 +43,7 @@ def list(request, list_id=-1, xhr=False):
         'tasks' : tasks,
         'xhr'   : xhr,
         'title_page' : todo_list.title,
+        'priority_levels' : [level for level in Task.priority_levels]
     }
     return render(request, 'todo/list.html', context)
 
@@ -50,8 +51,10 @@ def list(request, list_id=-1, xhr=False):
 def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']
+    due = request.POST['due']
+    prio = int(request.POST['priority'])
 
-    new_task = Task(title=title, description=descr, parent_list_id=list_id)
+    new_task = Task(title=title, description=descr, priority=prio, parent_list_id=list_id)
     new_task.save()
 
     return list(request, list_id=list_id, xhr=True)
