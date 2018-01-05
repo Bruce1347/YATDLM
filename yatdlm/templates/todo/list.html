@@ -5,65 +5,70 @@
     {% if not xhr %}
     <h1 style="text-align: center">{{ list.title }}</h1>
 
-    <div style="max-width: 60%; margin: auto">
-        <form>
-            <h2>Ajouter une tâche :</h2>
-            <label for="new_task_title">Titre :</label>
-            <br>
-            <br>
-            <input type="text" id="new_task_title" style="width: 100%">
-            <br>
-            <br>
-            <label for="new_task_descr">Description :</label>
-            <br>
-            <br>
-            <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
-            <br>
-            <br>
-            <label for="new_task_due_date">Date de fin :</label>
-            <input type="text" id="new_task_due_date" style="width: 100%">
-            <br>
-            <br>
-            <button type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>
-        </form>
-    </div>
-
-    <div style="max-width: 80%; margin:auto;">
+    <hr>
+    <div>
+        <div style="max-width: 50em; margin: auto;">
+            <form>
+                <h2>Ajouter une tâche :</h2>
+                <label for="new_task_title">Titre :</label>
+                <input type="text" id="new_task_title" style="width: 100%">
+                <br>
+                <br>
+                <label for="new_task_descr">Description :</label>
+                <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
+                <br>
+                <br>
+                <label for="new_task_due_date">Date de fin :</label>
+                <input type="text" id="new_task_due_date" style="width: 100%">
+                <br>
+                <br>
+                <button class="pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>
+            </form>
+        </div>
+        <br>
+        <hr>
+        <br>
         <div id="list-container">
-    {% endif %}
-            <table style="border-collapse: collapse; width: 100%">
+        {% endif %}
+            <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
                 <thead>
-                    <th class="cell l-align">
+                    <th class="cell c-align">
                         Tâche
                     </th>
-                    <th class="cell l-align">
-                        Date de création
+                    <th class="cell c-align">
+                        Création
                     </th>
-                    <th class="cell l-align">
-                        Date d'échéance
+                    <th class="cell c-align">
+                        Résolution
                     </th>
-                    <th class="cell">
+                    <th class="cell c-align">
+                        Échéance
+                    </th>
+                    <th class="cell c-align" style="max-width: 10%">
                         Priorité
                     </th>
-                    <th class="cell" style="background: #EEEEEE">
+                    <th class="cell c-align">
                         Complété
                     </th>
-                    <th class="cell" style="background: #EEEEEE">
+                    <th class="cell c-align">
                     </th>
                 </thead>
                 <tbody>
                     {% for task in tasks %}
                         <tr>
-                            <td class="cell l-align">
+                            <td class="cell l-align" style="white-space: nowrap;">
                                 {{ task.title }}
                             </td>
-                            <td class="cell l-align">
-                                {{ task.creation_date|date:"d/m/Y — H:i" }}
-                            </td>
-                            <td class="cell l-align">
-                                {{ task.due_date|date:"d/m/Y — H:i" }}
+                            <td class="cell c-align">
+                                {{ task.creation_date|date:"d/m/Y" }}
                             </td>
                             <td class="cell c-align">
+                                {{ task.resolution_date|date:"d/m/Y" }}
+                            </td>
+                            <td class="cell c-align">
+                                {{ task.due_date|date:"d/m/Y" }}
+                            </td>
+                            <td class="cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;">
                                 {{ task.get_priority_display }}
                             </td>
                             <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
@@ -78,10 +83,12 @@
                             </td>
                         </tr>
                     {% endfor %}
-    {% if not xhr %}
+        {% if not xhr %}
                 </tbody>
             </table>
         </div>
+        {% endif %}
+        <br>
+        <br>
     </div>
-    {% endif %}
 {% endblock %}

@@ -21,7 +21,7 @@ class TodoListAdmin(admin.ModelAdmin):
 
 class Task(models.Model):
     # Admin definitions
-    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'title', 'description', 'is_done', 'priority']
+    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'resolution_date', 'title', 'description', 'is_done', 'priority']
 
     # The primary key to the list that contains this task
     parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
@@ -33,6 +33,8 @@ class Task(models.Model):
 
     # The user may want to complete the task within a certain time (optional)
     due_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
+
+    resolution_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
 
     # A short description of the task (mandatory)
     title = models.CharField(max_length=100, blank=False)
