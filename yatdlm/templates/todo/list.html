@@ -5,8 +5,9 @@
     {% if not xhr %}
     <h1 style="text-align: center">{{ list.title }} </h1>
 
-    <hr>
     <div>
+        {% if not public %}
+        <hr>
         <div style="max-width: 50em; margin: auto;">
             <form>
                 <h2>Ajouter une tâche :</h2>
@@ -40,6 +41,7 @@
         <br>
         <hr>
         <br>
+        {% endif %}
         <div id="list-container">
         {% endif %}
             <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
@@ -62,8 +64,10 @@
                     <th class="cell c-align">
                         Complété
                     </th>
+                    {% if not public %}
                     <th class="cell c-align">
                     </th>
+                    {% endif %}
                 </thead>
                 <tbody>
                     {% for task in tasks %}
@@ -83,16 +87,22 @@
                             <td class="cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;">
                                 {{ task.get_priority_display }}
                             </td>
+                            {% if not public %}
                             <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
+                            {% else %}
+                            <td class="cell c-align">
+                            {% endif %}
                                 {% if task.is_done %}
                                     &#10004;
                                 {% else %}
                                     &#10008;
                                 {% endif %}
                             </td>
-                            <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
-                                X
-                            </td>
+                            {% if not public %}
+                                <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                                    X
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
         {% if not xhr %}

@@ -1,4 +1,6 @@
+from django.contrib.auth.decorators import login_required
 from django.urls import path
+
 
 from . import views
 
@@ -8,7 +10,9 @@ urlpatterns = [
     # Explicit index page
     path('lists', views.index),
     # Specific todo list page
-    path('lists/<int:list_id>/', views.list),
+    path('lists/<int:list_id>/', login_required(views.list)),
+    # Specific todo list _public_ page
+    path('lists/public/<int:list_id>/', views.list_public),
     # Create a new task
     path('lists/<int:list_id>/add_task', views.add_task),
     # Delete a specific task

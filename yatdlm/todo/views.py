@@ -29,8 +29,10 @@ def index(request):
     }
     return render(request, 'todo/index.html', context)
 
-@login_required()
-def list(request, list_id=-1, xhr=False):
+def list_public(request, list_id=-1):
+    return list(request, list_id, public=True)
+
+def list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
     # Retrieve the subsequent tasks
@@ -43,7 +45,8 @@ def list(request, list_id=-1, xhr=False):
         'tasks' : tasks,
         'xhr'   : xhr,
         'title_page' : todo_list.title,
-        'priority_levels' : [level for level in Task.priority_levels]
+        'priority_levels' : [level for level in Task.priority_levels],
+        'public': public,
     }
     return render(request, 'todo/list.html', context)
 

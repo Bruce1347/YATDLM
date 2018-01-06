@@ -33,3 +33,5 @@ Once you're in the virtualenv you can use pip as you want in order to manage the
 ```bash
     $ deactivate
 ```
+
+If you are a french reader, you can follow the progress of YATDLM [here](http://todo.wormholextreme.net/todo/lists/public/1/)
