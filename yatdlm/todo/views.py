@@ -55,9 +55,10 @@ def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']
     due = request.POST['due']
+    user = request.user
     prio = int(request.POST['priority'])
 
-    new_task = Task(title=title, description=descr, priority=prio, parent_list_id=list_id)
+    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id)
     new_task.save()
 
     return list(request, list_id=list_id, xhr=True)

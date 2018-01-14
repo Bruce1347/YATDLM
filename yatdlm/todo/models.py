@@ -1,14 +1,21 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib import admin
+from django.contrib.auth.models import User
 
 class TodoList(models.Model):
+    # The owner of the todo list
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
+
     # A short description of the todo list (mandatory)
     title = models.CharField(max_length=100, blank=False)
+    
     # The full description of the todo list (optional)
     description = models.TextField(max_length=600, blank=True)
+
     # We want the creation date of the list (mandatory)
     creation_date = models.DateTimeField(auto_now_add=True)
+
     # The user may want the todo list completed upon a certain date (optional)
     due_date = models.DateTimeField(auto_now_add=False, default=timezone.now, blank=True, null=True)
 
@@ -20,6 +27,9 @@ class TodoListAdmin(admin.ModelAdmin):
     readonly_fields=('creation_date',)
 
 class Task(models.Model):
+    # The user that created the task
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
+
     # Priority levels
     priority_levels = ( (1, "Urgent"),
                         (2, "Pressé"),
@@ -29,7 +39,8 @@ class Task(models.Model):
                         (6, "A considérer"))
 
     # Admin definitions
-    fields = ['parent_list', 'parent_task', 'creation_date', 'due_date', 'resolution_date', 'title', 'description', 'is_done', 'priority']
+    fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
+              'resolution_date', 'title', 'description', 'is_done', 'priority']
 
     # The primary key to the list that contains this task
     parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
