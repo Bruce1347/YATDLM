@@ -56,7 +56,7 @@ def add_task(request, list_id=-1):
     new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id)
     new_task.save()
 
-    return list(request, list_id=list_id, xhr=True)
+    return display_list(request, list_id=list_id, xhr=True)
 
 @login_required()
 def del_task(request, list_id=-1, task_id=-1):
@@ -65,7 +65,7 @@ def del_task(request, list_id=-1, task_id=-1):
         task.delete()
     else: # If the task does not exists in DB, raises a 404
         raise HttpResponseNotFound("Task does not exists")
-    return list(request, list_id=list_id, xhr=True)
+    return display_list(request, list_id=list_id, xhr=True)
 
 @login_required()
 def mark_as_done(request, list_id=-1, task_id=-1):
@@ -77,4 +77,12 @@ def mark_as_done(request, list_id=-1, task_id=-1):
         task.save()
     else: # Raise a 404 if the task does not exists
         raise HttpResponseNotFound("Task does not exists")
-    return list(request, list_id=list_id, xhr=True)
+    return display_list(request, list_id=list_id, xhr=True)
+
+@login_required()
+def display_detail(request, list_id=-1, task_id=-1):
+    if task_id != -1 and list_id != -1:
+        task = Task.objects.get(id=task_id, parent_list_id=list_id)
+        return render(request, 'todo/xhr/task_detail.html', {'task': task})
+    else:
+        return HttpResponseNotFound("Task not found")

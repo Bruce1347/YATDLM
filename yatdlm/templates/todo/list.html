@@ -72,19 +72,19 @@
                 <tbody>
                     {% for task in tasks %}
                         <tr>
-                            <td class="cell l-align" style="white-space: nowrap;">
+                            <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}');">
                                 {{ task.title }}
                             </td>
-                            <td class="cell c-align">
+                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}');">
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align">
+                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}');">
                                 {{ task.resolution_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align">
+                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}');">
                                 {{ task.due_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;">
+                            <td class="cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}');">
                                 {{ task.get_priority_display }}
                             </td>
                             {% if not public %}
@@ -99,6 +99,10 @@
                                 X
                             </td>
                             {% endif %}
+                        </tr>
+                        <tr id="task_subline_{{ task.id }}" class="hidden">
+                            <td id="task_detail_{{ task.id }}" colspan="7">
+                            </td>
                         </tr>
                     {% endfor %}
         {% if not xhr %}

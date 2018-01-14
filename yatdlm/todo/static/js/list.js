@@ -44,3 +44,9 @@ function mark_task_as_done(url)
     postdata = "";
     submit(url, postdata, "list-container");
 }
+
+function display_task(task_id, url)
+{
+    if (!toggle('task_subline_'+task_id))
+        submit(url, "", 'task_detail_'+task_id);
+}

@@ -2,3 +2,5 @@
 .cell { border: 1px solid;  }
 .l-align { text-align: left; }
 .c-align { text-align: center; }
+
+.b_lightgrey { background: #D3D3D3; }

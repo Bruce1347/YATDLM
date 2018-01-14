@@ -18,5 +18,7 @@ urlpatterns = [
     # Delete a specific task
     path('lists/<int:list_id>/del_task/<int:task_id>', views.del_task),
     # Mark a task as completed (or not)
-    path('lists/<int:list_id>/complete_task/<int:task_id>', views.mark_as_done)
+    path('lists/<int:list_id>/complete_task/<int:task_id>', views.mark_as_done),
+    # Display the details of a task
+    path('lists/<int:list_id>/detail/<int:task_id>', views.display_detail)
 ]
