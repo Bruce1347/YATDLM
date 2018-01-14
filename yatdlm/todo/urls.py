@@ -10,9 +10,9 @@ urlpatterns = [
     # Explicit index page
     path('lists', views.index),
     # Specific todo list page
-    path('lists/<int:list_id>/', login_required(views.list)),
+    path('lists/<int:list_id>/', login_required(views.display_list)),
     # Specific todo list _public_ page
-    path('lists/public/<int:list_id>/', views.list_public),
+    path('lists/public/<int:list_id>/', views.display_list, {'public': True}),
     # Create a new task
     path('lists/<int:list_id>/add_task', views.add_task),
     # Delete a specific task

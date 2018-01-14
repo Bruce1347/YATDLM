@@ -61,10 +61,10 @@
                     <th class="cell c-align" style="max-width: 10%">
                         Priorité
                     </th>
+                    {% if not public %}
                     <th class="cell c-align">
                         Complété
                     </th>
-                    {% if not public %}
                     <th class="cell c-align">
                     </th>
                     {% endif %}
@@ -89,19 +89,15 @@
                             </td>
                             {% if not public %}
                             <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
-                            {% else %}
-                            <td class="cell c-align">
-                            {% endif %}
                                 {% if task.is_done %}
-                                    &#10004;
+                                &#10004;
                                 {% else %}
-                                    &#10008;
+                                &#10008;
                                 {% endif %}
                             </td>
-                            {% if not public %}
-                                <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
-                                    X
-                                </td>
+                            <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                                X
+                            </td>
                             {% endif %}
                         </tr>
                     {% endfor %}

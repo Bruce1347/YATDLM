@@ -2,9 +2,7 @@ from datetime import datetime
 from django.utils.timezone import make_aware
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.http import HttpResponse
 from django.http import HttpResponseNotFound
-from django.shortcuts import render
 
 from .models import TodoList
 from .models import Task
@@ -29,10 +27,7 @@ def index(request):
     }
     return render(request, 'todo/index.html', context)
 
-def list_public(request, list_id=-1):
-    return list(request, list_id, public=True)
-
-def list(request, list_id=-1, xhr=False, public=False):
+def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
     # Retrieve the subsequent tasks

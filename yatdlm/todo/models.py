@@ -31,12 +31,12 @@ class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
 
     # Priority levels
-    priority_levels = ( (1, "Urgent"),
-                        (2, "Pressé"),
-                        (3, "Normal"),
-                        (4, "Y a le temps"),
-                        (5, "Y a vraiment le temps"),
-                        (6, "A considérer"))
+    priority_levels = ((1, "Urgent"),
+                       (2, "Pressé"),
+                       (3, "Normal"),
+                       (4, "Y a le temps"),
+                       (5, "Y a vraiment le temps"),
+                       (6, "A considérer"))
 
     # Admin definitions
     fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
@@ -44,10 +44,13 @@ class Task(models.Model):
 
     # The primary key to the list that contains this task
     parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
-    # The primary key to the parent task, since a task can have subtasks, this is a recursive relationship
-    parent_task = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
-    # Creation date (mandatory, automatically created and inalterable)    
+    # The primary key to the parent task, since a task can have subtasks, this is a recursive
+    # relationship
+    parent_task = models.ForeignKey('self', on_delete=models.CASCADE,
+                                    null=True, blank=True)
+
+    # Creation date (mandatory, automatically created and inalterable)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     # The user may want to complete the task within a certain time (optional)
@@ -71,4 +74,4 @@ class Task(models.Model):
         return self.title
 
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields=('creation_date',)
+    readonly_fields = ('creation_date',)
