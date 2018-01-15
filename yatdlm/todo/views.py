@@ -31,7 +31,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
     # Retrieve the subsequent tasks
-    tasks_filter = Task.objects.filter(parent_list=list_id).order_by('is_done', 'creation_date')
+    tasks_filter = Task.objects.filter(parent_list=list_id).order_by('is_done', 'priority', '-creation_date')
     tasks = [task for task in tasks_filter]
 
     # Create the context
