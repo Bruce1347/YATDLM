@@ -36,7 +36,8 @@ class Task(models.Model):
                        (3, "Normal"),
                        (4, "Y a le temps"),
                        (5, "Y a vraiment le temps"),
-                       (6, "A considérer"))
+                       (6, "A considérer"),
+                       (7, "Résolu"))
 
     # Admin definitions
     fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
