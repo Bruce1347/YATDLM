@@ -49,11 +49,11 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']
-    due = request.POST['due']
+    due = request.POST['due'] if request.POST['due'] is not "" else None
     user = request.user
     prio = int(request.POST['priority'])
 
-    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id)
+    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id, due_date=due)
     new_task.save()
 
     return display_list(request, list_id=list_id, xhr=True)
