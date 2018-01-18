@@ -20,7 +20,7 @@
                     <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
                 </div>
                 <div style="padding: 0.8em;">
-                    {{ followup.content }}
+                    {{ followup.content|linebreaks }}
                 </div>
                 <br>
             {% endfor %}
@@ -34,14 +34,16 @@
     <br>
     <br>
     <div class="c-align" style="display: flex;">
-        {% if not task.is_done %}
-        <div style="flex: 1;">
-            <button class="pure-button" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
-        </div>
+        {% if not public %}
+            {% if not task.is_done %}
+            <div style="flex: 1;">
+                <button class="pure-button" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
+            </div>
+            {% endif %}
+            <div style="flex: 1;">
+                <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Ajouter un commentaire</button>
+            </div>
         {% endif %}
-        <div style="flex: 1;">
-            <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Ajouter un commentaire</button>
-        </div>
         <div style="flex: 1;">
             <button class="pure-button" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">Afficher les commentaires</button>
         </div>
