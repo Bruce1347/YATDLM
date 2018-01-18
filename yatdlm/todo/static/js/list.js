@@ -58,9 +58,20 @@ function del_task(url)
     submit(url, postdata, "list-container");
 }
 
-function mark_task_as_done(url)
+
+/**
+ * Function that changes the boolean value `is_done` to its opposite (in order to mark a task as done or not)
+ * 
+ * url : the specific needed url
+ * btn : optional arg, if defined then we add to the postdata the followup added by the user
+ */
+function mark_task_as_done(url, btn, id)
 {
     postdata = "";
+
+    if (typeof btn !== "undefined")
+        postdata += "followup="+encodeURIComponent(document.getElementById('followup_'+id).value);
+
     submit(url, postdata, "list-container");
 }
 
@@ -68,4 +79,29 @@ function display_task(task_id, url)
 {
     if (toggle('task_subline_'+task_id))
         submit(url, "", 'task_detail_'+task_id);
+}
+
+/**
+ * Function that displays or masks the followups
+ * 
+ */
+function display_followups(id)
+{
+    if(toggle('followups_'+id))
+        document.getElementById('btn-followups_'+id).innerText = "Masquer les commentaires";
+    else
+        document.getElementById('btn-followups_'+id).innerText = "Afficher les commentaires";
+}
+
+/**
+ * Function that allows the user to only add a followup
+ * 
+ * url : the needed url in order to post the data to the server
+ * id : the task id
+ */
+function add_followup(url, task_id)
+{
+    postdata = "followup="+encodeURIComponent(document.getElementById('followup_'+task_id).value);
+
+    submit(url, postdata, 'followups_'+task_id);
 }

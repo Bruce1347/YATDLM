@@ -1,9 +1,52 @@
+{% if not xhr %}
 <td colspan="7">
+    <br>
     <div class="b_lightgrey">
-        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
+        Tâche crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
     </div>
     <div>
-        {{ task.description|linebreaks }}
+        <span style="width: 100%">
+            {{ task.description|linebreaks }}
+        </span>
+    </div>
+    <div class="hidden" id="followups_{{ task.id }}">
+{% endif %}
+        <br>
+        <hr>
+        <br>
+        <div>
+            {% for followup in followups %}
+                <div class="b_lightgrey" style="padding: 0.8em;">
+                    <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
+                </div>
+                <div style="padding: 0.8em;">
+                    {{ followup.content }}
+                </div>
+                <br>
+            {% endfor %}
+        </div>
+        <hr>
+{% if not xhr %}
     </div>
     <br>
+    <label for="followup_{{ task.id }}">Ajouter un commentaire :</label>
+    <textarea id="followup_{{ task.id }}" style="width: 100%;"></textarea>
+    <br>
+    <br>
+    <div class="c-align" style="display: flex;">
+        {% if not task.is_done %}
+        <div style="flex: 1;">
+            <button class="pure-button" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
+        </div>
+        {% endif %}
+        <div style="flex: 1;">
+            <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Ajouter un commentaire</button>
+        </div>
+        <div style="flex: 1;">
+            <button class="pure-button" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">Afficher les commentaires</button>
+        </div>
+    </div>
+    <br>
+    <br>
 </td>
+{% endif %}

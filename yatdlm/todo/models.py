@@ -74,5 +74,26 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+
 class TaskAdmin(admin.ModelAdmin):
+    readonly_fields = ('creation_date',)
+
+class FollowUp(models.Model):
+    # The user that wrote the Follow-up
+    writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
+
+    # The task and list that the Follow-up refers to 
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, null=False)
+    todol = models.ForeignKey('TodoList', on_delete=models.CASCADE, null=False)
+
+    # Creation date (mandatory, automatically created and inalterable)
+    creation_date = models.DateTimeField(auto_now_add=True)
+
+    # The followup content, since it may refer to a specific problem that needs explanations, the max_length is longer than usual
+    content = models.TextField(max_length=1000, blank=True)
+
+    # Admin fields
+    fields = ['task', 'todol']
+
+class FollowUpAdmin(admin.ModelAdmin):
     readonly_fields = ('creation_date',)
