@@ -89,7 +89,7 @@ def mark_as_done(request, list_id=-1, task_id=-1):
 
 def display_detail(request, list_id=-1, task_id=-1, xhr=False):
     if task_id != -1 and list_id != -1:
-        public = request.POST['public']
+        public = request.POST['public'] == 'True'
         task = Task.objects.get(id=task_id, parent_list_id=list_id)
 
         followups = FollowUp.objects.filter(task=task, todol_id=list_id).order_by('creation_date')
