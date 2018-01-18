@@ -60,9 +60,9 @@ class Task(models.Model):
     resolution_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
 
     # A short description of the task (mandatory)
-    title = models.CharField(max_length=100, blank=False)
+    title = models.CharField(max_length=300, blank=False)
     # Its full description (optional)
-    description = models.TextField(max_length=300, blank=True)
+    description = models.TextField(max_length=700, blank=True)
 
     # Value that indicates if the task was completed or not
     is_done = models.BooleanField(blank=False, null=False, default=False)
