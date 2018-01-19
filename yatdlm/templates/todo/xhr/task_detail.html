@@ -11,7 +11,6 @@
     </div>
     <div class="hidden" id="followups_{{ task.id }}">
 {% endif %}
-        <br>
         <hr>
         <br>
         <div>
@@ -20,19 +19,20 @@
                     <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
                 </div>
                 <div style="padding: 0.8em;">
-                    {{ followup.content|linebreaks }}
+                    {{ followup.content|display_urls|linebreaks }}
                 </div>
-                <br>
             {% endfor %}
         </div>
         <hr>
 {% if not xhr %}
     </div>
+    {% if not public %}
     <br>
     <label for="followup_{{ task.id }}">Ajouter un commentaire :</label>
     <textarea id="followup_{{ task.id }}" style="width: 100%;"></textarea>
     <br>
     <br>
+    {% endif %}
     <div class="c-align" style="display: flex;">
         {% if not public %}
             {% if not task.is_done %}
