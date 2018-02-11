@@ -1,6 +1,12 @@
-.pointer { cursor: pointer; }
-.cell { border: 1px solid;  }
-.l-align { text-align: left; }
-.c-align { text-align: center; }
+.pointer        { cursor: pointer; }
+.cell           { border: 1px solid;  }
+.l-align        { text-align: left; }
+.c-align        { text-align: center; }
+.noborder       { border-style: none; }
 
-.b_lightgrey { background: #D3D3D3; }
+.fullwidth      { width: 100%; }
+.flexdiv        { display: flex; }
+.flex1          { flex: 1; }
+
+.b_lightgrey    { background: #e5e2e2; }
+.b_grey         { background: #d4c7c7; }

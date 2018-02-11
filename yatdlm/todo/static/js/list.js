@@ -75,13 +75,31 @@ function mark_task_as_done(url, btn, id)
     submit(url, postdata, "list-container");
 }
 
-function display_task(task_id, url, public)
+function display_task(task_id, url, public, is_toggle)
 {
     postdata = "";
     postdata += "public="+encodeURIComponent(public);
+    postdata += "&xhr="+encodeURIComponent("True");
 
-    if (toggle('task_subline_'+task_id))
-        submit(url, postdata, 'task_detail_'+task_id);
+    if (typeof is_toggle !== 'undefined')
+        toggle('task_subline_'+task_id)
+
+    submit(url, postdata, 'task_detail_'+task_id);
+}
+
+function edit_task(task_id, url)
+{
+    var postdata = "";
+
+    var new_title = document.getElementById("task_title_"+task_id).value;
+    var new_descr = document.getElementById("task_descr_"+task_id).value;
+    var new_priority = document.getElementById("task_priority_"+task_id).value;
+
+    postdata += "title="+encodeURIComponent(new_title);
+    postdata += "&descr="+encodeURIComponent(new_descr);
+    postdata += '&prio='+encodeURIComponent(new_priority);
+
+    submit(url, postdata, 'task_detail_'+task_id);
 }
 
 /**

@@ -1,4 +1,3 @@
-{% if not xhr %}
 <td colspan="7">
     <br>
     <div class="b_lightgrey">
@@ -10,21 +9,25 @@
         </span>
     </div>
     <div class="hidden" id="followups_{{ task.id }}">
-{% endif %}
         <hr>
         <br>
         <div>
             {% for followup in followups %}
+                {% if followup.f_type != 2 %}
                 <div class="b_lightgrey" style="padding: 0.8em;">
                     <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
                 </div>
                 <div style="padding: 0.8em;">
                     {{ followup.content|display_urls|linebreaks }}
                 </div>
+                {% else %}
+                <div class="b_grey" style="padding: 0.8em;">
+                    <b>{{ followup.writer }}</b> a mis à jour la tâche le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }}
+                </div>
+                {% endif %}
             {% endfor %}
         </div>
         <hr>
-{% if not xhr %}
     </div>
     {% if not public %}
     <br>
@@ -33,22 +36,43 @@
     <br>
     <br>
     {% endif %}
-    <div class="c-align" style="display: flex;">
-        {% if not public %}
-            {% if not task.is_done %}
+    {% if xhr %}
+    <div class="flexdiv">
+        <div class="flex1">
+            {% if not public %}
+            <div style="">
+                <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Commenter</button>
+            </div>
+            <br>
+            {% endif %}
+            <div class="">
+                    <button class="pure-button" type="button" onclick="toggle('task_subline_{{ task.id }}');">
+                        Masquer les détails
+                    </button>
+                </div>
+        </div>
+        <div class="flex1">
+            {% if not public and not task.is_done %}
             <div style="flex: 1;">
                 <button class="pure-button" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
             </div>
+            <br>
             {% endif %}
-            <div style="flex: 1;">
-                <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Ajouter un commentaire</button>
+            <div class="flex1">
+                    <button class="pure-button" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">
+                        Afficher les commentaires
+                    </button>
             </div>
-        {% endif %}
-        <div style="flex: 1;">
-            <button class="pure-button" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">Afficher les commentaires</button>
+        </div>
+        <div class="flex1">
+            {% if not public and not task.is_done %}
+            <div style="flex: 1;">
+                <button class="pure-button" type="button" id="btn-edit_{{ task.id }}" onclick="submit('/todo/lists/{{ list.id }}/edit/{{ task.id }}', '', 'task_detail_{{ task.id }}');">
+                    Éditer
+                </button>
+            </div>
+            {% endif %}
         </div>
     </div>
-    <br>
-    <br>
+    {% endif %}
 </td>
-{% endif %}

@@ -23,4 +23,8 @@ urlpatterns = [
     path('lists/<int:list_id>/detail/<int:task_id>', views.display_detail),
     # Add a followup
     path('lists/<int:list_id>/detail/<int:task_id>/add_followup', views.add_followup),
+    # Edit a task
+    path('lists/<int:list_id>/edit/<int:task_id>', views.get_task_detail),
+    # Submit the modified task
+    path('lists/<int:list_id>/edit/submit/<int:task_id>', views.task_update),
 ]

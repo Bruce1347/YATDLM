@@ -72,19 +72,19 @@
                 <tbody>
                     {% for task in tasks %}
                         <tr>
-                            <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}');">
+                            <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                                 {{ task.title }}
                             </td>
-                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}');">
+                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}');">
+                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                                 {{ task.resolution_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}');">
+                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                                 {{ task.due_date|date:"d/m/Y" }}
                             </td>
-                            <td class="cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}');">
+                            <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                                 {{ task.get_priority_display }}
                             </td>
                             {% if not public %}

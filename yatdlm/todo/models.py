@@ -79,8 +79,20 @@ class TaskAdmin(admin.ModelAdmin):
     readonly_fields = ('creation_date',)
 
 class FollowUp(models.Model):
+    # Kinds of Follow-ups
+    possible_follow_ups = ((1, "Commentaire"),
+                           (2, "Modification"),
+                           (3, "Changement d'État"))
+
     # The user that wrote the Follow-up
     writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
+ 
+    # Type of follow up (State change or comment)
+    f_type = models.IntegerField(choices=possible_follow_ups, default=1)
+
+    # We keep the changes if there is a priority state change
+    old_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
+    new_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
 
     # The task and list that the Follow-up refers to 
     task = models.ForeignKey('Task', on_delete=models.CASCADE, null=False)

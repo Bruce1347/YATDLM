@@ -6,3 +6,5 @@
 yatdlm/static*
 env/*
 *.exe
+yatdlm/.vscode/settings.json
+settings.json
