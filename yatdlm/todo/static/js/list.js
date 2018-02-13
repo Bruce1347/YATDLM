@@ -126,3 +126,18 @@ function add_followup(url, task_id)
 
     submit(url, postdata, 'followups_'+task_id);
 }
+
+/**
+ * Function that hides or shows the div `id` and eventually replaces icon by a minus bar
+ * 
+ * id : the div id
+ * button_id : optional, when icon is defined we change the src of `button_id` accordingly
+ */
+function toggle_form(id, button_id, button_open, button_close)
+{
+    console.log(document.getElementById(button_id).src);
+    if (toggle(id))
+        document.getElementById(button_id).src = button_close;
+    else
+        document.getElementById(button_id).src = button_open;
+}
