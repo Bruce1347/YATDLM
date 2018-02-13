@@ -35,7 +35,6 @@ class Task(models.Model):
                        (2, "Pressé"),
                        (3, "Normal"),
                        (4, "Y a le temps"),
-                       (5, "Y a vraiment le temps"),
                        (6, "A considérer"),
                        (7, "Résolu"))
 
