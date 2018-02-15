@@ -2,25 +2,33 @@
 
 {% block content %}
     <h1 style="text-align: center">
-        YATDLM
+        YATDLM - {{ page_title }}
     </h1>
 
     {% if lists %}
-    <ul>
-        {% for list in lists %}
-        <li>
-            <a href="/todo/lists/{{ list.id }}">
-                {{ list.title }}
-            </a> 
-            <ul>
-            {% for task in tasks|get_value:list.id %}
-                <li>
-                    {{ task.title }}
-                </li>
-            {% endfor %}        
-            </ul>
-        </li>
-        {% endfor %}
-    </ul>
+        <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
+            <thead>
+                <tr>
+                    <th>Liste</th>
+                    <th>Tâches ouvertes</th>
+                    <th>Complétion</th>
+                    <th>Date de création</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for list in lists %}
+                    <tr>
+                        <td>
+                            <a href="/todo/lists/{{ context|get_value:list|get_value:'id' }}">
+                                {{ context|get_value:list|get_value:'title' }}
+                            </a>
+                        </td>
+                        <td>{{ context|get_value:list|get_value:'opened_tasks' }}</td>
+                        <td>{{ context|get_value:list|get_value:'completion' }} %</td>
+                        <td>{{ context|get_value:list|get_value:'creation_date'|date:"d/m/Y à H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
 {% endblock %}

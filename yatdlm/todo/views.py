@@ -12,20 +12,31 @@ from .models import Task
 def index(request):
     # Fetch all the lists
     todo_lists = TodoList.objects.all()
-    # Dictionary with all the existing tasks with their parent as key
-    tasks = {}
+    
+    # Dict that contains the needed information for each list.
+    # The key is the name of the list and the data corresponds to the needed infos
+    table_context = {}
+
     for todo in todo_lists:
-        # Fetch the tasks that have `todo` as a parent
-        children_tasks = Task.objects.filter(parent_list=todo.id)
-        tasks[todo.id] = []
-        for task in children_tasks:
-            tasks[todo.id].append(task)
+        opened_tasks = len(Task.objects.filter(parent_list=todo, is_done=False))
+        done_tasks = len(Task.objects.filter(parent_list=todo, is_done=True))
+
+        completion = done_tasks / (opened_tasks + done_tasks) * 100.0
+
+        table_context[todo.title] = {
+            'title' : todo.title,
+            'id' : todo.id,
+            'opened_tasks' : opened_tasks,
+            'completion' : completion,
+            'creation_date' : todo.creation_date
+        }
 
     context = {
-        'lists' : todo_lists,
-        'tasks' : tasks,
-        'title_page' : 'Mes listes',
+        'lists' : [todo.title for todo in todo_lists],
+        'page_title' : 'Mes listes',
+        'context' : table_context
     }
+
     return render(request, 'todo/index.html', context)
 
 def display_list(request, list_id=-1, xhr=False, public=False):
