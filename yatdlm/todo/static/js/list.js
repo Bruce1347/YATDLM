@@ -141,3 +141,17 @@ function toggle_form(id, button_id, button_open, button_close)
     else
         document.getElementById(button_id).src = button_open;
 }
+
+function add_list(url, elt)
+{
+    var title = document.getElementById('new_list_title').value;
+    var descr = document.getElementById('new_list_description').value;
+    var public = document.getElementById('new_list_privacy').value;
+
+    postdata = "";
+    postdata += "&title="+encodeURIComponent(title);
+    postdata += "&description="+encodeURIComponent(descr);
+    postdata += "&visibility="+encodeURIComponent(public);
+
+    submit(url, postdata, elt);
+}

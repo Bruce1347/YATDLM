@@ -6,9 +6,11 @@ from . import views
 
 urlpatterns = [
     # Default index page
-    path('', views.index),
+    path('', views.index, {'xhr' : False}),
     # Explicit index page
-    path('lists', views.index),
+    path('lists', views.index, {'xhr' : False}),
+    # Add a new todo list
+    path('lists/add', views.add_list),
     # Specific todo list page
     path('lists/<int:list_id>/', login_required(views.display_list)),
     # Specific todo list _public_ page

@@ -1,11 +1,49 @@
 {% extends 'todo/base.html' %}
 
 {% block content %}
+    {% if not xhr %}
     <h1 style="text-align: center">
         YATDLM - {{ page_title }}
     </h1>
 
+    <hr>
+    <form style="max-width: 50em; margin: auto;" id="new_list_form">
+        <h2>Ajouter une nouvelle liste :</h2>
+        <label for="new_list_title">Nom :</label>
+        <br>
+        <input class="fullwidth" type="text" id="new_list_title">
+        <br>
+        <br>
+        <label for="new_list_description">Description :</label>
+        <br>
+        <textarea class="fullwidth" id="new_list_description"></textarea>
+        <br>
+        <br>
+        <div class="flexdiv">
+            <div class="flex1" style="margin-right: 10px">
+                <label for="new_list_due_date">Date de fin :</label>
+                <br>
+                <input class="fullwidth" id="new_list_due_date" type="text">
+            </div>
+            <div class="flex1" style="margin-left: 10px">
+                <label for="new_list_privacy">Visibilité :</label>
+                <br>
+                <select class="fullwidth" id="new_list_privacy">
+                    <option value="True">Publique</option>
+                    <option value="False">Privée</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <button class="pure-button" type="button" onclick="add_list('/todo/lists/add', 'lists_container');">Ajouter une liste</button>
+        <br>
+    </form>
+    <hr>
+    <br>
+    {% endif %}
+
     {% if lists %}
+    <div id="lists_container">
         <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
             <thead>
                 <tr>
@@ -30,5 +68,6 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
     {% endif %}
 {% endblock %}

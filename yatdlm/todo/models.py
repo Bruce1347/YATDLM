@@ -19,6 +19,9 @@ class TodoList(models.Model):
     # The user may want the todo list completed upon a certain date (optional)
     due_date = models.DateTimeField(auto_now_add=False, default=timezone.now, blank=True, null=True)
 
+    # Define if the list should be private or not (by default, yes)
+    is_public = models.BooleanField(blank=False, null=False, default=False)
+
     # Identify the todolist with its title
     def __str__(self):
         return self.title

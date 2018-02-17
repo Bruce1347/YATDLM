@@ -3,13 +3,14 @@ from django.utils.timezone import make_aware
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
+from django.http import HttpResponseForbidden
 
 from .models import FollowUp
 from .models import TodoList
 from .models import Task
 
 @login_required()
-def index(request):
+def index(request, xhr):
     # Fetch all the lists
     todo_lists = TodoList.objects.all()
     
@@ -20,8 +21,9 @@ def index(request):
     for todo in todo_lists:
         opened_tasks = len(Task.objects.filter(parent_list=todo, is_done=False))
         done_tasks = len(Task.objects.filter(parent_list=todo, is_done=True))
+        total_tasks = done_tasks + opened_tasks
 
-        completion = done_tasks / (opened_tasks + done_tasks) * 100.0
+        completion = done_tasks / (total_tasks) * 100.0 if total_tasks is not 0 else 0
 
         table_context[todo.title] = {
             'title' : todo.title,
@@ -34,7 +36,8 @@ def index(request):
     context = {
         'lists' : [todo.title for todo in todo_lists],
         'page_title' : 'Mes listes',
-        'context' : table_context
+        'context' : table_context,
+        'xhr' : xhr
     }
 
     return render(request, 'todo/index.html', context)
@@ -42,6 +45,11 @@ def index(request):
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
+
+    # If the list is not public then we throw a 403
+    if not todo_list.is_public and public:
+        return HttpResponseForbidden()
+
     # Retrieve the subsequent tasks
     tasks_filter = Task.objects.filter(parent_list=list_id).order_by('is_done', 'priority', '-creation_date')
     tasks = [task for task in tasks_filter]
@@ -55,6 +63,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'priority_levels' : [level for level in Task.priority_levels],
         'public': public,
     }
+
     return render(request, 'todo/list.html', context)
 
 @login_required()
@@ -165,3 +174,15 @@ def task_update(request, list_id=-1, task_id=-1):
         return display_detail(request, list_id=list_id, task_id=task_id, xhr=True)
     else:
         return HttpResponseNotFound("NOPE.")
+
+@login_required
+def add_list(request):
+    list_title = request.POST['title']
+    list_description = request.POST['description']
+    # list_deadline = request.POST['end_date']
+    list_visibility = 'visibility' in request.POST and request.POST['visibility'] == "True"
+
+    new_list = TodoList(owner=request.user, title=list_title, description=list_description, is_public=list_visibility)
+    new_list.save()
+
+    return index(request, True)
