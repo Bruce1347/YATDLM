@@ -13,17 +13,28 @@
         <br>
         <div>
             {% for followup in followups %}
-                {% if followup.f_type != 2 %}
-                <div class="b_lightgrey" style="padding: 0.8em;">
-                    <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
-                </div>
-                <div style="padding: 0.8em;">
-                    {{ followup.content|display_urls|linebreaks }}
-                </div>
+                {% if followup.f_type == followup.COMMENT %}
+                    <div class="b_lightgrey" style="padding: 0.8em;">
+                        <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
+                    </div>
+                    <div style="padding: 0.8em;">
+                        {{ followup.content|display_urls|linebreaks }}
+                    </div>
                 {% else %}
-                <div class="b_grey" style="padding: 0.8em;">
-                    <b>{{ followup.writer }}</b> a mis à jour la tâche le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }}
-                </div>
+                    {% if followup.f_type == followup.STATE_CHANGE %}
+                        <div class="b_grey" style="padding: 0.8em;">
+                            <b>{{ followup.writer }}</b> a changé la priorité de 
+                            "{{ priority_levels|get_value:followup.old_priority }}" à
+                             "{{ priority_levels|get_value:followup.new_priority }}". 
+                        </div>
+                        <div style="padding: 0.8em;">
+                                {{ followup.content|display_urls|linebreaks }}
+                        </div>        
+                    {% else %}
+                        <div class="b_grey" style="padding: 0.8em;">
+                            <b>{{ followup.writer }}</b> a mis à jour la tâche le {{ followup.creation_date|date:"d/m/Y à H:i" }}
+                        </div>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>

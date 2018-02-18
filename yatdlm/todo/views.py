@@ -95,12 +95,15 @@ def mark_as_done(request, list_id=-1, task_id=-1):
         task.is_done = not task.is_done
 
         if 'followup' in request.POST:
-            f = FollowUp(writer=request.user, task=task, todol_id=list_id, content=request.POST['followup'])
+            f = FollowUp(writer=request.user, task=task, 
+                         f_type=FollowUp.STATE_CHANGE, todol_id=list_id,
+                         content=request.POST['followup'],
+                         old_priority=task.priority, new_priority=Task.SOLVED)
             f.save()
 
         if task.is_done:
             task.resolution_date = make_aware(datetime.now())
-            task.priority = 7 # Mark the task as solved
+            task.priority = Task.SOLVED # Mark the task as solved
 
         task.save()
     else: # Raise a 404 if the task does not exists
@@ -112,6 +115,7 @@ def display_detail(request, list_id=-1, task_id=-1, xhr=False):
         public = 'public' in request.POST and request.POST['public'] == 'True'
         xhr = 'xhr' in request.POST and request.POST['xhr'] == 'True'
         task = Task.objects.get(id=task_id, parent_list_id=list_id)
+        priority_levels = { level[0] : level[1] for level in Task.priority_levels }
         
         followups = FollowUp.objects.filter(task=task, todol_id=list_id).order_by('creation_date')
 
@@ -120,7 +124,8 @@ def display_detail(request, list_id=-1, task_id=-1, xhr=False):
             'followups' : followups,
             'xhr' : xhr,
             'public' : public,
-            'list' : task.parent_list
+            'list' : task.parent_list,
+            'priority_levels' : priority_levels
         })
     else:
         return HttpResponseNotFound("Task not found")

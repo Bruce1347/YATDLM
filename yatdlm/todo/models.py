@@ -34,12 +34,18 @@ class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
 
     # Priority levels
-    priority_levels = ((1, "Urgent"),
-                       (2, "Pressé"),
-                       (3, "Normal"),
-                       (4, "Y a le temps"),
-                       (6, "A considérer"),
-                       (7, "Résolu"))
+    URGENT = 1
+    HURRY = 2
+    NORMAL = 3
+    TAKEITEASY = 4
+    TOCONSIDER = 6
+    SOLVED = 7
+    priority_levels = ((URGENT, "Urgent"),
+                       (HURRY, "Pressé"),
+                       (NORMAL, "Normal"),
+                       (TAKEITEASY, "Y a le temps"),
+                       (TOCONSIDER, "A considérer"),
+                       (SOLVED, "Résolu"))
 
     # Admin definitions
     fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
@@ -82,9 +88,12 @@ class TaskAdmin(admin.ModelAdmin):
 
 class FollowUp(models.Model):
     # Kinds of Follow-ups
-    possible_follow_ups = ((1, "Commentaire"),
-                           (2, "Modification"),
-                           (3, "Changement d'État"))
+    COMMENT = 1
+    MODIFICATION = 2
+    STATE_CHANGE = 3
+    possible_follow_ups = ((COMMENT, "Commentaire"),
+                           (MODIFICATION, "Modification"),
+                           (STATE_CHANGE, "Changement d'État"))
 
     # The user that wrote the Follow-up
     writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
