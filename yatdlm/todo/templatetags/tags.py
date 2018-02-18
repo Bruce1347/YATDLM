@@ -14,7 +14,7 @@ def get_value(dict, key):
 @stringfilter
 def display_urls(desc):
     # Regex that matches URLs
-    url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+[a-zA-Z0-9-_&#\/]+)'
+    url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.]+)'
     urls_substrings = re.findall(url_regex, desc)
 
     for url in urls_substrings:
