@@ -12,6 +12,9 @@
  */
 function submit(url, postdata, dom_id, csrf_protec)
 {
+    // Add a spinner to the dom_id in order to notify the user that they have to wait
+    document.getElementById(dom_id).innerHTML = '<div class="c-align"><div class="lds-dual-ring"></div></div>';
+
     // Create our XHR object
     var xhr = new XMLHttpRequest();
 
