@@ -1,0 +1,23 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<div class="tiny centerelt">
+    <form class="pure-form" action="/login/auth" method="POST">
+        {% csrf_token %}
+        <fieldset class="noborder">
+            <label for="username">Nom d'utilisateur :</label>
+            <br>
+            <input type="text" name="username">
+            <br>
+            <br>
+
+            <label for="password">Mot de passe :</label>
+            <br>
+            <input type="password" name="password">
+            <br>
+            <br>
+            <button class="pure-button">CONNEXION</button>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}

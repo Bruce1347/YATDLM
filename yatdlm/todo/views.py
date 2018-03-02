@@ -4,6 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseForbidden
+from django.shortcuts import redirect
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth import logout
+from django.views.generic import TemplateView
 
 from .models import FollowUp
 from .models import TodoList
@@ -191,3 +196,24 @@ def add_list(request):
     new_list.save()
 
     return index(request, True)
+
+def display_login(request):
+    if request.user and request.user.is_authenticated:
+        return redirect('/todo')
+    
+    return render(request, 'todo/login.html')
+
+def user_login(request):
+    logout(request)
+
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('/todo')
+
+    return HttpResponseNotFound()    

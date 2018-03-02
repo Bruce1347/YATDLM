@@ -18,11 +18,17 @@ from django.urls import path
 from django.urls import include
 from django.views.generic import RedirectView
 
+from todo import views as todo_views
+
 urlpatterns = [
     # Django admin urls (TODO: enable/disable it through configuration variables)
     path('admin/', admin.site.urls),
     # Urls linked to the todo app
     path('todo/', include('todo.urls')),
-    # Redirection from <url>/ to <url>/todo
-    path(r'', RedirectView.as_view(url='/todo'))
+    # Redirection from <url>/ to <url>/login
+    path(r'', RedirectView.as_view(url='/login')),
+    # Login page
+    path('login', todo_views.display_login),
+    # Login request
+    path('login/auth', todo_views.user_login),
 ]

@@ -10,3 +10,17 @@
 
 .b_lightgrey    { background: #e5e2e2; }
 .b_grey         { background: #d4c7c7; }
+
+.padding50      { padding: 50px; }
+
+.tiny           { max-width: 25em; margin: auto; }
+.centerelt      { margin-top: 50vh; transform: translateY(-50%); }
+
+@media (max-width: 480px)
+{
+    .page-body {
+        margin-top: 40px;
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+}
