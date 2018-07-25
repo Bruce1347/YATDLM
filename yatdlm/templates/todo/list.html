@@ -4,8 +4,12 @@
 {% block content %}
     {% csrf_token %}
     {% if not xhr %}
-    <h1 style="text-align: center">{{ list.title }} <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
-         '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');"></h1>
+    <h1 style="text-align: center">{{ list.title }} 
+	    {% if not public %}
+	    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
+         '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');">
+	    {% endif %}
+    </h1>
 
 
     <div>
