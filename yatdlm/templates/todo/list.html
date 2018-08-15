@@ -89,7 +89,7 @@
                             </td>
                             {% if task.is_done %}
                             <td class="pointer cell c-align" colspan="2" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:m" }}
+                                Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
                             </td>
                             {% else %}
                             <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
