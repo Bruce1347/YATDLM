@@ -42,8 +42,8 @@
     <br>
     {% endif %}
 
-    {% if lists %}
     <div id="lists_container">
+    {% if lists %}
         <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
             <thead>
                 <tr>
@@ -68,6 +68,6 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
-    {% endif %}
 {% endblock %}
