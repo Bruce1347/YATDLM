@@ -5,7 +5,7 @@
     </div>
     <div>
         <span style="width: 100%">
-            {{ task.description|linebreaks }}
+            {{ task.description|linebreaks|display_urls }}
         </span>
     </div>
     <div class="hidden" id="followups_{{ task.id }}">
@@ -18,7 +18,7 @@
                         <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
                     </div>
                     <div style="padding: 0.8em;">
-                        {{ followup.content|display_urls|linebreaks }}
+                        {{ followup.content|linebreaks|display_urls }}
                     </div>
                 {% else %}
                     {% if followup.f_type == followup.STATE_CHANGE %}
