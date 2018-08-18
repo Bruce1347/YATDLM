@@ -8,9 +8,9 @@
 	    {% if not public %}
 	    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
          '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');">
+        <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}');">
 	    {% endif %}
     </h1>
-
 
     <div>
         {% if not public %}
@@ -111,7 +111,7 @@
                                 {% endif %}
                             </td>
                             <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
-                                X
+                                <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}">
                             </td>
                             {% endif %}
                         </tr>

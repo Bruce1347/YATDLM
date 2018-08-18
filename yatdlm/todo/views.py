@@ -1,18 +1,16 @@
 from datetime import datetime
-from django.utils.timezone import make_aware
+
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import HttpResponseNotFound
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
-from django.contrib.auth import authenticate
-from django.contrib.auth import login
-from django.contrib.auth import logout
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import (HttpResponse, HttpResponseForbidden,
+                         HttpResponseNotFound)
+from django.shortcuts import redirect, render
+from django.utils.timezone import make_aware
 from django.views.generic import TemplateView
 
-from .models import FollowUp
-from .models import TodoList
-from .models import Task
+from .models import FollowUp, Task, TodoList
+
 
 @login_required()
 def index(request, xhr):
@@ -216,4 +214,12 @@ def user_login(request):
             login(request, user)
             return redirect('/todo')
 
-    return HttpResponseNotFound()    
+    return HttpResponseNotFound()
+
+def delete_list(request, list_id):
+    try:
+        del_list = TodoList.objects.get(id=list_id)
+        del_list.delete()
+        return HttpResponse()
+    except ObjectDoesNotExist:
+        return HttpResponseForbidden()

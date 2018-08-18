@@ -155,3 +155,30 @@ function add_list(url, elt)
 
     submit(url, postdata, elt);
 }
+
+/**
+ * 
+ * @param {*} url 
+ */
+function delete_list(url) {
+
+    if (!confirm("Voulez-vous effacer la liste ?")) {
+        return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+
+    // Header creation, since we will only submit text, we use application/x-www-form-urlencoded 
+    // instead of multipart/form-data
+    xhr.setRequestHeader("X-CSRFToken", get_cookie("csrftoken"));
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            window.location = "/todo";
+        }
+    }
+
+    xhr.send();
+}

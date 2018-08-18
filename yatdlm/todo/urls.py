@@ -15,6 +15,8 @@ urlpatterns = [
     path('lists/<int:list_id>/', login_required(views.display_list)),
     # Specific todo list _public_ page
     path('lists/public/<int:list_id>/', views.display_list, {'public': True}),
+    # Delete a list
+    path('lists/delete/<int:list_id>', views.delete_list),
     # Create a new task
     path('lists/<int:list_id>/add_task', views.add_task),
     # Delete a specific task
