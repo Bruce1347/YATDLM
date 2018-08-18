@@ -1,8 +1,8 @@
 # YATDLM - Yet Another ToDo Lists Manager
 
-As said by the name, this aims to be a light and flexible todo lists manager.
+This project aims to be a light and flexible todo lists manager.
 
-# Development
+## Development
 
 The Python dependencies are in the requirements file, you can install them with pip :
 ```bash
