@@ -27,6 +27,7 @@ def index(request, xhr):
         total_tasks = done_tasks + opened_tasks
 
         completion = done_tasks / (total_tasks) * 100.0 if total_tasks is not 0 else 0
+        completion = round(completion, 2)
 
         table_context[todo.title] = {
             'title' : todo.title,
@@ -218,8 +219,12 @@ def user_login(request):
 
 def delete_list(request, list_id):
     try:
+        xhr = request.POST['xhr'] == 'True'
         del_list = TodoList.objects.get(id=list_id)
         del_list.delete()
-        return HttpResponse()
+        if not xhr:
+            return HttpResponse()
+        else:
+            return index(request, xhr=True)
     except ObjectDoesNotExist:
         return HttpResponseForbidden()

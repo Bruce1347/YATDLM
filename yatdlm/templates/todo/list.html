@@ -8,7 +8,7 @@
 	    {% if not public %}
 	    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
          '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');">
-        <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}');">
+        <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', False, null);">
 	    {% endif %}
     </h1>
 

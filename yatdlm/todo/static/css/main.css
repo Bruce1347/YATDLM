@@ -15,6 +15,7 @@
 
 .tiny           { max-width: 25em; margin: auto; }
 .centerelt      { margin-top: 50vh; transform: translateY(-50%); }
+.icon           { width: 24px; height: 24px; }
 
 @media (max-width: 480px)
 {
