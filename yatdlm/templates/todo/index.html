@@ -61,7 +61,7 @@
                     <tr>
                         <td>
                             <a href="/todo/lists/{{ context|get_value:list|get_value:'id' }}">
-                                {{ list.title }}
+                                {{ context|get_value:list|get_value:'title' }}
                             </a>
                         </td>
                         <td>{{ context|get_value:list|get_value:'opened_tasks' }}</td>
