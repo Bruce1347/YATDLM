@@ -61,6 +61,9 @@
         <table class="pure-table pure-table-bordered" style="max-width: 80em; margin: auto;">
             <thead>
                 <th class="cell c-align">
+                    #
+                </th>
+                <th class="cell c-align">
                     Tâche
                 </th>
                 <th class="cell c-align">
@@ -86,6 +89,9 @@
             <tbody>
                 {% for task in tasks %}
                 <tr>
+                    <td class="cell c-align">
+                        {{ task.task_no }}
+                    </td>
                     <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                         {{ task.title|truncatechars:40 }}
                     </td>
