@@ -77,8 +77,9 @@ def add_task(request, list_id=-1):
     due = request.POST['due'] if request.POST['due'] is not "" else None
     user = request.user
     prio = int(request.POST['priority'])
+    task_no = Task.objects.filter(parent_list_id=list_id).count() + 1
 
-    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id, due_date=due)
+    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id, due_date=due, task_no=task_no)
     new_task.save()
 
     return display_list(request, list_id=list_id, xhr=True)

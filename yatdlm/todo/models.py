@@ -78,6 +78,9 @@ class Task(models.Model):
     # Priority of the task
     priority = models.IntegerField(choices=priority_levels, default=3)
 
+    # A task number
+    task_no = models.IntegerField(default=0)
+
     # Identify the task with its title
     def __str__(self):
         return self.title
