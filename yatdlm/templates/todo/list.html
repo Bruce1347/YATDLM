@@ -85,7 +85,11 @@
             </thead>
             <tbody>
                 {% for task in tasks %}
+                {% if task.priority != task.SOLVED %}
                 <tr>
+                {% else %}
+                <tr class="solved">
+                {% endif %}
                     <td class="cell c-align">
                         {{ task.task_no }}
                     </td>
@@ -108,7 +112,7 @@
                     </td>
                     {% endif %}
                     <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;"
-                        onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                    onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
                         {{ task.get_priority_display }}
                     </td>
                     {% if not public %}

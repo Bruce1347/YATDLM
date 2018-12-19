@@ -17,6 +17,8 @@
 .centerelt      { margin-top: 50vh; transform: translateY(-50%); }
 .icon           { width: 24px; height: 24px; }
 
+.solved         { background: #3de250 }
+
 @media (max-width: 480px)
 {
     .page-body {
