@@ -2,134 +2,136 @@
 {% load static %}
 
 {% block content %}
-    {% csrf_token %}
-    {% if not xhr %}
-    <h1 style="text-align: center">{{ list.title }} 
-	    {% if not public %}
-	    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
+{% csrf_token %}
+{% if not xhr %}
+<h1 style="text-align: center">{{ list.title }}
+    {% if not public %}
+    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
          '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');">
-        <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', False, null);">
-	    {% endif %}
-    </h1>
+    <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', False, null);">
+    {% endif %}
+</h1>
 
-    <div>
-        {% if not public %}
-        <div class="hidden" id="add-container">
-            <hr>
-            <div style="max-width: 50em; margin: auto;">
-                <form>
-                    <h2>Ajouter une tâche :</h2>
-                    <label for="new_task_title">Titre :</label>
-                    <input type="text" id="new_task_title" style="width: 100%">
-                    <br>
-                    <br>
-                    <label for="new_task_descr">Description :</label>
-                    <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
-                    <br>
-                    <br>
-                    <div style="display: flex;">
-                        <div style="flex: 1; margin-right: 10px;">
-                            <label for="new_task_due_date">Date de fin :</label>
-                            <input type="text" id="new_task_due_date" style="width: 100%">
-                        </div>
-                        <div style="flex: 1; margin-left: 10px;">
-                            <label for="new_task_priority">Priorité :</label>
-                            <select id="new_task_priority" style="width: 100%;">
-                                {% for choice in priority_levels %}
-                                    {% if choice.0 != 3 %}
-                                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                                    {% else %}
-                                    <option selected value="{{ choice.0 }}">{{ choice.1 }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
+<div>
+    {% if not public %}
+    <div class="hidden" id="add-container">
+        <hr>
+        <div style="max-width: 50em; margin: auto;">
+            <form>
+                <h2>Ajouter une tâche :</h2>
+                <label for="new_task_title">Titre :</label>
+                <input type="text" id="new_task_title" style="width: 100%">
+                <br>
+                <br>
+                <label for="new_task_descr">Description :</label>
+                <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
+                <br>
+                <br>
+                <div style="display: flex;">
+                    <div style="flex: 1; margin-right: 10px;">
+                        <label for="new_task_due_date">Date de fin :</label>
+                        <input type="text" id="new_task_due_date" style="width: 100%">
                     </div>
-                    <br>
-                    <br>
-                    <button class="pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter une nouvelle tâche</button>
-                </form>
-            </div>
-            <hr>
-        </div>
-        <br>
-        <br>
-        {% endif %}
-        <div id="list-container">
-        {% endif %}
-            <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
-                <thead>
-                    <th class="cell c-align">
-                        Tâche
-                    </th>
-                    <th class="cell c-align">
-                        Création
-                    </th>
-                    <th class="cell c-align">
-                        Résolution
-                    </th>
-                    <th class="cell c-align">
-                        Échéance
-                    </th>
-                    <th class="cell c-align" style="max-width: 10%">
-                        Priorité
-                    </th>
-                    {% if not public %}
-                    <th class="cell c-align">
-                        Complété
-                    </th>
-                    <th class="cell c-align">
-                    </th>
-                    {% endif %}
-                </thead>
-                <tbody>
-                    {% for task in tasks %}
-                        <tr>
-                            <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                {{ task.title }}
-                            </td>
-                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                {{ task.creation_date|date:"d/m/Y" }}
-                            </td>
-                            {% if task.is_done %}
-                            <td class="pointer cell c-align" colspan="2" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
-                            </td>
+                    <div style="flex: 1; margin-left: 10px;">
+                        <label for="new_task_priority">Priorité :</label>
+                        <select id="new_task_priority" style="width: 100%;">
+                            {% for choice in priority_levels %}
+                            {% if choice.0 != 3 %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                             {% else %}
-                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                {{ task.resolution_date|date:"d/m/Y" }}
-                            </td>
-                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                {{ task.due_date|date:"d/m/Y" }}
-                            </td>
+                            <option selected value="{{ choice.0 }}">{{ choice.1 }}</option>
                             {% endif %}
-                            <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
-                                {{ task.get_priority_display }}
-                            </td>
-                            {% if not public %}
-                            <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
-                                {% if task.is_done %}
-                                &#10004;
-                                {% else %}
-                                &#10008;
-                                {% endif %}
-                            </td>
-                            <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
-                                <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}">
-                            </td>
-                            {% endif %}
-                        </tr>
-                        <tr id="task_subline_{{ task.id }}" class="hidden">
-                            <td id="task_detail_{{ task.id }}" colspan="7">
-                            </td>
-                        </tr>
-                    {% endfor %}
-        {% if not xhr %}
-                </tbody>
-            </table>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <button class="pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter
+                    une nouvelle tâche</button>
+            </form>
         </div>
-        {% endif %}
-        <br>
-        <br>
+        <hr>
     </div>
+    <br>
+    <br>
+    {% endif %}
+    <div id="list-container">
+        {% endif %}
+        <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
+            <thead>
+                <th class="cell c-align">
+                    Tâche
+                </th>
+                <th class="cell c-align">
+                    Création
+                </th>
+                <th class="cell c-align">
+                    Résolution
+                </th>
+                <th class="cell c-align">
+                    Échéance
+                </th>
+                <th class="cell c-align" style="max-width: 10%">
+                    Priorité
+                </th>
+                {% if not public %}
+                <th class="cell c-align">
+                    Complété
+                </th>
+                <th class="cell c-align">
+                </th>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        {{ task.title|truncatechars:40 }}
+                    </td>
+                    <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        {{ task.creation_date|date:"d/m/Y" }}
+                    </td>
+                    {% if task.is_done %}
+                    <td class="pointer cell c-align" colspan="2" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
+                    </td>
+                    {% else %}
+                    <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        {{ task.resolution_date|date:"d/m/Y" }}
+                    </td>
+                    <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        {{ task.due_date|date:"d/m/Y" }}
+                    </td>
+                    {% endif %}
+                    <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;"
+                        onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', '{{ public }}', 1);">
+                        {{ task.get_priority_display }}
+                    </td>
+                    {% if not public %}
+                    <td class="pointer cell c-align" onclick="mark_task_as_done('/todo/lists/{{ list.id }}/complete_task/{{ task.id }}');">
+                        {% if task.is_done %}
+                        &#10004;
+                        {% else %}
+                        &#10008;
+                        {% endif %}
+                    </td>
+                    <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                        <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}">
+                    </td>
+                    {% endif %}
+                </tr>
+                <tr id="task_subline_{{ task.id }}" class="hidden">
+                    <td id="task_detail_{{ task.id }}" colspan="7">
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not xhr %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    <br>
+    <br>
+</div>
 {% endblock %}
