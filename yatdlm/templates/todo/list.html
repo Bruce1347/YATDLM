@@ -4,18 +4,27 @@
 {% block content %}
 {% csrf_token %}
 {% if not xhr %}
-<h1 style="text-align: center">{{ list.title }}
+<div style="max-width: 40em; margin: auto;" id="todo_header">
+    <h1>
+        {{ list.title }}
+    </h1>
+    <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
+    <div style="">
+        {{ list.description|linebreaks }}
+    </div>
     {% if not public %}
-    <img class="pointer" id="toggle-icon" src="{% static 'img/icons/material-plus-circle.svg' %}" onclick="toggle_form('add-container', 'toggle-icon',
-         '{% static 'img/icons/material-plus-circle.svg' %}', '{% static 'img/icons/material-minus-circle.svg' %}');">
-    <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', False, null);">
+        <div>
+            <button id="add-task-btn" type="button" onclick="toggle_add_form('add-container', 'add-task-btn');" class="pure-button">Ajouter une tâche</button>
+            <button type="button" class="pure-button" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', false, null);">Supprimer la liste</button>
+        </div>
     {% endif %}
-</h1>
+</div>
+<br>
 <div>
     {% if not public %}
     <div class="hidden" id="add-container">
         <hr>
-        <div style="max-width: 50em; margin: auto;">
+        <div style="max-width: 40em; margin: auto;">
             <form>
                 <h2>Ajouter une tâche :</h2>
                 <label for="new_task_title">Titre :</label>

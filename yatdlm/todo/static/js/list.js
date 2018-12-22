@@ -127,21 +127,6 @@ function add_followup(url, task_id)
     submit(url, postdata, 'followups_'+task_id);
 }
 
-/**
- * Function that hides or shows the div `id` and eventually replaces icon by a minus bar
- * 
- * id : the div id
- * button_id : optional, when icon is defined we change the src of `button_id` accordingly
- */
-function toggle_form(id, button_id, button_open, button_close)
-{
-    console.log(document.getElementById(button_id).src);
-    if (toggle(id))
-        document.getElementById(button_id).src = button_close;
-    else
-        document.getElementById(button_id).src = button_open;
-}
-
 function add_list(url, elt)
 {
     var title = document.getElementById('new_list_title').value;
@@ -187,5 +172,18 @@ function delete_list(url, name, xhr, elt) {
         xhr.send();
     } else {
         submit(url, "&xhr="+encodeURIComponent("True"), elt);
+    }
+}
+
+/**
+ * Toggles the add form and changes the text button accordingly.
+ * @param {string} id - The id of the add form
+ * @param {string} btnId - The id of the display button
+ */
+function toggle_add_form(id, btnId) {
+    if (toggle(id)) {
+        document.getElementById(btnId).innerHTML = "Fermer le formulaire";
+    } else {
+        document.getElementById(btnId).innerHTML = "Ajouter une tâche";
     }
 }
