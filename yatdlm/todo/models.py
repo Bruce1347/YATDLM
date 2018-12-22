@@ -84,6 +84,7 @@ class Task(models.Model):
 
 class TaskAdmin(admin.ModelAdmin):
     readonly_fields = ('creation_date',)
+    list_display= ('title', 'creation_date', 'priority', 'is_done',)
 
 class FollowUp(models.Model):
     # Kinds of Follow-ups
