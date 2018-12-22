@@ -17,8 +17,10 @@
 .centerelt      { margin-top: 50vh; transform: translateY(-50%); }
 .icon           { width: 24px; height: 24px; }
 
-.priority_1     { background: #F11E29 }
-.priority_7     { background: #3de250 }
+.priority_1     { background: #F44E3E }
+.priority_2     { background: #FFFFFF }
+.priority_3     { background: #1CBAB5 }
+.priority_4     { background: #3de250 }
 
 @media (max-width: 480px)
 {

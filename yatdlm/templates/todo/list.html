@@ -35,7 +35,7 @@
                         <label for="new_task_priority">Priorité :</label>
                         <select id="new_task_priority" style="width: 100%;">
                             {% for choice in priority_levels %}
-                            {% if choice.0 != 3 %}
+                            {% if choice.0 != 2 %}
                             <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                             {% else %}
                             <option selected value="{{ choice.0 }}">{{ choice.1 }}</option>

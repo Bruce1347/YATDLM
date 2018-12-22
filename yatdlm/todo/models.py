@@ -35,15 +35,11 @@ class Task(models.Model):
 
     # Priority levels
     URGENT = 1
-    HURRY = 2
-    NORMAL = 3
-    TAKEITEASY = 4
-    TOCONSIDER = 6
-    SOLVED = 7
+    NORMAL = 2
+    TOCONSIDER = 3
+    SOLVED = 4
     priority_levels = ((URGENT, "Urgent"),
-                       (HURRY, "Pressé"),
                        (NORMAL, "Normal"),
-                       (TAKEITEASY, "Y a le temps"),
                        (TOCONSIDER, "A considérer"),
                        (SOLVED, "Résolu"))
 
