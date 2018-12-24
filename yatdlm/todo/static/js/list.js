@@ -22,6 +22,21 @@ const picker = datepicker(document.getElementById('new_task_due_date'), {
     }
 });
 
+document.getElementById("input_tid").addEventListener('keyup', function() {
+    this.classList.remove("red_border");
+    var pattern = this.getAttribute("pattern");
+    var list_id = document.getElementById("dom_list_id").value;
+    var value = this.value;
+
+    var validator = new RegExp(pattern);
+
+    if (validator.test(value)) {
+        search_tasks(`/todo/lists/${list_id}/search`);
+    } else {
+        this.classList.add("red_border");
+    }
+})
+
 /**
  * Function that creates the adequate post data then sends it to the server in order to
  * create a new task.
@@ -34,7 +49,7 @@ function add_task(url)
     var task_descr = document.getElementById('new_task_descr').value;
     var task_priority = document.getElementById('new_task_priority').value;
 
-    
+
     postdata  = "action=add";
     postdata += "&title="+encodeURIComponent(task_title);
     postdata += "&descr="+encodeURIComponent(task_descr);
@@ -42,6 +57,24 @@ function add_task(url)
     postdata += "&priority="+encodeURIComponent(task_priority);
 
     submit(url, postdata, "list-container");
+}
+
+function search_tasks(url) {
+    // Document inputs
+    var search_tid = document.getElementById("input_tid")
+
+    // Search terms
+    var input_tid = undefined;
+
+    if (search_tid.value !== undefined && search_tid.value !== "")
+        input_tid = encodeURIComponent(search_tid.value);
+
+    // Build the postdata
+    postdata = `?method=search`;
+    if (input_tid !== undefined)
+        postdata = postdata + `&tid=${input_tid}`
+
+    submit(url, postdata, "list-container", "GET");
 }
 
 /**

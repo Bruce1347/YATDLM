@@ -13,6 +13,7 @@ urlpatterns = [
     path('lists/add', views.add_list),
     # Specific todo list page
     path('lists/<int:list_id>/', login_required(views.display_list)),
+    path('lists/<int:list_id>/search', views.search_list),
     # Specific todo list _public_ page
     path('lists/public/<int:list_id>/', views.display_list, {'public': True}),
     # Delete a list

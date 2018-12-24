@@ -46,6 +46,36 @@ def index(request, xhr):
 
     return render(request, 'todo/index.html', context)
 
+def search_list(request, list_id=None, public=False):
+    try:
+        todolist = TodoList.objects.get(id=list_id)
+
+        if not todolist.is_public and public:
+            return HttpResponseForbidden()
+
+        tlfilter = Task.objects.filter(parent_list=list_id)
+
+        if 'tid' in request.GET:
+            if request.GET.get('tid') is not '':
+                tlfilter = tlfilter.filter(task_no=int(request.GET['tid']))
+        
+        tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
+
+
+        tasks = [task for task in tlfilter]
+
+        context = {
+            'list'  : todolist,
+            'tasks' : tasks,
+            'xhr'   : True,
+            'search': True,
+            'public': public
+        }
+
+        return render(request, 'todo/list.html', context)
+    except TodoList.DoesNotExist:
+        return None
+
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     todo_list = TodoList.objects.get(id=list_id)
