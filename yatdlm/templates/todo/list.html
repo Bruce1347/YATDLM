@@ -16,6 +16,7 @@
         <div>
             <button id="add-task-btn" type="button" onclick="toggle_add_form('add-container', 'add-task-btn');" class="pure-button">Ajouter une tâche</button>
             <button type="button" class="pure-button" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', false, null);">Supprimer la liste</button>
+            <button type="button" class="pure-button" onclick="close_details()">Tout refermer</button>
         </div>
     {% endif %}
 </div>
@@ -126,8 +127,8 @@
                             </td>
                         {% endif %}
                     </tr>
-                    <tr id="task_subline_{{ task.id }}" class="hidden">
-                        <td id="task_detail_{{ task.id }}" colspan="7">
+                    <tr id="task_subline_{{ task.id }}" class="hidden b_lightgrey">
+                        <td class="" id="task_detail_{{ task.id }}" colspan="7">
                         </td>
                     </tr>
                 {% endfor %}

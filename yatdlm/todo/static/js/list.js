@@ -187,3 +187,21 @@ function toggle_add_form(id, btnId) {
         document.getElementById(btnId).innerHTML = "Ajouter une tâche";
     }
 }
+
+/**
+ * Closes all tasks details in the current document.
+ */
+function close_details() {
+    var table = document.getElementById('list-container');
+    var cells = table.getElementsByTagName('tr');
+    var detail_re = new RegExp('^task_subline_[0-9]+');
+
+    for (var i = 0; i < cells.length; ++i) {
+        let element = cells[i];
+        var re_results = detail_re.exec(element.id);
+        if (re_results !== null) {
+            if (!element.classList.contains("hidden"))
+                toggle(element.id);
+        }
+    }
+}
