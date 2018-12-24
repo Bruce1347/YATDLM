@@ -1,20 +1,26 @@
+{% if not add_followup %}
 <td colspan="7">
-    <h4>Tâche #{{ task.task_no }} : {{ task.title }}</h4>
-    <div class="b_lightgrey">
-        Tâche crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
-    </div>
+    <br>
+    <span style="font-size: 1.8em;">Tâche #{{ task.task_no }} : {{ task.title }}</span>
+    <br>
+    <span class="b_lightgrey">
+        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
+    </span>
+    <hr>
+    <br>
     <div>
         <span style="width: 100%">
             {{ task.description|linebreaks|display_urls }}
         </span>
     </div>
-    <div class="hidden" id="followups_{{ task.id }}">
-        <hr>
-        <br>
-        <div>
-            {% for followup in followups %}
+    <br>
+    <hr>
+{% endif %}
+    <div class="followups_container" id="followups_{{ task.id }}">
+        {% for followup in followups %}
+            <div class="single_followup">
                 {% if followup.f_type == followup.COMMENT %}
-                    <div class="b_lightgrey" style="padding: 0.8em;">
+                    <div class="followup_header b_grey">
                         <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
                     </div>
                     <div style="padding: 0.8em;">
@@ -22,42 +28,44 @@
                     </div>
                 {% else %}
                     {% if followup.f_type == followup.STATE_CHANGE %}
-                        <div class="b_grey" style="padding: 0.8em;">
+                        <div class="followup_header b_grey">
                             <b>{{ followup.writer }}</b> a changé la priorité de 
                             "{{ priority_levels|get_value:followup.old_priority }}" à
-                             "{{ priority_levels|get_value:followup.new_priority }}". 
+                                "{{ priority_levels|get_value:followup.new_priority }}". 
                         </div>
                         <div style="padding: 0.8em;">
                                 {{ followup.content|display_urls|linebreaks }}
                         </div>        
                     {% else %}
-                        <div class="b_grey" style="padding: 0.8em;">
+                        <div class="update_header b_grey">
                             <b>{{ followup.writer }}</b> a mis à jour la tâche le {{ followup.creation_date|date:"d/m/Y à H:i" }}
                         </div>
                     {% endif %}
                 {% endif %}
-            {% endfor %}
-        </div>
-        <hr>
+            </div>
+            <br>
+        {% endfor %}
     </div>
+    {% if xhr %}
     {% if not public %}
     <br>
     <label for="followup_{{ task.id }}">Ajouter un commentaire :</label>
+    <br>
+    <br>
     <textarea id="followup_{{ task.id }}" style="width: 100%;"></textarea>
     <br>
     <br>
     {% endif %}
-    {% if xhr %}
     <div class="flexdiv">
         <div class="flex1">
             {% if not public %}
             <div style="">
-                <button class="pure-button" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Commenter</button>
+                <button class="pure-button pure-button-primary" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Commenter</button>
             </div>
             <br>
             {% endif %}
-            <div class="">
-                    <button class="pure-button" type="button" onclick="toggle('task_subline_{{ task.id }}');">
+            <div>
+                    <button class="pure-button pure-button-primary" type="button" onclick="toggle('task_subline_{{ task.id }}');">
                         Masquer les détails
                     </button>
                 </div>
@@ -65,20 +73,20 @@
         <div class="flex1">
             {% if not public and not task.is_done %}
             <div style="flex: 1;">
-                <button class="pure-button" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
+                <button class="pure-button pure-button-primary" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
             </div>
             <br>
             {% endif %}
             <div class="flex1">
-                    <button class="pure-button" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">
-                        Afficher les commentaires
+                    <button class="pure-button pure-button-primary" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">
+                        Masquer les commentaires
                     </button>
             </div>
         </div>
         <div class="flex1">
             {% if not public and not task.is_done %}
             <div style="flex: 1;">
-                <button class="pure-button" type="button" id="btn-edit_{{ task.id }}" onclick="submit('/todo/lists/{{ list.id }}/edit/{{ task.id }}', '', 'task_detail_{{ task.id }}');">
+                <button class="pure-button pure-button-primary" type="button" id="btn-edit_{{ task.id }}" onclick="submit('/todo/lists/{{ list.id }}/edit/{{ task.id }}', '', 'task_detail_{{ task.id }}');">
                     Éditer
                 </button>
             </div>

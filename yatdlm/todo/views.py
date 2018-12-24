@@ -121,7 +121,7 @@ def mark_as_done(request, list_id=-1, task_id=-1):
         raise HttpResponseNotFound("Task does not exists")
     return display_list(request, list_id=list_id, xhr=True)
 
-def display_detail(request, list_id=-1, task_id=-1, xhr=False):
+def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=False):
     if task_id != -1 and list_id != -1:
         public = 'public' in request.POST and request.POST['public'] == 'True'
         xhr = 'xhr' in request.POST and request.POST['xhr'] == 'True'
@@ -136,7 +136,8 @@ def display_detail(request, list_id=-1, task_id=-1, xhr=False):
             'xhr' : xhr,
             'public' : public,
             'list' : task.parent_list,
-            'priority_levels' : priority_levels
+            'priority_levels' : priority_levels,
+            'add_followup': add_followup
         })
     else:
         return HttpResponseNotFound("Task not found")
@@ -146,7 +147,7 @@ def add_followup(request, list_id=-1, task_id=-1):
     if task_id != -1 and list_id != -1:
         followup = FollowUp(writer=request.user, task_id=task_id, todol_id=list_id, content=request.POST['followup'])
         followup.save()
-        return display_detail(request, list_id=list_id, task_id=task_id, xhr=True)
+        return display_detail(request, list_id=list_id, task_id=task_id, add_followup=True, xhr=True)
     else:
         return HttpResponseNotFound("NOPE.")
 
