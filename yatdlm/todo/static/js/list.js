@@ -112,7 +112,7 @@ function display_task(task_id, url, public, is_toggle)
 {
     postdata = "";
     postdata += "public="+encodeURIComponent(public);
-    postdata += "&xhr="+encodeURIComponent("True");
+    postdata += "&xhr="+encodeURIComponent("true");
 
     if (typeof is_toggle !== 'undefined')
         toggle('task_subline_'+task_id)
