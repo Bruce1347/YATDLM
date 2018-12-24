@@ -11,6 +11,7 @@ from django.views.generic import TemplateView
 
 from .models import FollowUp, Task, TodoList
 
+from .utils import yesnojs
 
 @login_required()
 def index(request, xhr):
@@ -66,6 +67,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'title_page' : todo_list.title,
         'priority_levels' : [level for level in Task.priority_levels],
         'public': public,
+        'publicjs' : yesnojs(public)
     }
 
     return render(request, 'todo/list.html', context)
@@ -123,8 +125,8 @@ def mark_as_done(request, list_id=-1, task_id=-1):
 
 def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=False):
     if task_id != -1 and list_id != -1:
-        public = 'public' in request.POST and request.POST['public'] == 'True'
-        xhr = 'xhr' in request.POST and request.POST['xhr'] == 'True'
+        public = 'public' in request.POST and request.POST['public'] == 'true'
+        xhr = 'xhr' in request.POST and request.POST['xhr'] == 'true'
         task = Task.objects.get(id=task_id, parent_list_id=list_id)
         priority_levels = { level[0] : level[1] for level in Task.priority_levels }
         
