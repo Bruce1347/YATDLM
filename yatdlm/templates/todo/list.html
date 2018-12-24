@@ -70,28 +70,51 @@
     <div id="list-container">
         <table class="fullwidth pure-table pure-table-bordered" style="max-width: 80em; margin: auto;">
             <thead>
-                <th class="cell c-align">
-                    #
-                </th>
-                <th class="cell c-align">
-                    Tâche
-                </th>
-                <th class="cell c-align">
-                    Création
-                </th>
-                <th class="cell c-align">
-                    Résolution
-                </th>
-                <th class="cell c-align">
-                    Échéance
-                </th>
-                <th class="cell c-align" style="max-width: 10%">
-                    Priorité
-                </th>
-                {% if not public %}
+                <tr>
                     <th class="cell c-align">
+                        #
                     </th>
-                {% endif %}
+                    <th class="cell c-align">
+                        Tâche
+                    </th>
+                    <th class="cell c-align">
+                        Création
+                    </th>
+                    <th class="cell c-align">
+                        Résolution
+                    </th>
+                    <th class="cell c-align">
+                        Échéance
+                    </th>
+                    <th class="cell c-align" style="max-width: 10%">
+                        Priorité
+                    </th>
+                    {% if not public %}
+                        <th class="cell c-align">
+                        </th>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>
+                        <input class="fullwidth" size="1" type="text" name="search_tid" id="input_tid">
+                    </th>
+                    <th>
+                        <input class="fullwidth" size="1" type="text" name="search_tname" id="input_tname">
+                    </th>
+                    <th>
+                        <select class="fullwidth"></select>
+                    </th>
+                    <th>
+                        <select class="fullwidth"></select>
+                    </th>
+                    <th>
+                        <select class="fullwidth"></select>
+                    </th>
+                    <th>
+                        <select class="fullwidth"></select>
+                    </th>
+                    <th></th>
+                </tr>
             </thead>
             <tbody>
                 {% for task in tasks %}
