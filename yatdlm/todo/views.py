@@ -59,7 +59,10 @@ def search_list(request, list_id=None, public=False):
         if 'tid' in request.GET:
             if request.GET.get('tid') is not '':
                 tlfilter = tlfilter.filter(task_no=int(request.GET['tid']))
-        
+
+        if 'tname' in request.GET:
+            tlfilter = tlfilter.filter(title__icontains=request.GET.get('tname'))
+
         tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
 
 
@@ -70,7 +73,8 @@ def search_list(request, list_id=None, public=False):
             'tasks' : tasks,
             'xhr'   : True,
             'search': True,
-            'public': public
+            'public': public,
+            'publicjs' : yesnojs(public)
         }
 
         return render(request, 'todo/list.html', context)

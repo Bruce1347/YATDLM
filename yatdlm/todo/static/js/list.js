@@ -22,20 +22,25 @@ const picker = datepicker(document.getElementById('new_task_due_date'), {
     }
 });
 
+var current_list_id = document.getElementById("dom_list_id").value;
+
 document.getElementById("input_tid").addEventListener('keyup', function() {
     this.classList.remove("red_border");
     var pattern = this.getAttribute("pattern");
-    var list_id = document.getElementById("dom_list_id").value;
     var value = this.value;
 
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-        search_tasks(`/todo/lists/${list_id}/search`);
+        search_tasks(`/todo/lists/${current_list_id}/search`);
     } else {
         this.classList.add("red_border");
     }
-})
+});
+
+document.getElementById("input_tname").addEventListener('keyup', function () {
+    search_tasks(`/todo/lists/${current_list_id}/search`);
+});
 
 /**
  * Function that creates the adequate post data then sends it to the server in order to
@@ -61,18 +66,25 @@ function add_task(url)
 
 function search_tasks(url) {
     // Document inputs
-    var search_tid = document.getElementById("input_tid")
+    var search_tid = document.getElementById("input_tid");
+    var search_tname = document.getElementById("input_tname");
 
     // Search terms
     var input_tid = undefined;
+    var input_tname = undefined;
 
     if (search_tid.value !== undefined && search_tid.value !== "")
         input_tid = encodeURIComponent(search_tid.value);
 
+    if (search_tname.value !== undefined)
+        input_tname = encodeURIComponent(search_tname.value);
+
     // Build the postdata
     postdata = `?method=search`;
     if (input_tid !== undefined)
-        postdata = postdata + `&tid=${input_tid}`
+        postdata = postdata + `&tid=${input_tid}`;
+    if (input_tname !== undefined)
+        postdata = postdata + `&tname=${input_tname}`;
 
     submit(url, postdata, "list-container", "GET");
 }
