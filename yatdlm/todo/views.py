@@ -89,11 +89,28 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     if not todo_list.is_public and public:
         return HttpResponseForbidden()
 
+    tfilter = Task.objects.filter()
     # Retrieve the subsequent tasks
-    tasks_filter = Task.objects.filter(parent_list=list_id).order_by('is_done', 'priority', '-creation_date')
+    tasks_filter = tfilter.order_by('is_done', 'priority', '-creation_date')
     tasks = [task for task in tasks_filter]
 
     # Create the context
+    years_filter = tfilter.values('creation_date__year').order_by('-creation_date__year')
+    tasks_years = [year['creation_date__year'] for year in years_filter.distinct()]
+    months = (
+        ('Jan', 1),
+        ('Fev', 2),
+        ('Mar', 3),
+        ('Avr', 4),
+        ('Mai', 5),
+        ('Juin', 6),
+        ('Juil', 7),
+        ('Août', 8),
+        ('Sept', 9),
+        ('Oct', 10),
+        ('Nov', 11),
+        ('Dec', 12)
+    )
     context = {
         'list'  : todo_list,
         'tasks' : tasks,
@@ -101,7 +118,9 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'title_page' : todo_list.title,
         'priority_levels' : [level for level in Task.priority_levels],
         'public': public,
-        'publicjs' : yesnojs(public)
+        'publicjs' : yesnojs(public),
+        'tasks_years': tasks_years,
+        'months': months
     }
 
     return render(request, 'todo/list.html', context)

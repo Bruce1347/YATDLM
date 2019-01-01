@@ -22,7 +22,6 @@ const picker = datepicker(document.getElementById('new_task_due_date'), {
     }
 });
 
-var current_list_id = document.getElementById("dom_list_id").value;
 
 document.getElementById("input_tid").addEventListener('keyup', function() {
     this.classList.remove("red_border");
@@ -38,9 +37,14 @@ document.getElementById("input_tid").addEventListener('keyup', function() {
     }
 });
 
-document.getElementById("input_tname").addEventListener('keyup', function () {
+function search_task_handler() {
+    var current_list_id = document.getElementById("dom_list_id").value;
     search_tasks(`/todo/lists/${current_list_id}/search`);
-});
+}
+
+document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
+document.getElementById("select_tyear").addEventListener('change', search_task_handler);
+document.getElementById("select_tmonth").addEventListener('change', search_task_handler);
 
 /**
  * Function that creates the adequate post data then sends it to the server in order to
