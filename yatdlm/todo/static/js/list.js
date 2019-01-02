@@ -45,6 +45,8 @@ function search_task_handler() {
 document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
 document.getElementById("select_tcyear").addEventListener('change', search_task_handler);
 document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
+document.getElementById("select_tryear").addEventListener('change', search_task_handler);
+document.getElementById("select_trmonth").addEventListener('change', search_task_handler);
 document.getElementById("select_tprio").addEventListener('change', search_task_handler);
 
 /**
@@ -75,6 +77,8 @@ function search_tasks(url) {
     var search_tname = document.getElementById("input_tname");
     var search_tcyear = document.getElementById("select_tcyear");
     var search_tcmonth = document.getElementById("select_tcmonth");
+    var search_tryear = document.getElementById("select_tryear");
+    var search_trmonth = document.getElementById("select_trmonth");
     var search_tprio = document.getElementById("select_tprio");
 
     // Search terms
@@ -82,6 +86,8 @@ function search_tasks(url) {
     var input_tname = undefined;
     var input_tcyear = undefined;
     var input_tcmonth = undefined;
+    var input_tryear = undefined;
+    var input_trmonth = undefined;
     var input_tprio = undefined;
 
     if (search_tid.value !== undefined && search_tid.value !== "")
@@ -96,6 +102,12 @@ function search_tasks(url) {
     if (search_tcmonth.value != -1)
         input_tcmonth = encodeURIComponent(search_tcmonth.value);
 
+    if (search_tryear.value != -1)
+        input_tryear = encodeURIComponent(search_tryear.value);
+
+    if (search_trmonth.value != -1)
+        input_trmonth = encodeURIComponent(search_trmonth.value);
+
     if (search_tprio.value != -1)
         input_tprio = encodeURIComponent(search_tprio.value);
 
@@ -109,6 +121,10 @@ function search_tasks(url) {
         postdata = postdata + `&tcmonth=${input_tcmonth}`;
     if (input_tcyear !== undefined)
         postdata = postdata + `&tcyear=${input_tcyear}`;
+    if (input_trmonth !== undefined)
+        postdata = postdata + `&trmonth=${input_trmonth}`;
+    if (input_tryear !== undefined)
+        postdata = postdata + `&tryear=${input_tryear}`;
     if (input_tprio !== undefined)
         postdata = postdata + `&tprio=${input_tprio}`;
 

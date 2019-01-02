@@ -120,7 +120,20 @@
                         </div>
                     </th>
                     <th>
-                        <select class="fullwidth"></select>
+                        <div class="flexdiv">
+                            <select class="flex1 marginr-tiny" name="search_trmonth" id="select_trmonth">
+                                <option value="-1" selected></option>
+                                {% for month in months %}
+                                    <option value="{{ month.1 }}">{{ month.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="flex1 marginl-tiny" name="search_tryear" id="select_tryear">
+                                <option value="-1" selected></option>
+                                {% for year in tasks_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </th>
                     <th>
                         <select class="fullwidth"></select>
