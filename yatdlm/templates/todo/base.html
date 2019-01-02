@@ -1,7 +1,7 @@
 {% load static %}
 {% load tags %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     {% if not xhr %}
     <head>
         <meta charset="utf-8" />
@@ -13,13 +13,13 @@
     </head>
     {% endif %}
     <body class="page-body">
-        {% block content %}    
+        {% block content %}
         {% endblock %}
         {% if not xhr %}
-            <script type="text/javascript" src="{% static 'js/libs/flatpickr/flatpickr.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/xhr.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/list.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/functions.js' %}"></script>
+        <script src="{% static 'js/libs/flatpickr/flatpickr.min.js' %}"></script>
+        <script src="{% static 'js/xhr.js' %}"></script>
+        <script src="{% static 'js/list.js' %}"></script>
+        <script src="{% static 'js/functions.js' %}"></script>
         {% endif %}
     </body>
 

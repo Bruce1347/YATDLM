@@ -2,200 +2,186 @@
 {% load static %}
 
 {% block content %}
-{% csrf_token %}
-{% if not xhr %}
-<input class="hidden" id="dom_list_id" value="{{ list.id }}">
-<div style="max-width: 40em; margin: auto;" id="todo_header">
-    <h1>
-        {{ list.title }}
-    </h1>
-    <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
-    <div style="">
-        {{ list.description|linebreaks }}
-    </div>
-    {% if not public %}
+    {% csrf_token %}
+    {% if not xhr %}
+    <input class="hidden" id="dom_list_id" value="{{ list.id }}">
+    <div style="max-width: 40em; margin: auto;" id="todo_header">
+        <h1>{{ list.title }}</h1>
+        <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
+        <div>
+            {{ list.description|linebreaks }}
+        </div>
+        {% if not public %}
         <div>
             <button id="add-task-btn" type="button" onclick="toggle_add_form('add-container', 'add-task-btn');" class="pure-button">Ajouter une tâche</button>
             <button type="button" class="pure-button" onclick="delete_list('/todo/lists/delete/{{ list.id }}', '{{ list.title }}', false, null);">Supprimer la liste</button>
             <button type="button" class="pure-button" onclick="close_details()">Tout refermer</button>
         </div>
-    {% endif %}
-</div>
-<div class="margint-normal">
-    {% if not public %}
-    <div class="marginb-normal hidden" id="add-container">
-        <hr>
-        <div style="max-width: 40em; margin: auto;">
-            <form>
-                <h2>Ajouter une tâche :</h2>
-                <label for="new_task_title">Titre :</label>
-                <input class="marginb-normal" type="text" id="new_task_title" style="width: 100%">
-                <label for="new_task_descr">Description :</label>
-                <textarea class="marginb-normal" id="new_task_descr" rows="8" style="width: 100%"></textarea>
-                <div class="marginb-normal" style="display: flex;">
-                    <div style="flex: 1; margin-right: 10px;">
-                        <label for="new_task_due_date">Date de fin :</label>
-                        <input type="text" id="new_task_due_date" style="width: 100%">
-                    </div>
-                    <div style="flex: 1; margin-left: 10px;">
-                        <label for="new_task_priority">Priorité :</label>
-                        <select id="new_task_priority" style="width: 100%;">
-                            {% for choice in priority_levels %}
-                            {% if choice.0 != 2 %}
-                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                            {% else %}
-                            <option selected value="{{ choice.0 }}">{{ choice.1 }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <button class="marginb-normal pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter
-                    une nouvelle tâche</button>
-            </form>
-        </div>
-        <hr>
+        {% endif %}
     </div>
+    <div class="margint-normal">
+        {% if not public %}
+        <div class="marginb-normal hidden" id="add-container">
+            <hr>
+            <div style="max-width: 40em; margin: auto;">
+                <form>
+                    <h2>Ajouter une tâche :</h2>
+                    <label for="new_task_title">Titre :</label>
+                    <input class="marginb-normal" type="text" id="new_task_title" style="width: 100%">
+                    <label for="new_task_descr">Description :</label>
+                    <textarea class="marginb-normal" id="new_task_descr" rows="8" style="width: 100%"></textarea>
+                    <div class="marginb-normal" style="display: flex;">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="new_task_due_date">Date de fin :</label>
+                            <input type="text" id="new_task_due_date" style="width: 100%">
+                        </div>
+                        <div style="flex: 1; margin-left: 10px;">
+                            <label for="new_task_priority">Priorité :</label>
+                            <select id="new_task_priority" style="width: 100%;">
+                                {% for choice in priority_levels %}
+                                {% if choice.0 != 2 %}
+                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                {% else %}
+                                <option selected value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="marginb-normal pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter
+                        une nouvelle tâche</button>
+                </form>
+            </div>
+            <hr>
+        </div>
+        {% endif %}
     {% endif %}
-{% endif %}
-    <div class="marginb-normal">
-        <table class="fullwidth pure-table pure-table-bordered" style="max-width: 60em; margin: auto;">
-            {% if not search and not xhr %}
-            <thead>
-                <tr class="low_black_border">
-                    <th class="cell c-align">
-                        #
-                    </th>
-                    <th class="cell c-align">
-                        Tâche
-                    </th>
-                    <th class="cell c-align">
-                        Création
-                    </th>
-                    <th class="cell c-align">
-                        Résolution
-                    </th>
-                    <th class="cell c-align">
-                        Échéance
-                    </th>
-                    <th class="cell c-align" style="max-width: 10%">
-                        Priorité
-                    </th>
-                    {% if not public %}
+        <div class="marginb-normal">
+            <table class="fullwidth pure-table pure-table-bordered" style="max-width: 60em; margin: auto;">
+                {% if not search and not xhr %}
+                <thead>
+                    <tr class="low_black_border">
+                        <th class="cell c-align">#</th>
+                        <th class="cell c-align">Tâche</th>
+                        <th class="cell c-align">Création</th>
+                        <th class="cell c-align">Résolution</th>
+                        <th class="cell c-align">Échéance</th>
+                        <th class="cell c-align" style="max-width: 10%">Priorité</th>
+                        {% if not public %}
                         <th class="cell c-align">
                         </th>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <th>
-                        <input class="fullwidth" size="1" pattern="^[0-9]+$|^$" type="text" name="search_tid" id="input_tid">
-                    </th>
-                    <th>
-                        <input class="fullwidth" size="1" type="text" name="search_tname" id="input_tname">
-                    </th>
-                    <th>
-                        <div class="flexdiv">
-                            <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
-                                <option value="-1" selected></option>
-                                {% for month in months %}
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <th>
+                            <input class="fullwidth" size="1" pattern="^[0-9]+$|^$" type="text" name="search_tid" id="input_tid">
+                        </th>
+                        <th>
+                            <input class="fullwidth" size="1" type="text" name="search_tname" id="input_tname">
+                        </th>
+                        <th>
+                            <div class="flexdiv">
+                                <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for month in months %}
                                     <option value="{{ month.1 }}">{{ month.0 }}</option>
-                                {% endfor %}
-                            </select>
-                            <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
-                                <option value="-1" selected></option>
-                                {% for year in creation_years %}
+                                    {% endfor %}
+                                </select>
+                                <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for year in creation_years %}
                                     <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </th>
-                    <th>
-                        <div class="flexdiv">
-                            <select class="flex1 marginr-tiny" name="search_trmonth" id="select_trmonth">
-                                <option value="-1" selected></option>
-                                {% for month in months %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flexdiv">
+                                <select class="flex1 marginr-tiny" name="search_trmonth" id="select_trmonth">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for month in months %}
                                     <option value="{{ month.1 }}">{{ month.0 }}</option>
-                                {% endfor %}
-                            </select>
-                            <select class="flex1 marginl-tiny" name="search_tryear" id="select_tryear">
-                                <option value="-1" selected></option>
-                                {% for year in resolution_years %}
+                                    {% endfor %}
+                                </select>
+                                <select class="flex1 marginl-tiny" name="search_tryear" id="select_tryear">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for year in resolution_years %}
                                     <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </th>
-                    <th>
-                        <div class="flexdiv">
-                            <select class="flex1 marginr-tiny" name="search_tdmonth" id="select_tdmonth">
-                                <option value="-1" selected></option>
-                                {% for month in months %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flexdiv">
+                                <select class="flex1 marginr-tiny" name="search_tdmonth" id="select_tdmonth">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for month in months %}
                                     <option value="{{ month.1 }}">{{ month.0 }}</option>
-                                {% endfor %}
-                            </select>
-                            <select class="flex1 marginl-tiny" name="search_tdyear" id="select_tdyear">
-                                <option value="-1" selected></option>
-                                {% for year in deadlines_years %}
+                                    {% endfor %}
+                                </select>
+                                <select class="flex1 marginl-tiny" name="search_tdyear" id="select_tdyear">
+                                    <option value="-1" label=" " selected></option>
+                                    {% for year in deadlines_years %}
                                     <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </th>
-                    <th>
-                        <select class="fullwidth" name="search_tprio" id="select_tprio" >
-                            <option value="-1" selected></option>
-                            {% for choice in priority_levels %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </th>
+                        <th>
+                            <select class="fullwidth" name="search_tprio" id="select_tprio" >
+                                <option value="-1" label=" " selected></option>
+                                {% for choice in priority_levels %}
                                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                            {% endfor %}
-                        </select>
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            {% endif %}
-            <tbody id="list-container">
-                {% for task in tasks %}
-                    <tr colspan="7" class="nowrap priority_{{ task.priority }}">
-                        <td class="cell c-align">
-                            {{ task.task_no }}
-                        </td>
-                        <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                            {{ task.title|truncatechars:40 }}
-                        </td>
-                        <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                            {{ task.creation_date|date:"d/m/Y" }}
-                        </td>
-                        {% if task.is_done %}
-                            <td class="pointer cell c-align" colspan="2" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                                Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
+                                {% endfor %}
+                            </select>
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                {% endif %}
+                <tbody id="list-container">
+                    {% for task in tasks %}
+                        <tr class="nowrap priority_{{ task.priority }}">
+                            <td class="cell c-align">
+                                {{ task.task_no }}
                             </td>
-                        {% else %}
-                            <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                            {{ task.resolution_date|date:"d/m/Y" }}
+                            <td class="pointer cell l-align" style="white-space: nowrap;" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
+                                {{ task.title|truncatechars:40 }}
                             </td>
                             <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                                {{ task.due_date|date:"d/m/Y" }}
+                                {{ task.creation_date|date:"d/m/Y" }}
                             </td>
-                        {% endif %}
-                        <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;"
-                        onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
-                            {{ task.get_priority_display }}
-                        </td>
-                        {% if not public %}
-                            <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
-                                <img class="pointer" width="24px" height="24px" src="{% static 'img/icons/garbage_red.svg' %}">
+                            {% if task.is_done %}
+                                <td class="pointer cell c-align" colspan="2" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
+                                    Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
+                                </td>
+                            {% else %}
+                                <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
+                                {{ task.resolution_date|date:"d/m/Y" }}
+                                </td>
+                                <td class="pointer cell c-align" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
+                                    {{ task.due_date|date:"d/m/Y" }}
+                                </td>
+                            {% endif %}
+                            <td class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;"
+                            onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', {{ publicjs }}, 1);">
+                                {{ task.get_priority_display }}
                             </td>
-                        {% endif %}
-                    </tr>
-                    <tr id="task_subline_{{ task.id }}" class="hidden b_lightgrey">
-                        <td class="" id="task_detail_{{ task.id }}" colspan="7">
-                        </td>
-                    </tr>
-                {% endfor %}
-                {% if not xhr %}
-            </tbody>
-        </table>
+                            {% if not public %}
+                                <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                                    <img class="pointer" width="24" height="24"  alt="Delete" src="{% static 'img/icons/garbage_red.svg' %}">
+                                </td>
+                            {% endif %}
+                        </tr>
+                        <tr id="task_subline_{{ task.id }}" class="hidden b_lightgrey">
+                            <td class="" id="task_detail_{{ task.id }}" colspan="7">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% if not xhr %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 {% endblock %}
