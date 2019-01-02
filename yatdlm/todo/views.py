@@ -107,14 +107,14 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     if not todo_list.is_public and public:
         return HttpResponseForbidden()
 
-    tfilter = Task.objects.filter()
+    tfilter = Task.objects.filter(parent_list_id=todo_list.id)
     # Retrieve the subsequent tasks
     tasks_filter = tfilter.order_by('is_done', 'priority', '-creation_date')
     tasks = [task for task in tasks_filter]
 
     # Create the context
-    years_filter = tfilter.values('creation_date__year').order_by('-creation_date__year')
-    tasks_years = [year['creation_date__year'] for year in years_filter.distinct()]
+    years_filter = tfilter.dates('creation_date', 'year')
+    tasks_years = [date.year for date in years_filter]
     months = (
         ('Jan', 1),
         ('Fev', 2),
