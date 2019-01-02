@@ -45,6 +45,7 @@ function search_task_handler() {
 document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
 document.getElementById("select_tcyear").addEventListener('change', search_task_handler);
 document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
+document.getElementById("select_tprio").addEventListener('change', search_task_handler);
 
 /**
  * Function that creates the adequate post data then sends it to the server in order to
@@ -74,12 +75,14 @@ function search_tasks(url) {
     var search_tname = document.getElementById("input_tname");
     var search_tcyear = document.getElementById("select_tcyear");
     var search_tcmonth = document.getElementById("select_tcmonth");
+    var search_tprio = document.getElementById("select_tprio");
 
     // Search terms
     var input_tid = undefined;
     var input_tname = undefined;
     var input_tcyear = undefined;
     var input_tcmonth = undefined;
+    var input_tprio = undefined;
 
     if (search_tid.value !== undefined && search_tid.value !== "")
         input_tid = encodeURIComponent(search_tid.value);
@@ -93,6 +96,9 @@ function search_tasks(url) {
     if (search_tcmonth.value != -1)
         input_tcmonth = encodeURIComponent(search_tcmonth.value);
 
+    if (search_tprio.value != -1)
+        input_tprio = encodeURIComponent(search_tprio.value);
+
     // Build the postdata
     postdata = `?method=search`;
     if (input_tid !== undefined)
@@ -103,6 +109,8 @@ function search_tasks(url) {
         postdata = postdata + `&tcmonth=${input_tcmonth}`;
     if (input_tcyear !== undefined)
         postdata = postdata + `&tcyear=${input_tcyear}`;
+    if (input_tprio !== undefined)
+        postdata = postdata + `&tprio=${input_tprio}`;
 
     submit(url, postdata, "list-container", "GET");
 }

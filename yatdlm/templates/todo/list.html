@@ -106,13 +106,13 @@
                     <th>
                         <div class="flexdiv">
                             <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
-                                <option value="-1"></option>
+                                <option value="-1" selected></option>
                                 {% for month in months %}
                                     <option value="{{ month.1 }}">{{ month.0 }}</option>
                                 {% endfor %}
                             </select>
                             <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
-                                <option value="-1"></option>
+                                <option value="-1" selected></option>
                                 {% for year in tasks_years %}
                                     <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
@@ -126,7 +126,12 @@
                         <select class="fullwidth"></select>
                     </th>
                     <th>
-                        <select class="fullwidth"></select>
+                        <select class="fullwidth" name="search_tprio" id="select_tprio" >
+                            <option value="-1" selected></option>
+                            {% for choice in priority_levels %}
+                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
                     </th>
                     <th></th>
                 </tr>

@@ -69,6 +69,9 @@ def search_list(request, list_id=None, public=False):
         if 'tcmonth' in request.GET:
             tlfilter = tlfilter.filter(creation_date__month=request.GET.get('tcmonth'))
 
+        if 'tprio' in request.GET:
+            tlfilter = tlfilter.filter(priority=int(request.GET.get('tprio')))
+
         tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
 
 
