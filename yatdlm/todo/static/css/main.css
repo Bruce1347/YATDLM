@@ -3,13 +3,21 @@
 .l-align        { text-align: left; }
 .c-align        { text-align: center; }
 .noborder       { border-style: none; }
+.nowrap         { white-space: nowrap; }
 
 .fullwidth      { width: 100%; }
+.midwidth       { width: 50%; }
 .flexdiv        { display: flex; }
 .flex1          { flex: 1; }
 
+.marginl-tiny   { margin-left: 5px; }
+.marginr-tiny   { margin-right: 5px; }
+
+.b_white        { background: #FFFFFF; }
 .b_lightgrey    { background: #e5e2e2; }
 .b_grey         { background: #d4c7c7; }
+.red_border     { border: solid red 1px; }
+.low_black_border { border-bottom: solid black 1px; }
 
 .padding50      { padding: 50px; }
 

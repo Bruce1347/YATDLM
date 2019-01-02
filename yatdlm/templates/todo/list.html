@@ -4,6 +4,7 @@
 {% block content %}
 {% csrf_token %}
 {% if not xhr %}
+<input class="hidden" id="dom_list_id" value="{{ list.id }}">
 <div style="max-width: 40em; margin: auto;" id="todo_header">
     <h1>
         {{ list.title }}
@@ -67,35 +68,104 @@
     <br>
     {% endif %}
 {% endif %}
-    <div id="list-container">
-        <table class="fullwidth pure-table pure-table-bordered" style="max-width: 80em; margin: auto;">
+    <div>
+        <table class="fullwidth pure-table pure-table-bordered" style="max-width: 60em; margin: auto;">
+            {% if not search and not xhr %}
             <thead>
-                <th class="cell c-align">
-                    #
-                </th>
-                <th class="cell c-align">
-                    Tâche
-                </th>
-                <th class="cell c-align">
-                    Création
-                </th>
-                <th class="cell c-align">
-                    Résolution
-                </th>
-                <th class="cell c-align">
-                    Échéance
-                </th>
-                <th class="cell c-align" style="max-width: 10%">
-                    Priorité
-                </th>
-                {% if not public %}
+                <tr class="low_black_border">
                     <th class="cell c-align">
+                        #
                     </th>
-                {% endif %}
+                    <th class="cell c-align">
+                        Tâche
+                    </th>
+                    <th class="cell c-align">
+                        Création
+                    </th>
+                    <th class="cell c-align">
+                        Résolution
+                    </th>
+                    <th class="cell c-align">
+                        Échéance
+                    </th>
+                    <th class="cell c-align" style="max-width: 10%">
+                        Priorité
+                    </th>
+                    {% if not public %}
+                        <th class="cell c-align">
+                        </th>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>
+                        <input class="fullwidth" size="1" pattern="^[0-9]+$|^$" type="text" name="search_tid" id="input_tid">
+                    </th>
+                    <th>
+                        <input class="fullwidth" size="1" type="text" name="search_tname" id="input_tname">
+                    </th>
+                    <th>
+                        <div class="flexdiv">
+                            <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
+                                <option value="-1" selected></option>
+                                {% for month in months %}
+                                    <option value="{{ month.1 }}">{{ month.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
+                                <option value="-1" selected></option>
+                                {% for year in tasks_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="flexdiv">
+                            <select class="flex1 marginr-tiny" name="search_trmonth" id="select_trmonth">
+                                <option value="-1" selected></option>
+                                {% for month in months %}
+                                    <option value="{{ month.1 }}">{{ month.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="flex1 marginl-tiny" name="search_tryear" id="select_tryear">
+                                <option value="-1" selected></option>
+                                {% for year in tasks_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="flexdiv">
+                            <select class="flex1 marginr-tiny" name="search_tdmonth" id="select_tdmonth">
+                                <option value="-1" selected></option>
+                                {% for month in months %}
+                                    <option value="{{ month.1 }}">{{ month.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="flex1 marginl-tiny" name="search_tdyear" id="select_tdyear">
+                                <option value="-1" selected></option>
+                                {% for year in tasks_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        <select class="fullwidth" name="search_tprio" id="select_tprio" >
+                            <option value="-1" selected></option>
+                            {% for choice in priority_levels %}
+                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th></th>
+                </tr>
             </thead>
-            <tbody>
+            {% endif %}
+            <tbody id="list-container">
                 {% for task in tasks %}
-                        <tr class="priority_{{ task.priority }}">
+                    <tr colspan="7" class="nowrap priority_{{ task.priority }}">
                         <td class="cell c-align">
                             {{ task.task_no }}
                         </td>
