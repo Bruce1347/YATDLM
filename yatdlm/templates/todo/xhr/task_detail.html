@@ -1,24 +1,24 @@
 {% if not add_followup %}
 <td colspan="7">
-    <br>
-    <span style="font-size: 1.8em;">Tâche #{{ task.task_no }} : {{ task.title }}</span>
-    <br>
-    <span class="b_lightgrey">
-        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
-    </span>
+    <div class="margint-normal">
+        <span style="font-size: 1.8em;">Tâche #{{ task.task_no }} : {{ task.title }}</span>
+    </div>
+    <div class="marginb-normal">
+        <span class="b_lightgrey">
+            Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b> :
+        </span>
+    </div>
     <hr>
-    <br>
     <div>
-        <span style="width: 100%">
+        <span class="fullwidth">
             {{ task.description|linebreaks|display_urls }}
         </span>
     </div>
-    <br>
     <hr>
 {% endif %}
-    <div class="followups_container" id="followups_{{ task.id }}">
+    <div class="margint-normal followups_container" id="followups_{{ task.id }}">
         {% for followup in followups %}
-            <div class="single_followup">
+            <div class="marginb-normal single_followup">
                 {% if followup.f_type == followup.COMMENT %}
                     <div class="followup_header b_grey">
                         <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
@@ -43,44 +43,36 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <br>
         {% endfor %}
     </div>
     {% if xhr %}
     {% if not public %}
-    <br>
     <label for="followup_{{ task.id }}">Ajouter un commentaire :</label>
-    <br>
-    <br>
-    <textarea id="followup_{{ task.id }}" style="width: 100%;"></textarea>
-    <br>
-    <br>
+    <textarea class="marginb-normal margint-normal" id="followup_{{ task.id }}" style="width: 100%;"></textarea>
     {% endif %}
     <div class="flexdiv">
         <div class="flex1">
             {% if not public %}
-            <div style="">
-                <button class="pure-button pure-button-primary" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Commenter</button>
+            <div>
+                <button class="marginb-normal pure-button pure-button-primary" type="button" id="btn-addfollowup_{{ task.id }}" onclick="add_followup('/todo/lists/{{ task.parent_list.id }}/detail/{{ task.id }}/add_followup', '{{ task.id }}');">Commenter</button>
             </div>
-            <br>
             {% endif %}
             <div>
-                    <button class="pure-button pure-button-primary" type="button" onclick="toggle('task_subline_{{ task.id }}');">
-                        Masquer les détails
-                    </button>
-                </div>
+                <button class="pure-button pure-button-primary" type="button" onclick="toggle('task_subline_{{ task.id }}');">
+                    Masquer les détails
+                </button>
+            </div>
         </div>
         <div class="flex1">
             {% if not public and not task.is_done %}
-            <div style="flex: 1;">
+            <div class="marginb-normal flex1">
                 <button class="pure-button pure-button-primary" type="button" onclick="mark_task_as_done('/todo/lists/{{ task.parent_list.id }}/complete_task/{{ task.id }}', '1', '{{ task.id }}');">Fermer la tâche</button>
             </div>
-            <br>
             {% endif %}
             <div class="flex1">
-                    <button class="pure-button pure-button-primary" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">
-                        Masquer les commentaires
-                    </button>
+                <button class="pure-button pure-button-primary" type="button" id="btn-followups_{{ task.id }}" onclick="display_followups('{{ task.id }}');">
+                    Masquer les commentaires
+                </button>
             </div>
         </div>
         <div class="flex1">

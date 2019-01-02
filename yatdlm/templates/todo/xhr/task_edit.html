@@ -2,16 +2,11 @@
     <form>
         <fieldset class="noborder">
             <label for="task_title_{{ task.id }}">Titre :</label>
-            <br>
-            <input class="fullwidth" type="text" id="task_title_{{ task.id }}" value="{{ task.title }}">
-            <br>
-            <br>
+            <input class="marginb-normal fullwidth" type="text" id="task_title_{{ task.id }}" value="{{ task.title }}">
             <label for="task_descr_{{ task.id }}">Description :</label>
-            <br>
-            <textarea class="fullwidth" id="task_descr_{{ task.id }}">{{ task.description|linebreaks|striptags }}</textarea>
-            <br>
+            <textarea class="marginb-normal fullwidth" id="task_descr_{{ task.id }}">{{ task.description|linebreaks|striptags }}</textarea>
             <label for="task_priority_{{ task.id }}">Priorité :</label>
-            <select class="fullwidth" id="task_priority_{{ task.id }}">
+            <select class="marginb-normal fullwidth" id="task_priority_{{ task.id }}">
                 {% for choice in priority_levels %}
                     {% if task.priority == choice.0 %}
                         <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
@@ -20,14 +15,12 @@
                     {% endif %}
                 {% endfor %}
             </select>
-            <br>
-            <br>
             <div class="flexdiv">
                 <div style="flex: 3;">
-                    <button class="pure-button" type="button" onclick="edit_task('{{ task.id }}', '/todo/lists/{{ list.id }}/edit/submit/{{ task.id }}');">Sauvegarder les changements</button>
+                    <button class="pure-button pure-button-primary" type="button" onclick="edit_task('{{ task.id }}', '/todo/lists/{{ list.id }}/edit/submit/{{ task.id }}');">Sauvegarder les changements</button>
                 </div>
                 <div class="flex1">
-                    <button class="pure-button" type="button" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', 'False');">Fermer</button>
+                    <button class="pure-button pure-button-primary" type="button" onclick="display_task('{{ task.id }}', '/todo/lists/{{ list.id }}/detail/{{ task.id }}', 'False');">Fermer</button>
                 </div>
             </div>
         </fieldset>

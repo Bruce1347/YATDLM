@@ -5,17 +5,14 @@
     <form class="pure-form" action="/login/auth" method="POST">
         {% csrf_token %}
         <fieldset class="noborder">
-            <label for="username">Nom d'utilisateur :</label>
-            <br>
-            <input type="text" name="username">
-            <br>
-            <br>
-
-            <label for="password">Mot de passe :</label>
-            <br>
-            <input type="password" name="password">
-            <br>
-            <br>
+            <div class="marginb-normal">
+                <label for="username">Nom d'utilisateur :<br/></label>
+                <input type="text" name="username">
+            </div>
+            <div class="marginb-normal">
+                <label for="password">Mot de passe :<br/></label>
+                <input type="password" name="password">
+            </div>
             <button class="pure-button">CONNEXION</button>
         </fieldset>
     </form>

@@ -21,23 +21,18 @@
         </div>
     {% endif %}
 </div>
-<br>
-<div>
+<div class="margint-normal">
     {% if not public %}
-    <div class="hidden" id="add-container">
+    <div class="marginb-normal hidden" id="add-container">
         <hr>
         <div style="max-width: 40em; margin: auto;">
             <form>
                 <h2>Ajouter une tâche :</h2>
                 <label for="new_task_title">Titre :</label>
-                <input type="text" id="new_task_title" style="width: 100%">
-                <br>
-                <br>
+                <input class="marginb-normal" type="text" id="new_task_title" style="width: 100%">
                 <label for="new_task_descr">Description :</label>
-                <textarea id="new_task_descr" rows="8" style="width: 100%"></textarea>
-                <br>
-                <br>
-                <div style="display: flex;">
+                <textarea class="marginb-normal" id="new_task_descr" rows="8" style="width: 100%"></textarea>
+                <div class="marginb-normal" style="display: flex;">
                     <div style="flex: 1; margin-right: 10px;">
                         <label for="new_task_due_date">Date de fin :</label>
                         <input type="text" id="new_task_due_date" style="width: 100%">
@@ -55,20 +50,15 @@
                         </select>
                     </div>
                 </div>
-                <br>
-                <br>
-                <button class="pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter
+                <button class="marginb-normal pure-button" type="button" onclick="add_task('/todo/lists/{{ list.id }}/add_task');">Ajouter
                     une nouvelle tâche</button>
-                <br>
-                <br>
             </form>
         </div>
         <hr>
     </div>
-    <br>
     {% endif %}
 {% endif %}
-    <div>
+    <div class="marginb-normal">
         <table class="fullwidth pure-table pure-table-bordered" style="max-width: 60em; margin: auto;">
             {% if not search and not xhr %}
             <thead>
@@ -206,8 +196,6 @@
             </tbody>
         </table>
     </div>
-    <br>
-    <br>
     {% endif %}
 </div>
 {% endblock %}

@@ -13,6 +13,9 @@
 .marginl-tiny   { margin-left: 5px; }
 .marginr-tiny   { margin-right: 5px; }
 
+.margint-normal { margin-top: 20px; }
+.marginb-normal { margin-bottom: 20px; }
+
 .b_white        { background: #FFFFFF; }
 .b_lightgrey    { background: #e5e2e2; }
 .b_grey         { background: #d4c7c7; }
