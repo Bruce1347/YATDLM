@@ -47,6 +47,8 @@ document.getElementById("select_tcyear").addEventListener('change', search_task_
 document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
 document.getElementById("select_tryear").addEventListener('change', search_task_handler);
 document.getElementById("select_trmonth").addEventListener('change', search_task_handler);
+document.getElementById("select_tdyear").addEventListener('change', search_task_handler);
+document.getElementById("select_tdmonth").addEventListener('change', search_task_handler);
 document.getElementById("select_tprio").addEventListener('change', search_task_handler);
 
 /**
@@ -79,6 +81,8 @@ function search_tasks(url) {
     var search_tcmonth = document.getElementById("select_tcmonth");
     var search_tryear = document.getElementById("select_tryear");
     var search_trmonth = document.getElementById("select_trmonth");
+    var search_tdyear = document.getElementById("select_tdyear");
+    var search_tdmonth = document.getElementById("select_tdmonth");
     var search_tprio = document.getElementById("select_tprio");
 
     // Search terms
@@ -88,6 +92,8 @@ function search_tasks(url) {
     var input_tcmonth = undefined;
     var input_tryear = undefined;
     var input_trmonth = undefined;
+    var input_tdyear = undefined;
+    var input_tdmonth = undefined;
     var input_tprio = undefined;
 
     if (search_tid.value !== undefined && search_tid.value !== "")
@@ -96,17 +102,23 @@ function search_tasks(url) {
     if (search_tname.value !== undefined)
         input_tname = encodeURIComponent(search_tname.value);
 
+    // Creation filter
     if (search_tcyear.value != -1)
         input_tcyear = encodeURIComponent(search_tcyear.value);
-
     if (search_tcmonth.value != -1)
         input_tcmonth = encodeURIComponent(search_tcmonth.value);
 
+    // Resolution filter
     if (search_tryear.value != -1)
         input_tryear = encodeURIComponent(search_tryear.value);
-
     if (search_trmonth.value != -1)
         input_trmonth = encodeURIComponent(search_trmonth.value);
+
+    // Deadline filter
+    if (search_tdyear.value != -1)
+        input_tdyear = encodeURIComponent(search_tdyear.value);
+    if (search_tdmonth.value != -1)
+        input_tdmonth = encodeURIComponent(search_tdmonth.value);
 
     if (search_tprio.value != -1)
         input_tprio = encodeURIComponent(search_tprio.value);
@@ -125,6 +137,10 @@ function search_tasks(url) {
         postdata = postdata + `&trmonth=${input_trmonth}`;
     if (input_tryear !== undefined)
         postdata = postdata + `&tryear=${input_tryear}`;
+    if (input_tdmonth !== undefined)
+        postdata = postdata + `&tdmonth=${input_tdmonth}`;
+    if (input_tdyear !== undefined)
+        postdata = postdata + `&tdyear=${input_tdyear}`;
     if (input_tprio !== undefined)
         postdata = postdata + `&tprio=${input_tprio}`;
 

@@ -72,7 +72,7 @@
         <table class="fullwidth pure-table pure-table-bordered" style="max-width: 60em; margin: auto;">
             {% if not search and not xhr %}
             <thead>
-                <tr>
+                <tr class="low_black_border">
                     <th class="cell c-align">
                         #
                     </th>
@@ -136,7 +136,20 @@
                         </div>
                     </th>
                     <th>
-                        <select class="fullwidth"></select>
+                        <div class="flexdiv">
+                            <select class="flex1 marginr-tiny" name="search_tdmonth" id="select_tdmonth">
+                                <option value="-1" selected></option>
+                                {% for month in months %}
+                                    <option value="{{ month.1 }}">{{ month.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="flex1 marginl-tiny" name="search_tdyear" id="select_tdyear">
+                                <option value="-1" selected></option>
+                                {% for year in tasks_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </th>
                     <th>
                         <select class="fullwidth" name="search_tprio" id="select_tprio" >

@@ -65,15 +65,18 @@ def search_list(request, list_id=None, public=False):
 
         if 'tcyear' in request.GET:
             tlfilter = tlfilter.filter(creation_date__year=request.GET.get('tcyear'))
-
         if 'tcmonth' in request.GET:
             tlfilter = tlfilter.filter(creation_date__month=request.GET.get('tcmonth'))
 
         if 'tryear' in request.GET:
             tlfilter = tlfilter.filter(resolution_date__year=request.GET.get('tryear'))
-
         if 'trmonth' in request.GET:
             tlfilter = tlfilter.filter(resolution_date__month=request.GET.get('trmonth'))
+
+        if 'tdyear' in request.GET:
+            tlfilter = tlfilter.filter(due_date__year=request.GET.get('tdyear'))
+        if 'tdmonth' in request.GET:
+            tlfilter = tlfilter.filter(due_date__month=request.GET.get('tdmonth'))
 
         if 'tprio' in request.GET:
             tlfilter = tlfilter.filter(priority=int(request.GET.get('tprio')))
