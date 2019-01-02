@@ -31,7 +31,7 @@ document.getElementById("input_tid").addEventListener('keyup', function() {
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-        search_tasks(`/todo/lists/${current_list_id}/search`);
+	search_task_handler();
     } else {
         this.classList.add("red_border");
     }
