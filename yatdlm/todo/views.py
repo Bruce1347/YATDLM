@@ -63,6 +63,12 @@ def search_list(request, list_id=None, public=False):
         if 'tname' in request.GET:
             tlfilter = tlfilter.filter(title__icontains=request.GET.get('tname'))
 
+        if 'tcyear' in request.GET:
+            tlfilter = tlfilter.filter(creation_date__year=request.GET.get('tcyear'))
+
+        if 'tcmonth' in request.GET:
+            tlfilter = tlfilter.filter(creation_date__month=request.GET.get('tcmonth'))
+
         tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
 
 

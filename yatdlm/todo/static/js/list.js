@@ -43,8 +43,8 @@ function search_task_handler() {
 }
 
 document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
-document.getElementById("select_tyear").addEventListener('change', search_task_handler);
-document.getElementById("select_tmonth").addEventListener('change', search_task_handler);
+document.getElementById("select_tcyear").addEventListener('change', search_task_handler);
+document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
 
 /**
  * Function that creates the adequate post data then sends it to the server in order to
@@ -72,10 +72,14 @@ function search_tasks(url) {
     // Document inputs
     var search_tid = document.getElementById("input_tid");
     var search_tname = document.getElementById("input_tname");
+    var search_tcyear = document.getElementById("select_tcyear");
+    var search_tcmonth = document.getElementById("select_tcmonth");
 
     // Search terms
     var input_tid = undefined;
     var input_tname = undefined;
+    var input_tcyear = undefined;
+    var input_tcmonth = undefined;
 
     if (search_tid.value !== undefined && search_tid.value !== "")
         input_tid = encodeURIComponent(search_tid.value);
@@ -83,12 +87,22 @@ function search_tasks(url) {
     if (search_tname.value !== undefined)
         input_tname = encodeURIComponent(search_tname.value);
 
+    if (search_tcyear.value != -1)
+        input_tcyear = encodeURIComponent(search_tcyear.value);
+
+    if (search_tcmonth.value != -1)
+        input_tcmonth = encodeURIComponent(search_tcmonth.value);
+
     // Build the postdata
     postdata = `?method=search`;
     if (input_tid !== undefined)
         postdata = postdata + `&tid=${input_tid}`;
     if (input_tname !== undefined)
         postdata = postdata + `&tname=${input_tname}`;
+    if (input_tcmonth !== undefined)
+        postdata = postdata + `&tcmonth=${input_tcmonth}`;
+    if (input_tcyear !== undefined)
+        postdata = postdata + `&tcyear=${input_tcyear}`;
 
     submit(url, postdata, "list-container", "GET");
 }
