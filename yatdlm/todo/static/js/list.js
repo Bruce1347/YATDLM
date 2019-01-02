@@ -2,27 +2,23 @@
  * File that contains all the functions for list management
  */
 
-// JS calls at page loading
 
-// Setup for datepicker.js
-// String that contains the due date as a ISO Date
-var sendDate = "";
-const picker = datepicker(document.getElementById('new_task_due_date'), {
-    formatter: function(element, date) {
-        /**
-         * Ensuring that the saved date takes into account the timezone 
-         * Since getTimezoneOffset returns a time in minutes, we have to convert the returned offset to milliseconds
-         */
-        var localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-
-        // Ensuring that the display date is to the european format (DD/MM/YYYY)
-        element.value = localDate.toLocaleDateString();
-
-        sendDate = localDate.toISOString();
-    }
+// Things to do when the page is loaded
+/**
+ * Setup the date picker and ensure that the user cannot input deadlines in the
+ * past.
+*/
+var picker = flatpickr(document.getElementById('new_task_due_date'), {
+    minDate: "today"
 });
 
-
+/**
+ * Setup the filters events.
+ */
+function search_task_handler() {
+    var current_list_id = document.getElementById("dom_list_id").value;
+    search_tasks(`/todo/lists/${current_list_id}/search`);
+}
 document.getElementById("input_tid").addEventListener('keyup', function() {
     this.classList.remove("red_border");
     var pattern = this.getAttribute("pattern");
@@ -36,12 +32,6 @@ document.getElementById("input_tid").addEventListener('keyup', function() {
         this.classList.add("red_border");
     }
 });
-
-function search_task_handler() {
-    var current_list_id = document.getElementById("dom_list_id").value;
-    search_tasks(`/todo/lists/${current_list_id}/search`);
-}
-
 document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
 document.getElementById("select_tcyear").addEventListener('change', search_task_handler);
 document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
@@ -62,12 +52,13 @@ function add_task(url)
     var task_title = document.getElementById('new_task_title').value;
     var task_descr = document.getElementById('new_task_descr').value;
     var task_priority = document.getElementById('new_task_priority').value;
+    var task_end_date = document.getElementById('new_task_due_date').value;
 
 
     postdata  = "action=add";
     postdata += "&title="+encodeURIComponent(task_title);
     postdata += "&descr="+encodeURIComponent(task_descr);
-    postdata += "&due="+encodeURIComponent(sendDate);
+    postdata += "&due="+encodeURIComponent(task_end_date);
     postdata += "&priority="+encodeURIComponent(task_priority);
 
     submit(url, postdata, "list-container");
