@@ -113,7 +113,7 @@
                             </select>
                             <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
                                 <option value="-1" selected></option>
-                                {% for year in tasks_years %}
+                                {% for year in creation_years %}
                                     <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
                             </select>
@@ -129,7 +129,7 @@
                             </select>
                             <select class="flex1 marginl-tiny" name="search_tryear" id="select_tryear">
                                 <option value="-1" selected></option>
-                                {% for year in tasks_years %}
+                                {% for year in resolution_years %}
                                     <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
                             </select>
@@ -145,7 +145,7 @@
                             </select>
                             <select class="flex1 marginl-tiny" name="search_tdyear" id="select_tdyear">
                                 <option value="-1" selected></option>
-                                {% for year in tasks_years %}
+                                {% for year in deadlines_years %}
                                     <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
                             </select>

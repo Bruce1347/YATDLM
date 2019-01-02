@@ -113,8 +113,13 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     tasks = [task for task in tasks_filter]
 
     # Create the context
-    years_filter = tfilter.dates('creation_date', 'year')
-    tasks_years = [date.year for date in years_filter]
+    creation_years_filter = tfilter.dates('creation_date', 'year')
+    deadlines_years_filter = tfilter.dates('due_date', 'year')
+    resolution_years_filter = tfilter.dates('resolution_date', 'year')
+    creation_years = [date.year for date in creation_years_filter]
+    resolution_years = [date.year for date in resolution_years_filter]
+    deadlines_years = [date.year for date in deadlines_years_filter]
+
     months = (
         ('Jan', 1),
         ('Fev', 2),
@@ -137,7 +142,9 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'priority_levels' : [level for level in Task.priority_levels],
         'public': public,
         'publicjs' : yesnojs(public),
-        'tasks_years': tasks_years,
+        'creation_years': creation_years,
+        'resolution_years': resolution_years,
+        'deadlines_years': deadlines_years,
         'months': months
     }
 
