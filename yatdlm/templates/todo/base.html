@@ -2,22 +2,25 @@
 {% load tags %}
 <!DOCTYPE html>
 <html>
+    {% if not xhr %}
     <head>
         <meta charset="utf-8" />
         <title>YATDLM - {{ title_page }}</title>
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
         <link rel="stylesheet" href="{% static 'css/libs/loaders.css' %}">
-        <link rel="stylesheet" href="{% static 'css/libs/datepicker.css' %}">
+        <link rel="stylesheet" href="{% static 'css/libs/flatpickr.min.css' %}">
         <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
     </head>
-    
+    {% endif %}
     <body class="page-body">
         {% block content %}    
         {% endblock %}
-        <script type="text/javascript" src="{% static 'js/libs/datepicker/datepicker.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/xhr.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/list.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/functions.js' %}"></script>
+        {% if not xhr %}
+            <script type="text/javascript" src="{% static 'js/libs/flatpickr/flatpickr.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/xhr.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/list.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/functions.js' %}"></script>
+        {% endif %}
     </body>
 
 </html>
