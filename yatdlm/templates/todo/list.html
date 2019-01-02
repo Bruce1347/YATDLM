@@ -5,6 +5,7 @@
     {% csrf_token %}
     {% if not xhr %}
     <input class="hidden" id="dom_list_id" value="{{ list.id }}">
+    <input class="hidden" id="dom_ispublicjs" value="{{ publicjs }}">
     <div style="max-width: 40em; margin: auto;" id="todo_header">
         <h1>{{ list.title }}</h1>
         <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
@@ -135,7 +136,9 @@
                                 {% endfor %}
                             </select>
                         </th>
+                        {% if not public %}
                         <th></th>
+                        {% endif %}
                     </tr>
                 </thead>
                 {% endif %}

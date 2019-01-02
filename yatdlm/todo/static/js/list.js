@@ -65,6 +65,7 @@ function add_task(url)
 }
 
 function search_tasks(url) {
+    var public = document.getElementById("dom_ispublicjs").value;
     // Document inputs
     var search_tid = document.getElementById("input_tid");
     var search_tname = document.getElementById("input_tname");
@@ -115,7 +116,7 @@ function search_tasks(url) {
         input_tprio = encodeURIComponent(search_tprio.value);
 
     // Build the postdata
-    postdata = `?method=search`;
+    postdata = `?method=search&public=${public}`;
     if (input_tid !== undefined)
         postdata = postdata + `&tid=${input_tid}`;
     if (input_tname !== undefined)

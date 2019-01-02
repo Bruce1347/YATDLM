@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 
 from .models import FollowUp, Task, TodoList
 
-from .utils import yesnojs
+from .utils import yesnojs, yesnopython
 
 @login_required()
 def index(request, xhr):
@@ -50,7 +50,7 @@ def index(request, xhr):
 def search_list(request, list_id=None, public=False):
     try:
         todolist = TodoList.objects.get(id=list_id)
-
+        public = yesnopython(request.GET.get('public'))
         if not todolist.is_public and public:
             return HttpResponseForbidden()
 
@@ -82,8 +82,6 @@ def search_list(request, list_id=None, public=False):
             tlfilter = tlfilter.filter(priority=int(request.GET.get('tprio')))
 
         tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
-
-
         tasks = [task for task in tlfilter]
 
         context = {
