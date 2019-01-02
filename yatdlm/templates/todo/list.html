@@ -105,13 +105,13 @@
                     </th>
                     <th>
                         <div class="flexdiv">
-                            <select class="flex1 marginr-tiny" name="search_tmonth" id="select_tmonth">
+                            <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
                                 <option value="-1"></option>
                                 {% for month in months %}
                                     <option value="{{ month.1 }}">{{ month.0 }}</option>
                                 {% endfor %}
                             </select>
-                            <select class="flex1 marginl-tiny" name="search_tyear" id="select_tyear">
+                            <select class="flex1 marginl-tiny" name="search_tcyear" id="select_tcyear">
                                 <option value="-1"></option>
                                 {% for year in tasks_years %}
                                     <option value="{{ year }}">{{ year }}</option>
