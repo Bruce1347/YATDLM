@@ -140,17 +140,38 @@ function search_tasks(url) {
 }
 
 /**
- * Function that creates the adequate post data then sends it to the server in order to delete a specified task
- * 
- * url : the specific needed url
+ * Sends a DELETE request to `url` to delete a task and modify accordingly the
+ * DOM.
+ * @param {string} url The URL that will be used to delete the task
+ * @param {int} task_id The ID of the dom element containing the task
  */
-function del_task(url)
-{
+function del_task(url, task_id) {
     if (!confirm("Voulez-vous supprimer cette tâche ?"))
         return;
-    
-    postdata = "";
-    submit(url, postdata, "list-container");
+
+    var headers = new Headers({
+            'X-CSRFToken': get_cookie('csrftoken')
+        });
+
+    var methodDescription = {
+        method: 'DELETE',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default'
+    }
+
+    const callback = function(response) {
+        if (response.status == 200) {
+            var domTask = document.getElementById(task_id);
+            domTask.remove();
+        } else {
+            alert(`Il y a eu une erreur avec l'effacement de la tâche ${task_id}`);
+        }
+    }
+
+    fetch(url, methodDescription).then((response) => {
+        callback(response);
+    });
 }
 
 

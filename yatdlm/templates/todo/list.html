@@ -144,7 +144,7 @@
                 {% endif %}
                 <tbody id="list-container">
                     {% for task in tasks %}
-                        <tr class="nowrap priority_{{ task.priority }}">
+                        <tr id="{{ task.id }}" class="nowrap priority_{{ task.priority }}">
                             <td class="cell c-align">
                                 {{ task.task_no }}
                             </td>
@@ -171,7 +171,7 @@
                                 {{ task.get_priority_display }}
                             </td>
                             {% if not public %}
-                                <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}');">
+                                <td class="pointer cell c-align" style="min-width: 30px;" onclick="del_task('/todo/lists/{{ list.id }}/del_task/{{ task.id }}', {{ task.id }});">
                                     <img class="pointer" width="24" height="24"  alt="Delete" src="{% static 'img/icons/garbage_red.svg' %}">
                                 </td>
                             {% endif %}
