@@ -163,6 +163,8 @@ function del_task(url, task_id) {
     const callback = function(response) {
         if (response.status == 200) {
             var domTask = document.getElementById(task_id);
+            var taskSubline = document.getElementById(`task_subline_${task_id}`);
+            taskSubline.remove();
             domTask.remove();
         } else {
             alert(`Il y a eu une erreur avec l'effacement de la tâche ${task_id}`);
