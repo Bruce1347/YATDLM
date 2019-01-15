@@ -27,7 +27,7 @@ document.getElementById("input_tid").addEventListener('keyup', function () {
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-        search_task_handler();
+        search_tasks_experimental();
     } else {
         this.classList.add("red_border");
     }
@@ -48,17 +48,22 @@ function createNewDOMTasktr(data) {
     var tdId = document.createElement('td');
     tdId.classList.add("pointer", "cell", "c-align");
     tdId.innerText = data.task_no;
+    tdId.id = `${data.id}_id`;
     var tdTitle = document.createElement('td');
     tdTitle.classList.add("pointer", "cell");
     tdTitle.innerText = data.title;
+    tdTitle.id = `${data.id}_title`;
     var tdCreationDate = document.createElement('td');
     tdCreationDate.classList.add("pointer", "cell", "c-align");
     tdCreationDate.innerText = data.creation_date;
+    tdCreationDate.id = `${data.id}_creationd`;
     var tdResolutionDate = document.createElement('td');
     tdResolutionDate.classList.add("pointer", "cell", "c-align");
+    tdResolutionDate.id = `${data.id}_resolutiond`;
     var tdDeadline = document.createElement('td');
     tdDeadline.classList.add("pointer", "cell", "c-align");
     tdDeadline.innerText = data.end_date;
+    tdDeadline.id = `${data.id}_deadline`;
     var tdPriority = document.createElement('td');
     tdPriority.classList.add("pointer", "cell", "c-align");
     tdPriority.innerText = data.priority_str;
@@ -124,6 +129,42 @@ function add_task_exp(url) {
 
     fetch(url, methodDescription).then((response) => {
         callback(response);
+    });
+}
+
+function convertTaskTrToObject(tr) {
+    console.log(tr.id);
+    var id = document.getElementById(`${tr.id}_id`);
+    var title = document.getElementById(`${tr.id}_title`);
+    var creationd = document.getElementById(`${tr.id}_creationd`);
+    var resolutiond = document.getElementById(`${tr.id}_resolutiond`);
+    var deadline = document.getElementById(`${tr.id}_deadline`);
+
+    var ret = {
+        id: parseInt(id.innerText),
+        title: title.innerText,
+        creationd: creationd.innerText,
+        resolutiond: resolutiond.innerText,
+        deadline: deadline.innerText
+    }
+
+    return ret;
+}
+
+function search_tasks_experimental(url) {
+    var tableElements = document.getElementById("list-container").querySelectorAll('tr:not(.hidden)');
+    var task_id = document.getElementById("input_tid").value;
+    tableElements.forEach(element => {
+        element.classList.remove("hidden")
+    })
+
+    tableElements.forEach(element => {
+        var task = convertTaskTrToObject(element);
+        console.log(task);
+        console.log(task_id !== task.id);
+        if (task_id !== "" && task_id !== task.id) {
+            element.classList.add("hidden");
+        }
     });
 }
 
