@@ -41,48 +41,27 @@ document.getElementById("select_tdyear").addEventListener('change', search_task_
 document.getElementById("select_tdmonth").addEventListener('change', search_task_handler);
 document.getElementById("select_tprio").addEventListener('change', search_task_handler);
 
-/**
- * Function that creates the adequate post data then sends it to the server in order to
- * create a new task.
- * 
- * url : the specfic needed url 
- */
-function add_task(url) {
-    var task_title = document.getElementById('new_task_title').value;
-    var task_descr = document.getElementById('new_task_descr').value;
-    var task_priority = document.getElementById('new_task_priority').value;
-    var task_end_date = document.getElementById('new_task_due_date').value;
-
-
-    postdata = "action=add";
-    postdata += "&title=" + encodeURIComponent(task_title);
-    postdata += "&descr=" + encodeURIComponent(task_descr);
-    postdata += "&due=" + encodeURIComponent(task_end_date);
-    postdata += "&priority=" + encodeURIComponent(task_priority);
-
-    submit(url, postdata, "list-container");
-}
-
-function createNewDOMTasktr(id, title, priority, priority_str, creation_date, end_date) {
+function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
-    newTr.classList.add('nowrap', `priority_${priority}`);
+    newTr.classList.add('nowrap', `priority_${data.priority}`);
 
     var tdId = document.createElement('td');
     tdId.classList.add("pointer", "cell", "c-align");
-    tdId.innerText = id;
+    tdId.innerText = data.task_no;
     var tdTitle = document.createElement('td');
-    tdTitle.classList.add("pointer", "cell", "c-align");
-    tdTitle.innerText = title;
+    tdTitle.classList.add("pointer", "cell");
+    tdTitle.innerText = data.title;
     var tdCreationDate = document.createElement('td');
     tdCreationDate.classList.add("pointer", "cell", "c-align");
-    tdCreationDate.innerText = creation_date;
+    tdCreationDate.innerText = data.creation_date;
     var tdResolutionDate = document.createElement('td');
     tdResolutionDate.classList.add("pointer", "cell", "c-align");
     var tdDeadline = document.createElement('td');
     tdDeadline.classList.add("pointer", "cell", "c-align");
+    tdDeadline.innerText = data.end_date;
     var tdPriority = document.createElement('td');
     tdPriority.classList.add("pointer", "cell", "c-align");
-    tdPriority.innerText = priority_str;
+    tdPriority.innerText = data.priority_str;
     var tdDelete = document.createElement('td');
     tdDelete.classList.add("pointer", "cell", "c-align");
     var tdImg = document.createElement('img');
@@ -115,12 +94,6 @@ function add_task_exp(url) {
         'Content-Type': 'application/json'
     });
 
-    console.log(JSON.stringify({
-        'title': task_title,
-        'descr': task_descr,
-        'due': task_end_date,
-        'priority': task_priority
-    }));
     var methodDescription = {
         method: 'POST',
         headers: headers,
@@ -138,12 +111,7 @@ function add_task_exp(url) {
         var data = await response.json();
         if (response.status == 200) {
             var firstElt = document.querySelectorAll(`tr.priority_${task_priority}`).item(0);
-            var newTr = createNewDOMTasktr(
-                data['task_no'],
-                data['title'],
-                data['priority'],
-                data['priority_str'],
-                data['creation_date']);
+            var newTr = createNewDOMTasktr(data);
             if (firstElt === null) {
                 firstElt = document.getElementById('list-container');
                 firstElt.appendChild(newTr);
