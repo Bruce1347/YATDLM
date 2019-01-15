@@ -16,6 +16,7 @@ from .utils import yesnojs, yesnopython
 
 import json
 from django.utils.formats import date_format
+from datetime import datetime
 
 @login_required()
 def index(request, xhr):
@@ -191,6 +192,7 @@ def add_task_experimental(request, list_id=None):
             title=body['title'],
             description=body['descr'],
             priority=int(body['priority']),
+            due_date=datetime.strptime(body['due'], "%Y-%m-%d") if body['due'] != '' else None,
             owner=request.user,
             task_no=task_no
         )
@@ -200,6 +202,7 @@ def add_task_experimental(request, list_id=None):
             'task_no': task.task_no,
             'title': task.title,
             'creation_date': date_format(task.creation_date, "SHORT_DATE_FORMAT"),
+            'end_date': date_format(task.due_date, "SHORT_DATE_FORMAT"),
             'priority_str': task.get_priority_display(),
             'priority': task.priority
         }
