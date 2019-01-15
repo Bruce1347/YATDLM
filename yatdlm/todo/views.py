@@ -14,6 +14,9 @@ from .models import FollowUp, Task, TodoList
 
 from .utils import yesnojs, yesnopython
 
+import json
+from django.utils.formats import date_format
+
 @login_required()
 def index(request, xhr):
     # Fetch all the lists
@@ -168,6 +171,42 @@ def add_task(request, list_id=-1):
     new_task.save()
 
     return display_list(request, list_id=list_id, xhr=True)
+
+def add_task_experimental(request, list_id=None):
+    """Adds a task to the database for the given list"""
+    responsecode = 200
+    json_body = dict()
+    body = json.loads(request.body)
+    try:
+        todo = TodoList.objects.get(id=list_id)
+        if Task.objects.count() > 0:
+            latest_task_no = Task.objects.values_list(
+                'task_no',
+                flat=True).latest('creation_date')
+            task_no = latest_task_no + 1
+        else:
+            task_no = 1
+        task = Task(
+            parent_list=todo,
+            title=body['title'],
+            description=body['descr'],
+            priority=int(body['priority']),
+            owner=request.user,
+            task_no=task_no
+        )
+        task.save()
+        json_body = {
+            'id': task.id,
+            'task_no': task.task_no,
+            'title': task.title,
+            'creation_date': date_format(task.creation_date, "SHORT_DATE_FORMAT"),
+            'priority_str': task.get_priority_display(),
+            'priority': task.priority
+        }
+    except TodoList.DoesNotExist:
+        responsecode = 404
+        json_body['errors'] = 'The given list does not exists'
+    return JsonResponse(json_body, status=responsecode)
 
 @login_required()
 @require_http_methods(['DELETE'])

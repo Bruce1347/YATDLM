@@ -19,7 +19,7 @@ function search_task_handler() {
     var current_list_id = document.getElementById("dom_list_id").value;
     search_tasks(`/todo/lists/${current_list_id}/search`);
 }
-document.getElementById("input_tid").addEventListener('keyup', function() {
+document.getElementById("input_tid").addEventListener('keyup', function () {
     this.classList.remove("red_border");
     var pattern = this.getAttribute("pattern");
     var value = this.value;
@@ -27,7 +27,7 @@ document.getElementById("input_tid").addEventListener('keyup', function() {
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-	search_task_handler();
+        search_task_handler();
     } else {
         this.classList.add("red_border");
     }
@@ -47,21 +47,116 @@ document.getElementById("select_tprio").addEventListener('change', search_task_h
  * 
  * url : the specfic needed url 
  */
-function add_task(url)
-{
+function add_task(url) {
     var task_title = document.getElementById('new_task_title').value;
     var task_descr = document.getElementById('new_task_descr').value;
     var task_priority = document.getElementById('new_task_priority').value;
     var task_end_date = document.getElementById('new_task_due_date').value;
 
 
-    postdata  = "action=add";
-    postdata += "&title="+encodeURIComponent(task_title);
-    postdata += "&descr="+encodeURIComponent(task_descr);
-    postdata += "&due="+encodeURIComponent(task_end_date);
-    postdata += "&priority="+encodeURIComponent(task_priority);
+    postdata = "action=add";
+    postdata += "&title=" + encodeURIComponent(task_title);
+    postdata += "&descr=" + encodeURIComponent(task_descr);
+    postdata += "&due=" + encodeURIComponent(task_end_date);
+    postdata += "&priority=" + encodeURIComponent(task_priority);
 
     submit(url, postdata, "list-container");
+}
+
+function createNewDOMTasktr(id, title, priority, priority_str, creation_date, end_date) {
+    var newTr = document.createElement('tr');
+    newTr.classList.add('nowrap', `priority_${priority}`);
+
+    var tdId = document.createElement('td');
+    tdId.classList.add("pointer", "cell", "c-align");
+    tdId.innerText = id;
+    var tdTitle = document.createElement('td');
+    tdTitle.classList.add("pointer", "cell", "c-align");
+    tdTitle.innerText = title;
+    var tdCreationDate = document.createElement('td');
+    tdCreationDate.classList.add("pointer", "cell", "c-align");
+    tdCreationDate.innerText = creation_date;
+    var tdResolutionDate = document.createElement('td');
+    tdResolutionDate.classList.add("pointer", "cell", "c-align");
+    var tdDeadline = document.createElement('td');
+    tdDeadline.classList.add("pointer", "cell", "c-align");
+    var tdPriority = document.createElement('td');
+    tdPriority.classList.add("pointer", "cell", "c-align");
+    tdPriority.innerText = priority_str;
+    var tdDelete = document.createElement('td');
+    tdDelete.classList.add("pointer", "cell", "c-align");
+    var tdImg = document.createElement('img');
+    tdImg.classList.add("pointer");
+    tdImg.alt = "Delete";
+    tdImg.width = 24;
+    tdImg.height = 24;
+    tdImg.src = '/static/img/icons/garbage_red.svg';
+    tdDelete.appendChild(tdImg);
+
+    newTr.appendChild(tdId);
+    newTr.appendChild(tdTitle);
+    newTr.appendChild(tdCreationDate);
+    newTr.appendChild(tdResolutionDate);
+    newTr.appendChild(tdDeadline);
+    newTr.appendChild(tdPriority);
+    newTr.appendChild(tdDelete);
+
+    return newTr;
+}
+
+function add_task_exp(url) {
+    var task_title = document.getElementById('new_task_title').value;
+    var task_descr = document.getElementById('new_task_descr').value;
+    var task_priority = document.getElementById('new_task_priority').value;
+    var task_end_date = document.getElementById('new_task_due_date').value;
+
+    var headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
+
+    console.log(JSON.stringify({
+        'title': task_title,
+        'descr': task_descr,
+        'due': task_end_date,
+        'priority': task_priority
+    }));
+    var methodDescription = {
+        method: 'POST',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default',
+        body: JSON.stringify({
+            'title': task_title,
+            'descr': task_descr,
+            'due': task_end_date,
+            'priority': task_priority
+        })
+    }
+
+    const callback = async function (response) {
+        var data = await response.json();
+        if (response.status == 200) {
+            var firstElt = document.querySelectorAll(`tr.priority_${task_priority}`).item(0);
+            var newTr = createNewDOMTasktr(
+                data['task_no'],
+                data['title'],
+                data['priority'],
+                data['priority_str'],
+                data['creation_date']);
+            if (firstElt === null) {
+                firstElt = document.getElementById('list-container');
+                firstElt.appendChild(newTr);
+            } else {
+                firstElt.parentNode.insertBefore(newTr, firstElt);
+            }
+        } else {
+        }
+    }
+
+    fetch(url, methodDescription).then((response) => {
+        callback(response);
+    });
 }
 
 function search_tasks(url) {
@@ -150,8 +245,8 @@ function del_task(url, task_id) {
         return;
 
     var headers = new Headers({
-            'X-CSRFToken': get_cookie('csrftoken')
-        });
+        'X-CSRFToken': get_cookie('csrftoken')
+    });
 
     var methodDescription = {
         method: 'DELETE',
@@ -160,7 +255,7 @@ function del_task(url, task_id) {
         cache: 'default'
     }
 
-    const callback = function(response) {
+    const callback = function (response) {
         if (response.status == 200) {
             var domTask = document.getElementById(task_id);
             var taskSubline = document.getElementById(`task_subline_${task_id}`);
@@ -183,53 +278,49 @@ function del_task(url, task_id) {
  * url : the specific needed url
  * btn : optional arg, if defined then we add to the postdata the followup added by the user
  */
-function mark_task_as_done(url, btn, id)
-{
+function mark_task_as_done(url, btn, id) {
     postdata = "";
 
     if (typeof btn !== "undefined")
-        postdata += "followup="+encodeURIComponent(document.getElementById('followup_'+id).value);
+        postdata += "followup=" + encodeURIComponent(document.getElementById('followup_' + id).value);
 
     submit(url, postdata, "list-container");
 }
 
-function display_task(task_id, url, public, is_toggle)
-{
+function display_task(task_id, url, public, is_toggle) {
     postdata = "";
-    postdata += "public="+encodeURIComponent(public);
-    postdata += "&xhr="+encodeURIComponent("true");
+    postdata += "public=" + encodeURIComponent(public);
+    postdata += "&xhr=" + encodeURIComponent("true");
 
     if (typeof is_toggle !== 'undefined')
-        toggle('task_subline_'+task_id)
+        toggle('task_subline_' + task_id)
 
-    submit(url, postdata, 'task_detail_'+task_id);
+    submit(url, postdata, 'task_detail_' + task_id);
 }
 
-function edit_task(task_id, url)
-{
+function edit_task(task_id, url) {
     var postdata = "";
 
-    var new_title = document.getElementById("task_title_"+task_id).value;
-    var new_descr = document.getElementById("task_descr_"+task_id).value;
-    var new_priority = document.getElementById("task_priority_"+task_id).value;
+    var new_title = document.getElementById("task_title_" + task_id).value;
+    var new_descr = document.getElementById("task_descr_" + task_id).value;
+    var new_priority = document.getElementById("task_priority_" + task_id).value;
 
-    postdata += "title="+encodeURIComponent(new_title);
-    postdata += "&descr="+encodeURIComponent(new_descr);
-    postdata += '&prio='+encodeURIComponent(new_priority);
+    postdata += "title=" + encodeURIComponent(new_title);
+    postdata += "&descr=" + encodeURIComponent(new_descr);
+    postdata += '&prio=' + encodeURIComponent(new_priority);
 
-    submit(url, postdata, 'task_detail_'+task_id);
+    submit(url, postdata, 'task_detail_' + task_id);
 }
 
 /**
  * Function that displays or masks the followups
  * 
  */
-function display_followups(id)
-{
-    if(toggle('followups_'+id))
-        document.getElementById('btn-followups_'+id).innerText = "Masquer les commentaires";
+function display_followups(id) {
+    if (toggle('followups_' + id))
+        document.getElementById('btn-followups_' + id).innerText = "Masquer les commentaires";
     else
-        document.getElementById('btn-followups_'+id).innerText = "Afficher les commentaires";
+        document.getElementById('btn-followups_' + id).innerText = "Afficher les commentaires";
 }
 
 /**
@@ -238,23 +329,21 @@ function display_followups(id)
  * url : the needed url in order to post the data to the server
  * id : the task id
  */
-function add_followup(url, task_id)
-{
-    postdata = "followup="+encodeURIComponent(document.getElementById('followup_'+task_id).value);
+function add_followup(url, task_id) {
+    postdata = "followup=" + encodeURIComponent(document.getElementById('followup_' + task_id).value);
 
-    submit(url, postdata, 'followups_'+task_id);
+    submit(url, postdata, 'followups_' + task_id);
 }
 
-function add_list(url, elt)
-{
+function add_list(url, elt) {
     var title = document.getElementById('new_list_title').value;
     var descr = document.getElementById('new_list_description').value;
     var public = document.getElementById('new_list_privacy').value;
 
     postdata = "";
-    postdata += "&title="+encodeURIComponent(title);
-    postdata += "&description="+encodeURIComponent(descr);
-    postdata += "&visibility="+encodeURIComponent(public);
+    postdata += "&title=" + encodeURIComponent(title);
+    postdata += "&description=" + encodeURIComponent(descr);
+    postdata += "&visibility=" + encodeURIComponent(public);
 
     submit(url, postdata, elt);
 }
@@ -275,21 +364,21 @@ function delete_list(url, name, xhr, elt) {
     if (!xhr) {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
-    
+
         // Header creation, since we will only submit text, we use application/x-www-form-urlencoded 
         // instead of multipart/form-data
         xhr.setRequestHeader("X-CSRFToken", get_cookie("csrftoken"));
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    
+
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 window.location = "/todo";
             }
         }
-    
+
         xhr.send();
     } else {
-        submit(url, "&xhr="+encodeURIComponent("True"), elt);
+        submit(url, "&xhr=" + encodeURIComponent("True"), elt);
     }
 }
 

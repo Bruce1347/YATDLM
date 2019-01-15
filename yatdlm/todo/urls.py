@@ -19,7 +19,7 @@ urlpatterns = [
     # Delete a list
     path('lists/delete/<int:list_id>', views.delete_list),
     # Create a new task
-    path('lists/<int:list_id>/add_task', views.add_task),
+    path('lists/<int:list_id>/add_task', views.add_task_experimental),
     # Delete a specific task
     path('lists/<int:list_id>/del_task/<int:task_id>', views.delete_task),
     # Mark a task as completed (or not)
