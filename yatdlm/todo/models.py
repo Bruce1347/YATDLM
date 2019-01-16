@@ -92,16 +92,16 @@ class Task(models.Model):
             # Provide the user a shorter title for display
             'title_cropped': self.title[:40],
             'description': self.description,
-            'creation_date': date_format(self.creation_date, "SHORT_DATE_FORMAT"),
+            'creation_date': date_format(self.creation_date, "d/m/Y"),
             'priority': self.priority,
             'priority_str': self.get_priority_display()
         }
 
         if self.due_date is not None:
-            resp['due_date'] = date_format(self.due_date, "SHORT_DATE_FORMAT")
+            resp['due_date'] = date_format(self.due_date, "d/m/Y")
         
         if self.resolution_date is not None:
-            resp['resolution_date'] = date_format(self.resolution_date, "SHORT_DATE_FORMAT")
+            resp['resolution_date'] = date_format(self.resolution_date, "d/m/Y")
 
         return resp
 
