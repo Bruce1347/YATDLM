@@ -89,6 +89,8 @@ class Task(models.Model):
             'id' : self.id,
             'no': self.task_no,
             'title': self.title,
+            # Provide the user a shorter title for display
+            'title_cropped': self.title[:40],
             'description': self.description,
             'creation_date': date_format(self.creation_date, "SHORT_DATE_FORMAT"),
             'priority': self.priority,
@@ -98,7 +100,7 @@ class Task(models.Model):
         if self.due_date is not None:
             resp['due_date'] = date_format(self.due_date, "SHORT_DATE_FORMAT")
         
-        if self.due_date is not None:
+        if self.resolution_date is not None:
             resp['resolution_date'] = date_format(self.resolution_date, "SHORT_DATE_FORMAT")
 
         return resp
