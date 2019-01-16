@@ -154,6 +154,23 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     return render(request, 'todo/list.html', context)
 
 @login_required()
+@require_http_methods(['GET'])
+def list_tasks(request, list_id=None):
+    try:
+        tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
+        ltasks = [task.as_dict() for task in tasks]
+        print(ltasks)
+        resp = {'tasks': [
+            task.as_dict()
+            for task in tasks
+        ]}
+        resp_code= 200
+    except Task.DoesNotExist:
+        resp = {'errors': 'Invalid list ID'}
+        resp_code = 404
+    return JsonResponse(resp, status=resp_code)
+
+@login_required()
 def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']

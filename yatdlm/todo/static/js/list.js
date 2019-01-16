@@ -32,8 +32,8 @@ document.getElementById("input_tid").addEventListener('keyup', function () {
         this.classList.add("red_border");
     }
 });
-document.getElementById("input_tname").addEventListener('keyup', search_task_handler);
-document.getElementById("select_tcyear").addEventListener('change', search_task_handler);
+document.getElementById("input_tname").addEventListener('keyup', search_tasks_experimental);
+document.getElementById("select_tcyear").addEventListener('change', search_tasks_experimental);
 document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
 document.getElementById("select_tryear").addEventListener('change', search_task_handler);
 document.getElementById("select_trmonth").addEventListener('change', search_task_handler);
@@ -151,19 +151,48 @@ function convertTaskTrToObject(tr) {
     return ret;
 }
 
-function search_tasks_experimental(url) {
-    var tableElements = document.getElementById("list-container").querySelectorAll('tr:not(.hidden)');
-    var task_id = document.getElementById("input_tid").value;
-    tableElements.forEach(element => {
-        element.classList.remove("hidden")
-    })
+async function fetch_tasks() {
+    var listId = document.getElementById('dom_list_id').value;
+    var headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
 
-    tableElements.forEach(element => {
-        var task = convertTaskTrToObject(element);
-        console.log(task);
-        console.log(task_id !== task.id);
-        if (task_id !== "" && task_id !== task.id) {
-            element.classList.add("hidden");
+    var methodDescription = {
+        method: 'GET',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default'
+    }
+
+    var res = await fetch(`/todo/lists/${listId}/tasks`, methodDescription);
+    var data = await res.json();
+    return data;
+}
+
+var tasks = fetch_tasks();
+
+async function search_tasks_experimental() {
+    var t = await tasks;
+
+    var task_no = document.getElementById("input_tid").value;
+    var title = document.getElementById("input_tname").value;
+    var creationYear = parseInt(document.getElementById("select_tcyear").value);
+
+     t.tasks.forEach(element => {
+        var currDomElt = document.getElementById(element.id);
+        currDomElt.classList.remove("hidden");
+        var eltCrDate = new Date(element.creation_date);
+
+        // Conditions
+        var task_no_match = task_no !== "" && parseInt(task_no) !== element.no;
+        var task_in_title_match = title !== "" && !element.title.includes(title);
+        var task_creation_year_match = creationYear !== -1 && eltCrDate.getFullYear() !== creationYear;
+
+        console.log(creationYear);
+
+        if (task_no_match || task_in_title_match || task_creation_year_match) {
+            currDomElt.classList.add("hidden")
         }
     });
 }

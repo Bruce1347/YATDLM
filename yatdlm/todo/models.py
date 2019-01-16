@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.contrib import admin
 from django.contrib.auth.models import User
 
+from django.utils.formats import date_format
+
 class TodoList(models.Model):
     # The owner of the todo list
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
@@ -80,6 +82,26 @@ class Task(models.Model):
     # Identify the task with its title
     def __str__(self):
         return self.title
+
+    def as_dict(self):
+        """Returns a dict representation for the task"""
+        resp = {
+            'id' : self.id,
+            'no': self.task_no,
+            'title': self.title,
+            'description': self.description,
+            'creation_date': date_format(self.creation_date, "SHORT_DATE_FORMAT"),
+            'priority': self.priority,
+            'priority_str': self.get_priority_display()
+        }
+
+        if self.due_date is not None:
+            resp['due_date'] = date_format(self.due_date, "SHORT_DATE_FORMAT")
+        
+        if self.due_date is not None:
+            resp['resolution_date'] = date_format(self.resolution_date, "SHORT_DATE_FORMAT")
+
+        return resp
 
 
 class TaskAdmin(admin.ModelAdmin):
