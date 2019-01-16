@@ -115,6 +115,7 @@ function add_task_exp(url) {
 
     const callback = async function (response) {
         var data = await response.json();
+        tasks.unshift(data);
         if (response.status == 200) {
             var firstElt = document.querySelectorAll(`tr.priority_${task_priority}`).item(0);
             var newTr = createNewDOMTasktr(data);
