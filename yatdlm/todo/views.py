@@ -158,8 +158,6 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 def list_tasks(request, list_id=None):
     try:
         tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
-        ltasks = [task.as_dict() for task in tasks]
-        print(ltasks)
         resp = {'tasks': [
             task.as_dict()
             for task in tasks
@@ -214,15 +212,7 @@ def add_task_experimental(request, list_id=None):
             task_no=task_no
         )
         task.save()
-        json_body = {
-            'id': task.id,
-            'task_no': task.task_no,
-            'title': task.title,
-            'creation_date': date_format(task.creation_date, "SHORT_DATE_FORMAT"),
-            'end_date': date_format(task.due_date, "SHORT_DATE_FORMAT"),
-            'priority_str': task.get_priority_display(),
-            'priority': task.priority
-        }
+        json_body = task.as_dict()
     except TodoList.DoesNotExist:
         responsecode = 404
         json_body['errors'] = 'The given list does not exists'

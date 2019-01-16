@@ -47,11 +47,11 @@ function createNewDOMTasktr(data) {
 
     var tdId = document.createElement('td');
     tdId.classList.add("pointer", "cell", "c-align");
-    tdId.innerText = data.task_no;
+    tdId.innerText = data.no;
     tdId.id = `${data.id}_id`;
     var tdTitle = document.createElement('td');
     tdTitle.classList.add("pointer", "cell");
-    tdTitle.innerText = data.title;
+    tdTitle.innerText = data.title_cropped;
     tdTitle.id = `${data.id}_title`;
     var tdCreationDate = document.createElement('td');
     tdCreationDate.classList.add("pointer", "cell", "c-align");
@@ -62,7 +62,8 @@ function createNewDOMTasktr(data) {
     tdResolutionDate.id = `${data.id}_resolutiond`;
     var tdDeadline = document.createElement('td');
     tdDeadline.classList.add("pointer", "cell", "c-align");
-    tdDeadline.innerText = data.end_date;
+    if (data.due_date !== undefined)
+        tdDeadline.innerText = data.due_date;
     tdDeadline.id = `${data.id}_deadline`;
     var tdPriority = document.createElement('td');
     tdPriority.classList.add("pointer", "cell", "c-align");
@@ -132,24 +133,7 @@ function add_task_exp(url) {
     });
 }
 
-function convertTaskTrToObject(tr) {
-    console.log(tr.id);
-    var id = document.getElementById(`${tr.id}_id`);
-    var title = document.getElementById(`${tr.id}_title`);
-    var creationd = document.getElementById(`${tr.id}_creationd`);
-    var resolutiond = document.getElementById(`${tr.id}_resolutiond`);
-    var deadline = document.getElementById(`${tr.id}_deadline`);
-
-    var ret = {
-        id: parseInt(id.innerText),
-        title: title.innerText,
-        creationd: creationd.innerText,
-        resolutiond: resolutiond.innerText,
-        deadline: deadline.innerText
-    }
-
-    return ret;
-}
+var tasks = [];
 
 async function fetch_tasks() {
     var listId = document.getElementById('dom_list_id').value;
@@ -167,10 +151,11 @@ async function fetch_tasks() {
 
     var res = await fetch(`/todo/lists/${listId}/tasks`, methodDescription);
     var data = await res.json();
-    return data;
+    data.tasks.forEach(element => {
+        tasks.unshift(element);
+    })
 }
-
-var tasks = fetch_tasks();
+fetch_tasks();
 
 async function search_tasks_experimental() {
     var t = await tasks;
