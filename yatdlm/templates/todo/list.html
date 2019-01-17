@@ -10,7 +10,7 @@
         <h1>{{ list.title }}</h1>
         <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
         <div>
-            {{ list.description|linebreaks }}
+            {{ list.description|display_urls|linebreaks }}
         </div>
         {% if not public %}
         <div>
