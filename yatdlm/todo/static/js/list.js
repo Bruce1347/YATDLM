@@ -15,10 +15,6 @@ var picker = flatpickr(document.getElementById('new_task_due_date'), {
 /**
  * Setup the filters events.
  */
-function search_task_handler() {
-    var current_list_id = document.getElementById("dom_list_id").value;
-    search_tasks(`/todo/lists/${current_list_id}/search`);
-}
 document.getElementById("input_tid").addEventListener('keyup', function () {
     this.classList.remove("red_border");
     var pattern = this.getAttribute("pattern");
@@ -204,81 +200,6 @@ function filter_tasks_experimental() {
             currDomElt.classList.add("hidden");
         }
     });
-}
-
-function search_tasks(url) {
-    var public = document.getElementById("dom_ispublicjs").value;
-    // Document inputs
-    var search_tid = document.getElementById("input_tid");
-    var search_tname = document.getElementById("input_tname");
-    var search_tcyear = document.getElementById("select_tcyear");
-    var search_tcmonth = document.getElementById("select_tcmonth");
-    var search_tryear = document.getElementById("select_tryear");
-    var search_trmonth = document.getElementById("select_trmonth");
-    var search_tdyear = document.getElementById("select_tdyear");
-    var search_tdmonth = document.getElementById("select_tdmonth");
-    var search_tprio = document.getElementById("select_tprio");
-
-    // Search terms
-    var input_tid = undefined;
-    var input_tname = undefined;
-    var input_tcyear = undefined;
-    var input_tcmonth = undefined;
-    var input_tryear = undefined;
-    var input_trmonth = undefined;
-    var input_tdyear = undefined;
-    var input_tdmonth = undefined;
-    var input_tprio = undefined;
-
-    if (search_tid.value !== undefined && search_tid.value !== "")
-        input_tid = encodeURIComponent(search_tid.value);
-
-    if (search_tname.value !== undefined)
-        input_tname = encodeURIComponent(search_tname.value);
-
-    // Creation filter
-    if (search_tcyear.value != -1)
-        input_tcyear = encodeURIComponent(search_tcyear.value);
-    if (search_tcmonth.value != -1)
-        input_tcmonth = encodeURIComponent(search_tcmonth.value);
-
-    // Resolution filter
-    if (search_tryear.value != -1)
-        input_tryear = encodeURIComponent(search_tryear.value);
-    if (search_trmonth.value != -1)
-        input_trmonth = encodeURIComponent(search_trmonth.value);
-
-    // Deadline filter
-    if (search_tdyear.value != -1)
-        input_tdyear = encodeURIComponent(search_tdyear.value);
-    if (search_tdmonth.value != -1)
-        input_tdmonth = encodeURIComponent(search_tdmonth.value);
-
-    if (search_tprio.value != -1)
-        input_tprio = encodeURIComponent(search_tprio.value);
-
-    // Build the postdata
-    postdata = `?method=search&public=${public}`;
-    if (input_tid !== undefined)
-        postdata = postdata + `&tid=${input_tid}`;
-    if (input_tname !== undefined)
-        postdata = postdata + `&tname=${input_tname}`;
-    if (input_tcmonth !== undefined)
-        postdata = postdata + `&tcmonth=${input_tcmonth}`;
-    if (input_tcyear !== undefined)
-        postdata = postdata + `&tcyear=${input_tcyear}`;
-    if (input_trmonth !== undefined)
-        postdata = postdata + `&trmonth=${input_trmonth}`;
-    if (input_tryear !== undefined)
-        postdata = postdata + `&tryear=${input_tryear}`;
-    if (input_tdmonth !== undefined)
-        postdata = postdata + `&tdmonth=${input_tdmonth}`;
-    if (input_tdyear !== undefined)
-        postdata = postdata + `&tdyear=${input_tdyear}`;
-    if (input_tprio !== undefined)
-        postdata = postdata + `&tprio=${input_tprio}`;
-
-    submit(url, postdata, "list-container", "GET");
 }
 
 /**
