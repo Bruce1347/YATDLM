@@ -83,7 +83,7 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-    def as_dict(self):
+    def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
         resp = {
             'id' : self.id,
@@ -92,16 +92,16 @@ class Task(models.Model):
             # Provide the user a shorter title for display
             'title_cropped': self.title[:40],
             'description': self.description,
-            'creation_date': date_format(self.creation_date, "d/m/Y"),
+            'creation_date': date_format(self.creation_date, dates_format),
             'priority': self.priority,
             'priority_str': self.get_priority_display()
         }
 
         if self.due_date is not None:
-            resp['due_date'] = date_format(self.due_date, "d/m/Y")
+            resp['due_date'] = date_format(self.due_date, dates_format)
         
         if self.resolution_date is not None:
-            resp['resolution_date'] = date_format(self.resolution_date, "d/m/Y")
+            resp['resolution_date'] = date_format(self.resolution_date, dates_format)
 
         return resp
 
