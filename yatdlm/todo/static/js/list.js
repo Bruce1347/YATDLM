@@ -27,19 +27,19 @@ document.getElementById("input_tid").addEventListener('keyup', function () {
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-        search_tasks_experimental();
+        filter_tasks_experimental();
     } else {
         this.classList.add("red_border");
     }
 });
-document.getElementById("input_tname").addEventListener('keyup', search_tasks_experimental);
-document.getElementById("select_tcyear").addEventListener('change', search_tasks_experimental);
-document.getElementById("select_tcmonth").addEventListener('change', search_task_handler);
-document.getElementById("select_tryear").addEventListener('change', search_task_handler);
-document.getElementById("select_trmonth").addEventListener('change', search_task_handler);
-document.getElementById("select_tdyear").addEventListener('change', search_task_handler);
-document.getElementById("select_tdmonth").addEventListener('change', search_task_handler);
-document.getElementById("select_tprio").addEventListener('change', search_task_handler);
+document.getElementById("input_tname").addEventListener('keyup', filter_tasks_experimental);
+document.getElementById("select_tcyear").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_tcmonth").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_tryear").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_trmonth").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_tdyear").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_tdmonth").addEventListener('change', filter_tasks_experimental);
+document.getElementById("select_tprio").addEventListener('change', filter_tasks_experimental);
 
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
@@ -158,27 +158,50 @@ async function fetch_tasks() {
 }
 fetch_tasks();
 
-async function search_tasks_experimental() {
-    var t = await tasks;
-
+function filter_tasks_experimental() {
     var task_no = document.getElementById("input_tid").value;
     var title = document.getElementById("input_tname").value;
+    var creationMonth = parseInt(document.getElementById("select_tcmonth").value);
     var creationYear = parseInt(document.getElementById("select_tcyear").value);
+    var resolutionMonth = parseInt(document.getElementById("select_trmonth").value);
+    var resolutionYear = parseInt(document.getElementById("select_tryear").value);
+    var dueMonth = parseInt(document.getElementById("select_tdmonth").value);
+    var dueYear = parseInt(document.getElementById("select_tdyear").value);
 
-     t.tasks.forEach(element => {
+     tasks.forEach(element => {
         var currDomElt = document.getElementById(element.id);
         currDomElt.classList.remove("hidden");
         var eltCrDate = new Date(element.creation_date);
+        if (typeof(element.resolution_date) !== undefined)
+            var eltResDate = new Date(element.resolution_date);
+        else
+            var eltResDate = undefined;
+        if (typeof(element.due_date) !== undefined)
+            var eltDueDate = new Date(element.due_date);
+        else
+            var eltDueDate = undefined;
 
-        // Conditions
-        var task_no_match = task_no !== "" && parseInt(task_no) !== element.no;
-        var task_in_title_match = title !== "" && !element.title.includes(title);
-        var task_creation_year_match = creationYear !== -1 && eltCrDate.getFullYear() !== creationYear;
+        var conditions = [
+            // Check the task number
+            (task_no !== "" && parseInt(task_no) !== element.no),
+            // Check whether the title contains the user substring
+            (title !== "" && !element.title.includes(title)),
+            // Check the creation month
+            (creationMonth !== -1 && eltCrDate.getMonth() + 1 !== creationMonth),
+            // Check the creation year
+            (creationYear !== -1 && eltCrDate.getFullYear() !== creationYear),
+            // Check the resolution month
+            (resolutionMonth !== -1 && eltResDate !== undefined && eltResDate.getMonth() + 1 !== resolutionMonth),
+            // Check the resolution year
+            (resolutionYear !== -1 && eltResDate !== undefined && eltResDate.getFullYear() !== resolutionYear),
+            // Check the deadline month
+            (dueMonth !== -1 && eltDueDate !== undefined && eltDueDate.getMonth() + 1 !== dueMonth),
+            // Check the deadline year
+            (dueYear !== -1 && eltDueDate !== undefined && eltDueDate.getFullYear() !== dueYear)
+        ]
 
-        console.log(creationYear);
-
-        if (task_no_match || task_in_title_match || task_creation_year_match) {
-            currDomElt.classList.add("hidden")
+        if (conditions.some( function (item) { return item })) {
+            currDomElt.classList.add("hidden");
         }
     });
 }
