@@ -153,11 +153,13 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 
     return render(request, 'todo/list.html', context)
 
-@login_required()
 @require_http_methods(['GET'])
 def list_tasks(request, list_id=None):
     try:
         tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
+        todo = TodoList.objects.get(id=list_id)
+        if not todo.is_public:
+            return JsonResponse({'errors': 'Non.'}, status=403)
         resp = {'tasks': [
             task.as_dict(dates_format="Y/m/d")
             for task in tasks
