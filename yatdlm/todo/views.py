@@ -159,7 +159,7 @@ def list_tasks(request, list_id=None):
     try:
         tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
         resp = {'tasks': [
-            task.as_dict()
+            task.as_dict(dates_format="Y/m/d")
             for task in tasks
         ]}
         resp_code= 200
