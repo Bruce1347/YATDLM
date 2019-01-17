@@ -14,14 +14,15 @@ urlpatterns = [
     # Specific todo list page
     path('lists/<int:list_id>/', login_required(views.display_list)),
     path('lists/<int:list_id>/search', views.search_list),
+    path('lists/<int:list_id>/tasks', views.list_tasks),
     # Specific todo list _public_ page
     path('lists/public/<int:list_id>/', views.display_list, {'public': True}),
     # Delete a list
     path('lists/delete/<int:list_id>', views.delete_list),
     # Create a new task
-    path('lists/<int:list_id>/add_task', views.add_task),
+    path('lists/<int:list_id>/add_task', views.add_task_experimental),
     # Delete a specific task
-    path('lists/<int:list_id>/del_task/<int:task_id>', views.del_task),
+    path('lists/<int:list_id>/del_task/<int:task_id>', views.delete_task),
     # Mark a task as completed (or not)
     path('lists/<int:list_id>/complete_task/<int:task_id>', views.mark_as_done),
     # Display the details of a task

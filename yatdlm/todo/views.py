@@ -2,9 +2,10 @@ from datetime import datetime
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import (HttpResponse, HttpResponseForbidden,
-                         HttpResponseNotFound)
+                         HttpResponseNotFound, JsonResponse)
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views.generic import TemplateView
@@ -12,6 +13,10 @@ from django.views.generic import TemplateView
 from .models import FollowUp, Task, TodoList
 
 from .utils import yesnojs, yesnopython
+
+import json
+from django.utils.formats import date_format
+from datetime import datetime
 
 @login_required()
 def index(request, xhr):
@@ -149,6 +154,21 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     return render(request, 'todo/list.html', context)
 
 @login_required()
+@require_http_methods(['GET'])
+def list_tasks(request, list_id=None):
+    try:
+        tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
+        resp = {'tasks': [
+            task.as_dict(dates_format="Y/m/d")
+            for task in tasks
+        ]}
+        resp_code= 200
+    except Task.DoesNotExist:
+        resp = {'errors': 'Invalid list ID'}
+        resp_code = 404
+    return JsonResponse(resp, status=resp_code)
+
+@login_required()
 def add_task(request, list_id=-1):
     title = request.POST['title']
     descr = request.POST['descr']
@@ -168,14 +188,53 @@ def add_task(request, list_id=-1):
 
     return display_list(request, list_id=list_id, xhr=True)
 
+def add_task_experimental(request, list_id=None):
+    """Adds a task to the database for the given list"""
+    responsecode = 200
+    json_body = dict()
+    body = json.loads(request.body)
+    try:
+        todo = TodoList.objects.get(id=list_id)
+        if Task.objects.count() > 0:
+            latest_task_no = Task.objects.values_list(
+                'task_no',
+                flat=True).latest('creation_date')
+            task_no = latest_task_no + 1
+        else:
+            task_no = 1
+        task = Task(
+            parent_list=todo,
+            title=body['title'],
+            description=body['descr'],
+            priority=int(body['priority']),
+            due_date=datetime.strptime(body['due'], "%Y-%m-%d") if body['due'] != '' else None,
+            owner=request.user,
+            task_no=task_no
+        )
+        task.save()
+        json_body = task.as_dict()
+    except TodoList.DoesNotExist:
+        responsecode = 404
+        json_body['errors'] = 'The given list does not exists'
+    return JsonResponse(json_body, status=responsecode)
+
 @login_required()
-def del_task(request, list_id=-1, task_id=-1):
-    if task_id != -1:
-        task = Task.objects.get(id=task_id)
-        task.delete()
-    else: # If the task does not exists in DB, raises a 404
-        raise HttpResponseNotFound("Task does not exists")
-    return display_list(request, list_id=list_id, xhr=True)
+@require_http_methods(['DELETE'])
+def delete_task(request, list_id=None, task_id=None):
+    """Deletes a task from the database"""
+    if task_id is None or list_id is None:
+        resp = {'errors': 'No ID given for a Task or a List'}
+        resp_code = 404
+    else:
+        try:
+            task = Task.objects.get(id=task_id, parent_list_id=list_id)
+            task.delete()
+            resp = {'status': 'OK'}
+            resp_code = 200
+        except Task.DoesNotExist:
+            resp = {'errors': 'One of the given IDs is invalid'}
+            resp_code = 404
+    return JsonResponse(resp, status=resp_code)
 
 @login_required()
 def mark_as_done(request, list_id=-1, task_id=-1):
