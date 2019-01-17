@@ -23,19 +23,19 @@ document.getElementById("input_tid").addEventListener('keyup', function () {
     var validator = new RegExp(pattern);
 
     if (validator.test(value)) {
-        filter_tasks_experimental();
+        filter_tasks();
     } else {
         this.classList.add("red_border");
     }
 });
-document.getElementById("input_tname").addEventListener('keyup', filter_tasks_experimental);
-document.getElementById("select_tcyear").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_tcmonth").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_tryear").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_trmonth").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_tdyear").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_tdmonth").addEventListener('change', filter_tasks_experimental);
-document.getElementById("select_tprio").addEventListener('change', filter_tasks_experimental);
+document.getElementById("input_tname").addEventListener('keyup', filter_tasks);
+document.getElementById("select_tcyear").addEventListener('change', filter_tasks);
+document.getElementById("select_tcmonth").addEventListener('change', filter_tasks);
+document.getElementById("select_tryear").addEventListener('change', filter_tasks);
+document.getElementById("select_trmonth").addEventListener('change', filter_tasks);
+document.getElementById("select_tdyear").addEventListener('change', filter_tasks);
+document.getElementById("select_tdmonth").addEventListener('change', filter_tasks);
+document.getElementById("select_tprio").addEventListener('change', filter_tasks);
 
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
@@ -132,6 +132,9 @@ function add_task_exp(url) {
 
 var tasks = [];
 
+/**
+ * Retrieves tasks from the server and saves into `tasks`.
+ */
 async function fetch_tasks() {
     var listId = document.getElementById('dom_list_id').value;
     var headers = new Headers({
@@ -152,9 +155,12 @@ async function fetch_tasks() {
         tasks.unshift(element);
     })
 }
-fetch_tasks();
+fetch_tasks(); // Fetch tasks when the page is loaded
 
-function filter_tasks_experimental() {
+/**
+ * Filters the tasks inside the document with the user-set filters.
+ */
+function filter_tasks() {
     var task_no = document.getElementById("input_tid").value;
     var title = document.getElementById("input_tname").value;
     var creationMonth = parseInt(document.getElementById("select_tcmonth").value);
@@ -163,6 +169,7 @@ function filter_tasks_experimental() {
     var resolutionYear = parseInt(document.getElementById("select_tryear").value);
     var dueMonth = parseInt(document.getElementById("select_tdmonth").value);
     var dueYear = parseInt(document.getElementById("select_tdyear").value);
+    var priority = parseInt(document.getElementById("select_tprio").value);
 
      tasks.forEach(element => {
         var currDomElt = document.getElementById(element.id);
@@ -193,9 +200,12 @@ function filter_tasks_experimental() {
             // Check the deadline month
             (dueMonth !== -1 && eltDueDate !== undefined && eltDueDate.getMonth() + 1 !== dueMonth),
             // Check the deadline year
-            (dueYear !== -1 && eltDueDate !== undefined && eltDueDate.getFullYear() !== dueYear)
+            (dueYear !== -1 && eltDueDate !== undefined && eltDueDate.getFullYear() !== dueYear),
+            // Check the priority level
+            (priority !== -1 && element.priority !== priority)
         ]
 
+        // If any of the previous condition is met, the task is masked
         if (conditions.some( function (item) { return item })) {
             currDomElt.classList.add("hidden");
         }
