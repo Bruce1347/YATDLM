@@ -14,7 +14,7 @@ def get_value(dict, key):
 @stringfilter
 def display_urls(desc):
     # Regex that matches URLs
-    url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.]+)'
+    url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.\=\?]+)'
 
     # The set is used here to manage a stupid edge case when we have multiple
     # occurrences of a substring.
