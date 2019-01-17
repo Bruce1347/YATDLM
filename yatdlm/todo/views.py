@@ -194,7 +194,8 @@ def add_task_experimental(request, list_id=None):
     """Adds a task to the database for the given list"""
     responsecode = 200
     json_body = dict()
-    body = json.loads(request.body)
+    # Ensure that the body is decoded as plain text
+    body = json.loads(request.body.decode("utf-8"))
     try:
         todo = TodoList.objects.get(id=list_id)
         if Task.objects.count() > 0:
