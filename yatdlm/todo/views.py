@@ -1,28 +1,25 @@
+import json
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import (HttpResponse, HttpResponseForbidden,
                          HttpResponseNotFound, JsonResponse)
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
-from django.views.generic import TemplateView
+from django.views.decorators.http import require_http_methods
 
 from .models import FollowUp, Task, TodoList
+from .utils import yesnojs
 
-from .utils import yesnojs, yesnopython
-
-import json
-from django.utils.formats import date_format
-from datetime import datetime
 
 @login_required()
 def index(request, xhr):
     # Fetch all the lists
     todo_lists = TodoList.objects.all()
-    
+
     # Dict that contains the needed information for each list.
     # The key is the name of the list and the data corresponds to the needed infos
     table_context = {}
@@ -46,61 +43,12 @@ def index(request, xhr):
     context = {
         'lists' : [todo.title for todo in todo_lists],
         'page_title' : 'Mes listes',
+        'isdev' : 'DEV - ' if settings.DEBUG else '',
         'context' : table_context,
         'xhr' : xhr
     }
 
     return render(request, 'todo/index.html', context)
-
-def search_list(request, list_id=None, public=False):
-    try:
-        todolist = TodoList.objects.get(id=list_id)
-        public = yesnopython(request.GET.get('public'))
-        if not todolist.is_public and public:
-            return HttpResponseForbidden()
-
-        tlfilter = Task.objects.filter(parent_list=list_id)
-
-        if 'tid' in request.GET:
-            if request.GET.get('tid') is not '':
-                tlfilter = tlfilter.filter(task_no=int(request.GET['tid']))
-
-        if 'tname' in request.GET:
-            tlfilter = tlfilter.filter(title__icontains=request.GET.get('tname'))
-
-        if 'tcyear' in request.GET:
-            tlfilter = tlfilter.filter(creation_date__year=request.GET.get('tcyear'))
-        if 'tcmonth' in request.GET:
-            tlfilter = tlfilter.filter(creation_date__month=request.GET.get('tcmonth'))
-
-        if 'tryear' in request.GET:
-            tlfilter = tlfilter.filter(resolution_date__year=request.GET.get('tryear'))
-        if 'trmonth' in request.GET:
-            tlfilter = tlfilter.filter(resolution_date__month=request.GET.get('trmonth'))
-
-        if 'tdyear' in request.GET:
-            tlfilter = tlfilter.filter(due_date__year=request.GET.get('tdyear'))
-        if 'tdmonth' in request.GET:
-            tlfilter = tlfilter.filter(due_date__month=request.GET.get('tdmonth'))
-
-        if 'tprio' in request.GET:
-            tlfilter = tlfilter.filter(priority=int(request.GET.get('tprio')))
-
-        tlfilter = tlfilter.order_by('is_done', 'priority', '-creation_date')
-        tasks = [task for task in tlfilter]
-
-        context = {
-            'list'  : todolist,
-            'tasks' : tasks,
-            'xhr'   : True,
-            'search': True,
-            'public': public,
-            'publicjs' : yesnojs(public)
-        }
-
-        return render(request, 'todo/list.html', context)
-    except TodoList.DoesNotExist:
-        return None
 
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
@@ -113,7 +61,6 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     tfilter = Task.objects.filter(parent_list_id=todo_list.id)
     # Retrieve the subsequent tasks
     tasks_filter = tfilter.order_by('is_done', 'priority', '-creation_date')
-    tasks = [task for task in tasks_filter]
 
     # Create the context
     creation_years_filter = tfilter.dates('creation_date', 'year')
@@ -137,10 +84,12 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
+
     context = {
         'list'  : todo_list,
-        'tasks' : tasks,
+        'tasks' : [task for task in tasks_filter],
         'xhr'   : xhr,
+        'isdev' : 'DEV - ' if settings.DEBUG else '',
         'title_page' : todo_list.title,
         'priority_levels' : [level for level in Task.priority_levels],
         'public': public,
@@ -164,7 +113,7 @@ def list_tasks(request, list_id=None):
             task.as_dict(dates_format="Y/m/d")
             for task in tasks
         ]}
-        resp_code= 200
+        resp_code = 200
     except Task.DoesNotExist:
         resp = {'errors': 'Invalid list ID'}
         resp_code = 404
@@ -185,7 +134,14 @@ def add_task(request, list_id=-1):
     else:
         task_no = 1
 
-    new_task = Task(owner=user, title=title, description=descr, priority=prio, parent_list_id=list_id, due_date=due, task_no=task_no)
+    new_task = Task(
+        owner=user,
+        title=title,
+        description=descr,
+        priority=prio,
+        parent_list_id=list_id,
+        due_date=due,
+        task_no=task_no)
     new_task.save()
 
     return display_list(request, list_id=list_id, xhr=True)
@@ -246,11 +202,15 @@ def mark_as_done(request, list_id=-1, task_id=-1):
         task.is_done = not task.is_done
 
         if 'followup' in request.POST:
-            f = FollowUp(writer=request.user, task=task, 
-                         f_type=FollowUp.STATE_CHANGE, todol_id=list_id,
-                         content=request.POST['followup'],
-                         old_priority=task.priority, new_priority=Task.SOLVED)
-            f.save()
+            followup = FollowUp(
+                writer=request.user,
+                task=task,
+                f_type=FollowUp.STATE_CHANGE,
+                todol_id=list_id,
+                content=request.POST['followup'],
+                old_priority=task.priority,
+                new_priority=Task.SOLVED)
+            followup.save()
 
         if task.is_done:
             task.resolution_date = make_aware(datetime.now())
@@ -266,8 +226,8 @@ def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=Fals
         public = 'public' in request.POST and request.POST['public'] == 'true'
         xhr = 'xhr' in request.POST and request.POST['xhr'] == 'true'
         task = Task.objects.get(id=task_id, parent_list_id=list_id)
-        priority_levels = { level[0] : level[1] for level in Task.priority_levels }
-        
+        priority_levels = {level[0] : level[1] for level in Task.priority_levels}
+
         followups = FollowUp.objects.filter(task=task, todol_id=list_id).order_by('creation_date')
 
         return render(request, 'todo/xhr/task_detail.html', {
@@ -285,9 +245,18 @@ def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=Fals
 @login_required()
 def add_followup(request, list_id=-1, task_id=-1):
     if task_id != -1 and list_id != -1:
-        followup = FollowUp(writer=request.user, task_id=task_id, todol_id=list_id, content=request.POST['followup'])
+        followup = FollowUp(
+            writer=request.user,
+            task_id=task_id,
+            todol_id=list_id,
+            content=request.POST['followup'])
         followup.save()
-        return display_detail(request, list_id=list_id, task_id=task_id, add_followup=True, xhr=True)
+        return display_detail(
+            request,
+            list_id=list_id,
+            task_id=task_id,
+            add_followup=True,
+            xhr=True)
     else:
         return HttpResponseNotFound("NOPE.")
 
@@ -339,7 +308,11 @@ def add_list(request):
     # list_deadline = request.POST['end_date']
     list_visibility = 'visibility' in request.POST and request.POST['visibility'] == "True"
 
-    new_list = TodoList(owner=request.user, title=list_title, description=list_description, is_public=list_visibility)
+    new_list = TodoList(
+        owner=request.user,
+        title=list_title,
+        description=list_description,
+        is_public=list_visibility)
     new_list.save()
 
     return index(request, True)
