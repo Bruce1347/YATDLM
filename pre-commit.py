@@ -1,6 +1,6 @@
+#! /bin/env python
 """Custom pre-commit script in order to ensure that each commited file is
 pylint compliant"""
-#! /bin/python3
 
 import re
 import subprocess
