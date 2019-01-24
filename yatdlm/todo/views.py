@@ -18,7 +18,7 @@ from .utils import yesnojs
 @login_required()
 def index(request, xhr):
     # Fetch all the lists
-    todo_lists = TodoList.objects.all()
+    todo_lists = TodoList.objects.filter(owner=request.user)
 
     # Dict that contains the needed information for each list.
     # The key is the name of the list and the data corresponds to the needed infos
