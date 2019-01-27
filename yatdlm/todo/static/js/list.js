@@ -272,8 +272,6 @@ function display_task(task_id, url, public, is_toggle) {
 
     if (typeof is_toggle !== 'undefined')
         toggle('task_subline_' + task_id)
-
-    submit(url, postdata, 'task_detail_' + task_id);
 }
 
 function edit_task(task_id, url) {

@@ -83,6 +83,10 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    def get_followups(self):
+        followups = FollowUp.objects.filter(task=self.id)
+        return followups
+
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
         resp = {

@@ -88,6 +88,9 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     context = {
         'list'  : todo_list,
         'tasks' : [task for task in tasks_filter],
+        'followups': {
+            task.task_no: task.get_followups()
+            for task in tasks_filter},
         'xhr'   : xhr,
         'isdev' : 'DEV - ' if settings.DEBUG else '',
         'title_page' : todo_list.title,

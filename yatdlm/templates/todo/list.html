@@ -176,7 +176,47 @@
                             {% endif %}
                         </tr>
                         <tr id="task_subline_{{ task.task_no }}" class="hidden b_lightgrey">
-                            <td class="" id="task_detail_{{ task.task_no }}" colspan="7">
+                            <td id="task_detail_{{ task.task_no }}" colspan="7">
+                                <div class="margint-normal">
+                                    <span style="font-size: 1.8em">Tâche #{{ task.task_no }} : {{ task.title }}</span>
+                                </div>
+                                <div class="marginb-normal">
+                                    <span class="b_lightgrey">
+                                        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b>
+                                    </span>
+                                </div>
+                                <hr>
+                                <span class="fullwidth">{{ task.description|linebreaks|display_urls }}</span>
+                                <hr>
+                                <div class="margint-normal followups_container" id="followups_{{ task.task_no }}">
+                                {% for followup in followups|get_value:task.task_no %}
+                                    <div class="marginb-normal single_followup">
+                                {% if followup.f_type == followup.COMMENT %}
+                                    <div class="followup_header b_grey">
+                                        <b>{{ followup.writer }}</b> a commenté le {{ followup.creation_date|date:"d/m/Y" }} à {{ followup.creation_date|date:"H:i"  }} :
+                                    </div>
+                                    <div style="padding: 0.8em;">
+                                        {{ followup.content|linebreaks|display_urls }}
+                                    </div>
+                                {% else %}
+                                {% if followup.f_type == followup.STATE_CHANGE %}
+                                    <div class="followup_header b_grey">
+                                        <b>{{ followup.writer }}</b> a changé la priorité de 
+                                        "{{ priority_levels|get_value_from_tuple_list:followup.old_priority }}" à
+                                            "{{ priority_levels|get_value_from_tuple_list:followup.new_priority }}". 
+                                    </div>
+                                    <div style="padding: 0.8em;">
+                                            {{ followup.content|display_urls|linebreaks }}
+                                    </div>
+                                {% else %}
+                                    <div class="update_header b_grey">
+                                        <b>{{ followup.writer }}</b> a mis à jour la tâche le {{ followup.creation_date|date:"d/m/Y à H:i" }}
+                                    </div>
+                                {% endif %}
+                                {% endif %}
+                                    </div>
+                                {% endfor %}
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

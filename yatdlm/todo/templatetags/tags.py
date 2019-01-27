@@ -9,6 +9,14 @@ import re
 def get_value(dict, key):
     return dict.get(key)
 
+@register.filter
+def get_value_from_tuple_list(l, first_value):
+    for t in l:
+        if t[0] is first_value:
+            return t[1]
+
+    return None
+
 # Custom filter that inserts hrefs into the given string then returns it
 @register.filter
 @stringfilter
