@@ -172,7 +172,7 @@ function filter_tasks() {
     var priority = parseInt(document.getElementById("select_tprio").value);
 
      tasks.forEach(element => {
-        var currDomElt = document.getElementById(element.id);
+        var currDomElt = document.getElementById(element.no);
         currDomElt.classList.remove("hidden");
         var eltCrDate = new Date(element.creation_date);
         if (typeof(element.resolution_date) !== undefined)
