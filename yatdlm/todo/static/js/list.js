@@ -205,8 +205,10 @@ function filter_tasks() {
             (priority !== -1 && element.priority !== priority)
         ]
 
-        // If any of the previous condition is met, the task is masked
+        // If any of the previous condition is met, the task and its subline are
+        // masked
         if (conditions.some( function (item) { return item })) {
+            document.getElementById(`task_detail_${element.no}`).classList.add("hidden");
             currDomElt.classList.add("hidden");
         }
     });
