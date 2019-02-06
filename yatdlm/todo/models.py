@@ -97,6 +97,7 @@ class Task(models.Model):
             'title_cropped': self.title[:40],
             'description': self.description,
             'creation_date': date_format(self.creation_date, dates_format),
+            'creation_hour': date_format(self.creation_date, "H:i"),
             'priority': self.priority,
             'priority_str': self.get_priority_display()
         }

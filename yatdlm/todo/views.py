@@ -175,6 +175,7 @@ def add_task_experimental(request, list_id=None):
         )
         task.save()
         json_body = task.as_dict()
+        json_body['creator'] = task.owner.username
     except TodoList.DoesNotExist:
         responsecode = 404
         json_body['errors'] = 'The given list does not exists'
