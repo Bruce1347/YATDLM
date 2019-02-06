@@ -45,25 +45,31 @@ function createNewDOMTasktr(data) {
     tdId.classList.add("pointer", "cell", "c-align");
     tdId.innerText = data.no;
     tdId.id = `${data.id}_id`;
+    tdId.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdTitle = document.createElement('td');
     tdTitle.classList.add("pointer", "cell");
     tdTitle.innerText = data.title_cropped;
     tdTitle.id = `${data.id}_title`;
+    tdTitle.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdCreationDate = document.createElement('td');
     tdCreationDate.classList.add("pointer", "cell", "c-align");
     tdCreationDate.innerText = data.creation_date;
     tdCreationDate.id = `${data.id}_creationd`;
+    tdCreationDate.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdResolutionDate = document.createElement('td');
     tdResolutionDate.classList.add("pointer", "cell", "c-align");
     tdResolutionDate.id = `${data.id}_resolutiond`;
+    tdResolutionDate.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdDeadline = document.createElement('td');
     tdDeadline.classList.add("pointer", "cell", "c-align");
     if (data.due_date !== undefined)
         tdDeadline.innerText = data.due_date;
     tdDeadline.id = `${data.id}_deadline`;
+    tdDeadline.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdPriority = document.createElement('td');
     tdPriority.classList.add("pointer", "cell", "c-align");
     tdPriority.innerText = data.priority_str;
+    tdPriority.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdDelete = document.createElement('td');
     tdDelete.classList.add("pointer", "cell", "c-align");
     var tdImg = document.createElement('img');
@@ -83,6 +89,48 @@ function createNewDOMTasktr(data) {
     newTr.appendChild(tdDelete);
 
     return newTr;
+}
+
+function createNewDOMDetailTr(data) {
+    var newSubline = document.createElement('tr');
+    var newDetail = document.createElement('td');
+
+    newSubline.id = `task_subline_${data.no}`;
+    newSubline.classList.add('b_lightgrey');
+
+    newDetail.id = `task_detail_${data.no}`;
+    newDetail.colSpan = 7;
+
+    // Task title
+    var divTitle = document.createElement('div');
+    var spanTitle = document.createElement('span');
+    divTitle.classList.add('margint-normal');
+    spanTitle.style = 'font-size: 1.8em';
+    spanTitle.innerHTML = `Tâche #${data.no} : ${data.title}`;
+    divTitle.appendChild(spanTitle);
+    // Task creation date
+    var divCrDate = document.createElement('div');
+    var spanCrDate = document.createElement('span');
+    divCrDate.appendChild(spanCrDate);
+    spanCrDate.innerHTML = `Crée le ${data.creation_date} à ${data.creation_hour} par <b>${data.creator}</b>`;
+    // Task description
+    var spanDescr = document.createElement('span');
+    spanDescr.innerHTML = `<p>${data.description}</p>`
+    // Followups
+    var divFollowups = document.createElement('div');
+    divFollowups.classList.add('margint-normal');
+    divFollowups.classList.add('followups_container');
+    divFollowups.id = `followups_${data.no}`;
+
+    newDetail.appendChild(divTitle);
+    newDetail.appendChild(spanCrDate);
+    newDetail.appendChild(document.createElement('hr'));
+    newDetail.appendChild(spanDescr);
+    newDetail.appendChild(document.createElement('hr'));
+    newDetail.appendChild(divFollowups);
+
+    newSubline.appendChild(newDetail);
+    return newSubline;
 }
 
 function add_task_exp(url) {
@@ -113,13 +161,16 @@ function add_task_exp(url) {
         var data = await response.json();
         tasks.unshift(data);
         if (response.status == 200) {
-            var firstElt = document.querySelectorAll(`tr.priority_${task_priority}`).item(0);
+            var domTasks = document.querySelectorAll(`tr.priority_${task_priority}`);
+            var firstElt = domTasks.item(0);
             var newTr = createNewDOMTasktr(data);
+            var newDetail = createNewDOMDetailTr(data);
             if (firstElt === null) {
                 firstElt = document.getElementById('list-container');
                 firstElt.appendChild(newTr);
             } else {
                 firstElt.parentNode.insertBefore(newTr, firstElt);
+                firstElt.parentNode.insertBefore(newDetail, newTr.nextSibling);
             }
         } else {
         }
