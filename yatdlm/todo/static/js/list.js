@@ -259,7 +259,7 @@ function filter_tasks() {
         // If any of the previous condition is met, the task and its subline are
         // masked
         if (conditions.some( function (item) { return item })) {
-            document.getElementById(`task_detail_${element.no}`).classList.add("hidden");
+            document.getElementById(`task_subline_${element.no}`).classList.add("hidden");
             currDomElt.classList.add("hidden");
         }
     });
