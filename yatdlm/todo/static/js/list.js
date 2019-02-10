@@ -52,6 +52,7 @@ document.getElementById("list-container").querySelectorAll('tr').forEach(
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
     newTr.classList.add('nowrap', `priority_${data.priority}`);
+    newTr.id = data.no;
 
     var tdId = document.createElement('td');
     tdId.classList.add("pointer", "cell", "c-align");
@@ -180,6 +181,7 @@ function add_task_exp(url) {
             if (firstElt === null) {
                 firstElt = document.getElementById('list-container');
                 firstElt.appendChild(newTr);
+                firstElt.appendChild(newDetail);
             } else {
                 firstElt.parentNode.insertBefore(newTr, firstElt);
                 firstElt.parentNode.insertBefore(newDetail, newTr.nextSibling);
