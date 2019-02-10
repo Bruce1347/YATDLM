@@ -1,4 +1,5 @@
 .pointer        { cursor: pointer; }
+.delete         {  }
 .cell           { border: 1px solid;  }
 .l-align        { text-align: left; }
 .c-align        { text-align: center; }

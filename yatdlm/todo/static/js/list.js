@@ -37,6 +37,18 @@ document.getElementById("select_tdyear").addEventListener('change', filter_tasks
 document.getElementById("select_tdmonth").addEventListener('change', filter_tasks);
 document.getElementById("select_tprio").addEventListener('change', filter_tasks);
 
+// Setup togglers for sub lines inside the tbody
+document.getElementById("list-container").querySelectorAll('tr').forEach(
+    (element) => {
+        var children = element.querySelectorAll('td:not(.delete)');
+        children.forEach((child) => {
+            child.addEventListener('click', () => {
+                toggle(`task_subline_${element.id}`);
+            });
+        });
+    }
+);
+
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
     newTr.classList.add('nowrap', `priority_${data.priority}`);
@@ -226,10 +238,11 @@ function filter_tasks() {
         var currDomElt = document.getElementById(element.no);
         currDomElt.classList.remove("hidden");
         var eltCrDate = new Date(element.creation_date);
+        var eltResDate = undefined;
         if (typeof(element.resolution_date) !== undefined)
-            var eltResDate = new Date(element.resolution_date);
+            eltResDate = new Date(element.resolution_date);
         else
-            var eltResDate = undefined;
+            eltResDate = undefined;
         if (typeof(element.due_date) !== undefined)
             var eltDueDate = new Date(element.due_date);
         else
@@ -318,15 +331,6 @@ function mark_task_as_done(url, btn, id) {
     submit(url, postdata, "list-container");
 }
 
-function display_task(task_id, url, public, is_toggle) {
-    postdata = "";
-    postdata += "public=" + encodeURIComponent(public);
-    postdata += "&xhr=" + encodeURIComponent("true");
-
-    if (typeof is_toggle !== 'undefined')
-        toggle('task_subline_' + task_id)
-}
-
 function edit_task(task_id, url) {
     var postdata = "";
 
@@ -369,7 +373,7 @@ function add_list(url, elt) {
     var descr = document.getElementById('new_list_description').value;
     var public = document.getElementById('new_list_privacy').value;
 
-    postdata = "";
+    var postdata = "";
     postdata += "&title=" + encodeURIComponent(title);
     postdata += "&description=" + encodeURIComponent(descr);
     postdata += "&visibility=" + encodeURIComponent(public);
