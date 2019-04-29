@@ -49,6 +49,70 @@ document.getElementById("list-container").querySelectorAll('tr').forEach(
     }
 );
 
+var tasks = [];
+// Fetch tasks when the page is loaded
+fetch_tasks(tasks).then(() => {
+    // Setup togglers for each task detail
+    for (var i = 0; i < tasks.length; ++i) {
+        var element = tasks[i];
+        // Get the task id from the tr id
+        document.getElementById(`edit-btn_${element.id}`).addEventListener('click', () => {
+            edit_task_experimental(`task_detail_${element.id}`);
+        });
+    }
+});
+
+function edit_task_experimental(id) {
+    createTaskEditTd(id);
+}
+
+function createTaskEditTd(task_id) {
+    /** EDIT FORM */
+    var td = document.createElement('td');
+    td.id = `task_edit_${task_id}`;
+    td.colSpan = 7;
+    var editForm = document.createElement('form');
+    var fieldSet = document.createElement('fieldset');
+    fieldSet.classList.add('noborder');
+
+    /** INPUTS */
+    // Title
+    var edit_title = document.createElement('input');
+    edit_title.name = `task_${task_id}_new_title`;
+    edit_title.classList.add('marginb-normal', 'fullwidth');
+    edit_title.setAttribute('type', 'text');
+    var edit_title_label = document.createElement('label');
+    edit_title_label.setAttribute('for', edit_title.name);
+    edit_title_label.textContent = 'Titre :';
+
+    // Description
+    var edit_description = document.createElement('textarea');
+    edit_description.name = `task_${task_id}_new_description`;
+    edit_description.classList.add('marginb-normal', 'fullwidth');
+    var edit_description_label = document.createElement('label');
+    edit_description_label.setAttribute('for', edit_title.name);
+    edit_description_label.textContent = 'Description :';
+
+    // Priority
+    var edit_priority = document.createElement('select');
+    edit_priority.name = `task_${task_id}_new_priority`;
+
+    // Assemble the form
+    fieldSet.appendChild(edit_title_label);
+    fieldSet.appendChild(edit_title);
+    fieldSet.appendChild(edit_description_label);
+    fieldSet.appendChild(edit_description);
+    fieldSet.appendChild(edit_priority);
+    editForm.appendChild(fieldSet);
+    td.appendChild(editForm);
+
+    /**
+     * Replace the child and save the current child, its internal structure
+     * will be used with the newer information  */ 
+    var task_td = document.getElementById(task_id);
+    task_td.parentNode.replaceChild(td, task_td);
+}
+
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
     newTr.classList.add('nowrap', `priority_${data.priority}`);
@@ -195,12 +259,10 @@ function add_task_exp(url) {
     });
 }
 
-var tasks = [];
-
 /**
  * Retrieves tasks from the server and saves into `tasks`.
  */
-async function fetch_tasks() {
+async function fetch_tasks(arr) {
     var listId = document.getElementById('dom_list_id').value;
     var headers = new Headers({
         'X-CSRFToken': get_cookie('csrftoken'),
@@ -217,10 +279,9 @@ async function fetch_tasks() {
     var res = await fetch(`/todo/lists/${listId}/tasks`, methodDescription);
     var data = await res.json();
     data.tasks.forEach(element => {
-        tasks.unshift(element);
+        arr.unshift(element);
     })
 }
-fetch_tasks(); // Fetch tasks when the page is loaded
 
 /**
  * Filters the tasks inside the document with the user-set filters.
