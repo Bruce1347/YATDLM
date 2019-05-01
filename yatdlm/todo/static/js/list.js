@@ -50,24 +50,30 @@ document.getElementById("list-container").querySelectorAll('tr').forEach(
 );
 
 var tasks = [];
+const priorities = Object();
 // Fetch tasks when the page is loaded
 fetch_tasks(tasks).then(() => {
     // Setup togglers for each task detail
     for (var i = 0; i < tasks.length; ++i) {
-        var element = tasks[i];
+        const element = tasks[i];
         // Get the task id from the tr id
-        document.getElementById(`edit-btn_${element.id}`).addEventListener('click', () => {
-            edit_task_experimental(`task_detail_${element.id}`);
+        var btn = document.getElementById(`edit-btn_${element.id}`);
+        btn.addEventListener('click', () => {
+            edit_task_experimental(`task_detail_${element.id}`, element.id);
         });
     }
 });
 
-function edit_task_experimental(id) {
-    createTaskEditTd(id);
+function edit_task_experimental(node_id, id) {
+    createTaskEditTd(node_id, id);
 }
 
-function createTaskEditTd(task_id) {
+function createTaskEditTd(node_id, task_id) {
+    console.log(node_id);
     /** EDIT FORM */
+    var currentTask = tasks.find((elt) => {
+        return elt.id === parseInt(task_id);
+    });
     var td = document.createElement('td');
     td.id = `task_edit_${task_id}`;
     td.colSpan = 7;
@@ -81,6 +87,7 @@ function createTaskEditTd(task_id) {
     edit_title.name = `task_${task_id}_new_title`;
     edit_title.classList.add('marginb-normal', 'fullwidth');
     edit_title.setAttribute('type', 'text');
+    edit_title.value = currentTask.title;
     var edit_title_label = document.createElement('label');
     edit_title_label.setAttribute('for', edit_title.name);
     edit_title_label.textContent = 'Titre :';
@@ -89,19 +96,25 @@ function createTaskEditTd(task_id) {
     var edit_description = document.createElement('textarea');
     edit_description.name = `task_${task_id}_new_description`;
     edit_description.classList.add('marginb-normal', 'fullwidth');
+    edit_description.value = currentTask.description;
     var edit_description_label = document.createElement('label');
     edit_description_label.setAttribute('for', edit_title.name);
     edit_description_label.textContent = 'Description :';
 
     // Priority
-    var edit_priority = document.createElement('select');
+    var edit_priority = objectToSelect(priorities, currentTask.priority);
     edit_priority.name = `task_${task_id}_new_priority`;
+    edit_priority.classList.add('marginb-normal', 'fullwidth');
+    var edit_priority_label = document.createElement('label');
+    edit_priority_label.setAttribute('for', edit_priority.name);
+    edit_priority_label.textContent = 'Priorité :';
 
     // Assemble the form
     fieldSet.appendChild(edit_title_label);
     fieldSet.appendChild(edit_title);
     fieldSet.appendChild(edit_description_label);
     fieldSet.appendChild(edit_description);
+    fieldSet.appendChild(edit_priority_label);
     fieldSet.appendChild(edit_priority);
     editForm.appendChild(fieldSet);
     td.appendChild(editForm);
@@ -109,7 +122,7 @@ function createTaskEditTd(task_id) {
     /**
      * Replace the child and save the current child, its internal structure
      * will be used with the newer information  */ 
-    var task_td = document.getElementById(task_id);
+    var task_td = document.getElementById(node_id);
     task_td.parentNode.replaceChild(td, task_td);
 }
 
@@ -280,7 +293,9 @@ async function fetch_tasks(arr) {
     var data = await res.json();
     data.tasks.forEach(element => {
         arr.unshift(element);
-    })
+    });
+    // Copy priorities values and keys to the current context
+    Object.assign(priorities, data.priorities);
 }
 
 /**
