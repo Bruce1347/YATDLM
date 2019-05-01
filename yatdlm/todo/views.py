@@ -112,10 +112,15 @@ def list_tasks(request, list_id=None):
         todo = TodoList.objects.get(id=list_id)
         if not todo.is_public:
             return JsonResponse({'errors': 'Non.'}, status=403)
-        resp = {'tasks': [
-            task.as_dict(dates_format="Y/m/d")
-            for task in tasks
-        ]}
+        priorities = {
+            name: value
+            for name, value in Task.priority_levels
+        }
+        resp = {
+            'tasks': [
+                task.as_dict(dates_format="Y/m/d")
+                for task in tasks],
+            'priorities': priorities}
         resp_code = 200
     except Task.DoesNotExist:
         resp = {'errors': 'Invalid list ID'}
