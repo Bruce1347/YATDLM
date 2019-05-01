@@ -42,3 +42,21 @@ function toggle(id)
 
     return return_value;
 }
+
+/**
+ * This function takes an object and creates a ``select`` HTML element from
+ * the object Keys & Values.
+ */
+function objectToSelect(obj, selected_id=undefined) {
+    const select = document.createElement('select');
+    Object.keys(obj).forEach((key) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.text = obj[key];
+        if (selected_id !== undefined && selected_id === parseInt(key)) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+    return select;
+}
