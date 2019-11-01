@@ -187,6 +187,27 @@ def add_task_experimental(request, list_id=None):
     return JsonResponse(json_body, status=responsecode)
 
 @login_required()
+@require_http_methods(['PATCH'])
+def update_task(request, list_id=None, task_id=None):
+    if not list_id or not task_id:
+        resp = {'errors': 'No ID given for a task or a list'}
+        resp_code = 500
+    else:
+        try:
+            task = Task.objects.get(id=task_id, parent_list_id=list_id)
+            body = json.loads(request.body.decode("utf-8"))
+            task.title = body.get('title')
+            task.description = body.get('description')
+            task.priority = int(body.get('priority'))
+            task.save()
+            resp = task.as_dict()
+            resp_code = 202
+        except TodoList.DoesNotExist:
+            resp = {'errors': 'Wrong task ID or list ID'}
+            resp_code = 404
+    return JsonResponse(resp, status=resp_code)
+
+@login_required()
 @require_http_methods(['DELETE'])
 def delete_task(request, list_id=None, task_id=None):
     """Deletes a task from the database"""
