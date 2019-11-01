@@ -91,6 +91,7 @@ class Task(models.Model):
         """Returns a dict representation for the task"""
         resp = {
             'id' : self.id,
+            'list_id': self.parent_list.id,
             'no': self.task_no,
             'title': self.title,
             # Provide the user a shorter title for display
