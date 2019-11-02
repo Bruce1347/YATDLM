@@ -126,6 +126,24 @@ function createTaskEditTd(node_id, task_id) {
     task_td.parentNode.replaceChild(td, task_td);
 }
 
+async function updateTask(body, task) {
+    const headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
+    const methodDescription = {
+        method: 'PATCH',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default',
+        body: body
+    };
+    const response = await fetch(
+        `/todo/lists/${task.list_id}/${task.id}/update/`, methodDescription);
+    const updatedTask = await response.json();
+    return updatedTask;
+}
+
 function createNewDOMTasktr(data) {
     var newTr = document.createElement('tr');
     newTr.classList.add('nowrap', `priority_${data.priority}`);
