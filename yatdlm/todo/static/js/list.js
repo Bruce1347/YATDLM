@@ -126,6 +126,13 @@ function createTaskEditTd(node_id, task_id) {
     task_td.parentNode.replaceChild(td, task_td);
 }
 
+/**
+ * Makes the network request to update a specific task and ask the server to
+ * save the changes in database.
+ * @param {String} body The body of the request, it is expected to be a
+ * stringified Object.
+ * @param {Object} task The object that is subject to changes.
+ */
 async function updateTask(body, task) {
     const headers = new Headers({
         'X-CSRFToken': get_cookie('csrftoken'),
@@ -142,6 +149,25 @@ async function updateTask(body, task) {
         `/todo/lists/${task.list_id}/${task.id}/update/`, methodDescription);
     const updatedTask = await response.json();
     return updatedTask;
+}
+
+/**
+ * Updates the DOM nodes that are displaying a specific task informations.
+ * @param {Object} task The task subject to modifications
+ */
+function updateDOMTask(task) {
+    const tr = document.getElementById(`${task.no}`);
+    console.log(task);
+    console.log(`${task.no}`);
+    console.log(tr);
+    // Remove all the previous classes from the <tr>
+    tr.classList.remove(...tr.classList);
+    tr.classList.add("nowrap", `priority_${task.priority}`);
+    // Replace all the visible text by their updated versions
+    const priorityCell = document.getElementById(`priority_${task.no}`);
+    priorityCell.innerText = task.priority_str;
+    const titleCell = document.getElementById(`title_${task.no}`);
+    titleCell.innerText = task.title;
 }
 
 function createNewDOMTasktr(data) {
