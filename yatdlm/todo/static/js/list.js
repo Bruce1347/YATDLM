@@ -109,6 +109,21 @@ function createTaskEditTd(node_id, task_id) {
     edit_priority_label.setAttribute('for', edit_priority.name);
     edit_priority_label.textContent = 'Priorité :';
 
+    // Save and cancel buttons
+    const cancel_edit_btn = document.createElement('button');
+    cancel_edit_btn.type = 'button';
+    cancel_edit_btn.classList.add('pure-button');
+    cancel_edit_btn.classList.add('pure-button-primary');
+    cancel_edit_btn.classList.add('marginr-tiny');
+    const save_task_btn = document.createElement('button');
+    save_task_btn.type = 'button';
+    save_task_btn.classList.add('pure-button');
+    save_task_btn.classList.add('pure-button-primary');
+    save_task_btn.classList.add('marginl-tiny');
+
+    cancel_edit_btn.innerText = "ANNULER L'EDITION"
+    save_task_btn.innerText = "SAUVEGARDER";
+
     // Assemble the form
     fieldSet.appendChild(edit_title_label);
     fieldSet.appendChild(edit_title);
@@ -116,13 +131,36 @@ function createTaskEditTd(node_id, task_id) {
     fieldSet.appendChild(edit_description);
     fieldSet.appendChild(edit_priority_label);
     fieldSet.appendChild(edit_priority);
+    fieldSet.appendChild(cancel_edit_btn);
+    fieldSet.appendChild(save_task_btn);
     editForm.appendChild(fieldSet);
     td.appendChild(editForm);
 
     /**
      * Replace the child and save the current child, its internal structure
      * will be used with the newer information  */ 
-    var task_td = document.getElementById(node_id);
+    const task_td = document.getElementById(node_id);
+    // Bind cancel button to a callback which will restore the previous state
+    cancel_edit_btn.addEventListener('click', () => {
+        document.getElementById(td.id).replaceWith(task_td);
+    });
+    // Bind save button to a callback which will request the server to update
+    // the task
+    save_task_btn.addEventListener('click', async () => {
+        const requestBody = JSON.stringify({
+            'title': edit_title.value,
+            'description': edit_description.value,
+            'priority': edit_priority.value
+        })
+
+        const updatedTask = await updateTask(requestBody, currentTask);
+        const currentTaskIdx = tasks.findIndex((elt) => {
+            return elt.id === parseInt(task_id);
+        });
+        Object.assign(tasks[currentTaskIdx], updatedTask);
+        document.getElementById(td.id).replaceWith(task_td);
+        updateDOMTask(updatedTask);
+    });
     task_td.parentNode.replaceChild(td, task_td);
 }
 
@@ -168,6 +206,8 @@ function updateDOMTask(task) {
     priorityCell.innerText = task.priority_str;
     const titleCell = document.getElementById(`title_${task.no}`);
     titleCell.innerText = task.title;
+    const descriptionCell = document.getElementById(`description_${task.no}`);
+    descriptionCell.querySelector("p").innerText = task.description;
 }
 
 function createNewDOMTasktr(data) {
