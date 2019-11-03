@@ -38,7 +38,7 @@ document.getElementById("select_tdmonth").addEventListener('change', filter_task
 document.getElementById("select_tprio").addEventListener('change', filter_tasks);
 
 // Setup togglers for sub lines inside the tbody
-document.getElementById("list-container").querySelectorAll('tr').forEach(
+document.getElementById("list-container").querySelectorAll('tr:not(.hidden)').forEach(
     (element) => {
         var children = element.querySelectorAll('td:not(.delete)');
         children.forEach((child) => {
