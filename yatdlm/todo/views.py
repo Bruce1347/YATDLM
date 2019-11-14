@@ -154,6 +154,7 @@ def add_task(request, list_id=-1):
 
     return display_list(request, list_id=list_id, xhr=True)
 
+@login_required()
 def add_task_experimental(request, list_id=None):
     """Adds a task to the database for the given list"""
     responsecode = 200
@@ -169,6 +170,7 @@ def add_task_experimental(request, list_id=None):
             task_no = latest_task_no + 1
         else:
             task_no = 1
+        # TODO: Leverage the kwargs
         task = Task(
             parent_list=todo,
             title=body['title'],
@@ -224,6 +226,40 @@ def delete_task(request, list_id=None, task_id=None):
             resp = {'errors': 'One of the given IDs is invalid'}
             resp_code = 404
     return JsonResponse(resp, status=resp_code)
+
+@login_required()
+@require_http_methods(['PATCH'])
+def close_task(request, list_id=None, task_id=None):
+    if not list_id or not task_id:
+        status = 404
+        payload = {"errors": "Task ID or List ID missing"}
+    try:
+        task = Task.objects.get(id=task_id, parent_list=list_id)
+        if 'followup' in request.POST:
+            comment = request.POST.get('followup')
+        else:
+            comment = ''
+        task.change_state(comment=comment, writer=request.user)
+        task.save()
+        status = 202
+        payload = task.as_dict()
+    except Task.DoesNotExist:
+        status = 404
+        payload = {"errors": "Wrong Task ID or List ID"}
+    return JsonResponse(payload, status=status)
+
+@login_required()
+@require_http_methods(['GET'])
+def get_followups(request, list_id=None, task_id=None):
+    if not list_id or not task_id:
+        status = 500
+        payload = {"errors": "No Task ID or List ID"}
+    try:
+        task = Task.objects.get(id=task_id, parent_list=list_id)
+    except Task.DoesNotExist:
+        status = 4040
+        payload = {"errors": "Wrong Task ID or List ID"}
+    return JsonResponse(payload, status=status)
 
 @login_required()
 def mark_as_done(request, list_id=-1, task_id=-1):

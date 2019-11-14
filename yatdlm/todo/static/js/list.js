@@ -57,12 +57,49 @@ fetch_tasks(tasks).then(() => {
     for (var i = 0; i < tasks.length; ++i) {
         const element = tasks[i];
         // Get the task id from the tr id
-        var btn = document.getElementById(`edit-btn_${element.id}`);
-        btn.addEventListener('click', () => {
+        const editBtn = document.getElementById(`edit-btn_${element.id}`);
+        const closeBtn = document.getElementById(`close-btn_${element.id}`);
+        editBtn.addEventListener('click', () => {
             edit_task_experimental(`task_detail_${element.id}`, element.id);
         });
+        closeBtn.addEventListener('click', () => {
+            closeTask(element.list_id, element.id);
+        })
     }
 });
+
+/**
+ * Handles the closure or the re-opening of a task.
+ * @param {Number} taskId The task that has to be closed or re-opened
+ */
+async function closeTask(listId, taskId) {
+    const requestBody = JSON.stringify({
+        '': '',
+    });
+    const headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
+    const methodDescription = {
+        method: 'PATCH',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default',
+        body: requestBody
+    };
+    const response = await fetch(
+        `/todo/lists/${listId}/${taskId}/close`, methodDescription);
+    const updatedTask = await response.json();
+}
+
+/**
+ * Updates the followups and their DOM representation.
+ * @param {number} listId 
+ * @param {number} taskId 
+ */
+async function updateFollowups(listId, taskId) {
+    
+}
 
 function edit_task_experimental(node_id, id) {
     createTaskEditTd(node_id, id);

@@ -2,6 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.utils.timezone import make_aware
+from datetime import datetime
 
 from django.utils.formats import date_format
 
@@ -86,6 +88,37 @@ class Task(models.Model):
     def get_followups(self):
         followups = FollowUp.objects.filter(task=self.id)
         return followups
+
+    def change_state(self, comment=None, writer=None):
+        """Changes the is_done state of the current Task instance.
+        If ``comment`` is not None then the current task will have a
+        newly added followup that will explain why the task was closed by
+        a user (if they provided a comment).
+
+        :param comment: The text followup written by the user when closing the
+        task."""
+
+        self.is_done = not self.is_done
+
+        if self.is_done:
+            new_priority = Task.SOLVED
+        else:
+            new_priority = Task.NORMAL
+        followup = FollowUp(
+            writer=writer,
+            task=self,
+            f_type=FollowUp.STATE_CHANGE,
+            todol=self.parent_list,
+            content=comment,
+            old_priority=self.priority,
+            new_priority=new_priority)
+        followup.save()
+        self.priority = new_priority
+        
+        if self.is_done:
+            self.resolution_date = make_aware(datetime.now())
+        else:
+            self.resolution_date = None
 
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""

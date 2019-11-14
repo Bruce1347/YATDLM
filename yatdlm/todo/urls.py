@@ -34,4 +34,6 @@ urlpatterns = [
     path('lists/<int:list_id>/edit/<int:task_id>', views.get_task_detail),
     # Submit the modified task
     path('lists/<int:list_id>/edit/submit/<int:task_id>', views.task_update),
+    # Close a task
+    path('lists/<int:list_id>/<int:task_id>/close', views.close_task),
 ]

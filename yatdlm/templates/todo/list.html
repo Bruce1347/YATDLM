@@ -218,7 +218,16 @@
                                     </div>
                                 {% endfor %}
                                 </div>
-                                <button type="button" id="edit-btn_{{ task.task_no }}" class="pure-button pure-button-primary">EDITER</button>
+                                <button type="button" id="edit-btn_{{ task.task_no }}" class="marginr-tiny pure-button pure-button-primary">EDITER</button>
+                                {% if not task.is_done %}
+                                    <button type="button" id="close-btn_{{ task.task_no }}" class="marginl-tiny pure-button pure-button-primary">
+                                        FERMER LA TÂCHE
+                                    </button>
+                                {% else %}
+                                    <button type="button" id="close-btn_{{ task.task_no }}" class="marginl-tiny pure-button pure-button-primary">
+                                        ROUVRIR LA TÂCHE
+                                    </button>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
