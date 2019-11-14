@@ -154,14 +154,14 @@
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
                             {% if task.is_done %}
-                                <td class="pointer cell c-align" colspan="2">
+                                <td id="resolutiond_{{ task.task_no }}" class="pointer cell c-align" colspan="2">
                                     Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
                                 </td>
                             {% else %}
-                                <td class="pointer cell c-align">
+                                <td id="resolutiond_{{ task.task_no }}" class="pointer cell c-align">
                                 {{ task.resolution_date|date:"d/m/Y" }}
                                 </td>
-                                <td class="pointer cell c-align">
+                                <td id="dued_{{ task.task_no }}" class="pointer cell c-align">
                                     {{ task.due_date|date:"d/m/Y" }}
                                 </td>
                             {% endif %}

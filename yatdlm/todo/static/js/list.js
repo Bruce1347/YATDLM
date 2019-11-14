@@ -90,6 +90,11 @@ async function closeTask(listId, taskId) {
     const response = await fetch(
         `/todo/lists/${listId}/${taskId}/close`, methodDescription);
     const updatedTask = await response.json();
+    const currentTaskIdx = tasks.findIndex((t) => {
+        return t.id === updatedTask.id;
+    });
+    Object.assign(tasks[currentTaskIdx], updatedTask);
+    updateDOMTask(updatedTask);
 }
 
 /**
@@ -245,6 +250,21 @@ function updateDOMTask(task) {
     titleCell.innerText = task.title;
     const descriptionCell = document.getElementById(`description_${task.no}`);
     descriptionCell.querySelector("p").innerText = task.description;
+    // Update the resolution date and due date cells
+    if (task.is_done) {
+        const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
+        resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
+        resolutionDateCell.colSpan = 2;
+        const dueDateCell = document.getElementById(`dued_${task.no}`);
+        dueDateCell.remove();
+    } else {
+        const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
+        resolutionDateCell.innerText = "";
+        resolutionDateCell.colSpan = 1;
+        const dueDateCell = document.createElement("td");
+        dueDateCell.id = `dued_${task.no}`;
+        resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
+    }
 }
 
 function createNewDOMTasktr(data) {

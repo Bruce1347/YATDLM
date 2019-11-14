@@ -127,6 +127,7 @@ class Task(models.Model):
             'list_id': self.parent_list.id,
             'no': self.task_no,
             'title': self.title,
+            'is_done': self.is_done,
             # Provide the user a shorter title for display
             'title_cropped': self.title[:40],
             'description': self.description,
@@ -141,6 +142,7 @@ class Task(models.Model):
         
         if self.resolution_date is not None:
             resp['resolution_date'] = date_format(self.resolution_date, dates_format)
+            resp['resolution_hour'] = date_format(self.resolution_date, "H:i")
 
         return resp
 
