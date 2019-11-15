@@ -218,6 +218,8 @@
                                     </div>
                                 {% endfor %}
                                 </div>
+                                <label for="followup_{{ task.task_no}}">Ajouter un commentaire :</label>
+                                <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.task_no }}"></textarea>
                                 <button type="button" id="edit-btn_{{ task.task_no }}" class="marginr-tiny pure-button pure-button-primary">EDITER</button>
                                 {% if not task.is_done %}
                                     <button type="button" id="close-btn_{{ task.task_no }}" class="marginl-tiny pure-button pure-button-primary">
