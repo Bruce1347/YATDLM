@@ -251,12 +251,14 @@ function updateDOMTask(task) {
     const descriptionCell = document.getElementById(`description_${task.no}`);
     descriptionCell.querySelector("p").innerText = task.description;
     // Update the resolution date and due date cells
+    const closeBtn = document.getElementById(`close-btn_${task.no}`);
     if (task.is_done) {
         const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
         resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
         resolutionDateCell.colSpan = 2;
         const dueDateCell = document.getElementById(`dued_${task.no}`);
         dueDateCell.remove();
+        closeBtn.innerText = "ROUVRIR LA TÂCHE";
     } else {
         const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
         resolutionDateCell.innerText = "";
@@ -264,6 +266,7 @@ function updateDOMTask(task) {
         const dueDateCell = document.createElement("td");
         dueDateCell.id = `dued_${task.no}`;
         resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
+        closeBtn.innerText = "FERMER LA TÂCHE";
     }
 }
 
