@@ -73,8 +73,9 @@ fetch_tasks(tasks).then(() => {
  * @param {Number} taskId The task that has to be closed or re-opened
  */
 async function closeTask(listId, taskId) {
+    console.log(document.getElementById(`followup_${taskId}`).value);
     const requestBody = JSON.stringify({
-        '': '',
+        'followup': document.getElementById(`followup_${taskId}`).value,
     });
     const headers = new Headers({
         'X-CSRFToken': get_cookie('csrftoken'),
