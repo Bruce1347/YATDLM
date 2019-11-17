@@ -26,8 +26,6 @@ urlpatterns = [
     path('lists/<int:list_id>/complete_task/<int:task_id>', views.mark_as_done),
     # Display the details of a task
     path('lists/<int:list_id>/detail/<int:task_id>', views.display_detail),
-    # Add a followup
-    path('lists/<int:list_id>/detail/<int:task_id>/add_followup', views.add_followup),
     # Update a task
     path('lists/<int:list_id>/<int:task_id>/update/', views.update_task),
     # Edit a task
@@ -36,4 +34,6 @@ urlpatterns = [
     path('lists/<int:list_id>/edit/submit/<int:task_id>', views.task_update),
     # Close a task
     path('lists/<int:list_id>/<int:task_id>/close', views.close_task),
+    # Add a followup
+    path('lists/<int:list_id>/<int:task_id>/add_followup', views.add_followup)
 ]

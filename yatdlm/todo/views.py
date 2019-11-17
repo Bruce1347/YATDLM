@@ -310,22 +310,19 @@ def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=Fals
         return HttpResponseNotFound("Task not found")
 
 @login_required()
-def add_followup(request, list_id=-1, task_id=-1):
-    if task_id != -1 and list_id != -1:
-        followup = FollowUp(
-            writer=request.user,
-            task_id=task_id,
-            todol_id=list_id,
-            content=request.POST['followup'])
-        followup.save()
-        return display_detail(
-            request,
-            list_id=list_id,
-            task_id=task_id,
-            add_followup=True,
-            xhr=True)
-    else:
-        return HttpResponseNotFound("NOPE.")
+@require_http_methods(['POST'])
+def add_followup(request, list_id=None, task_id=None):
+    try:
+        task = Task.objects.get(id=task_id, parent_list=list_id)
+        body = json.loads(request.body.decode('utf-8'))
+        followup = body.get('followup')
+        task.add_followup(followup, request.user)
+        status = 200
+        payload = {"status": "OK!"}
+    except Task.DoesNotExist:
+        status = 404
+        payload = {"errors": "Wrong Task ID or List ID"}
+    return JsonResponse(payload, status=status)
 
 @login_required()
 def get_task_detail(request, list_id=-1, task_id=-1):
