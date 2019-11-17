@@ -180,6 +180,16 @@ class FollowUp(models.Model):
     # The followup content, since it may refer to a specific problem that needs explanations, the max_length is longer than usual
     content = models.TextField(max_length=1000, blank=True)
 
+    def as_dict(self):
+        return {
+            'writer': self.writer.username,
+            'creation_date': date_format(self.creation_date, "d/m/Y à H:i"),
+            'content': self.content,
+            'old_priority': self.get_old_priority_display(),
+            'new_priority': self.get_new_priority_display(),
+            'type': self.f_type
+        }
+
     # Admin fields
     fields = ['task', 'todol']
 
