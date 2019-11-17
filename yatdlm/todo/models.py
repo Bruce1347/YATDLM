@@ -89,6 +89,15 @@ class Task(models.Model):
         followups = FollowUp.objects.filter(task=self.id)
         return followups
 
+    def add_followup(self, followup, writer):
+        followup = FollowUp(
+            f_type=FollowUp.COMMENT,
+            writer=writer,
+            content=followup,
+            todol=self.parent_list,
+            task=self)
+        followup.save()
+
     def change_state(self, comment=None, writer=None):
         """Changes the is_done state of the current Task instance.
         If ``comment`` is not None then the current task will have a
