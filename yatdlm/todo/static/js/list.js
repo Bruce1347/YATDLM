@@ -59,14 +59,44 @@ fetch_tasks(tasks).then(() => {
         // Get the task id from the tr id
         const editBtn = document.getElementById(`edit-btn_${element.id}`);
         const closeBtn = document.getElementById(`close-btn_${element.id}`);
+        const addCommentBtn = document.getElementById(`add_followup-btn_${element.id}`);
         editBtn.addEventListener('click', () => {
             edit_task_experimental(`task_detail_${element.id}`, element.id);
         });
         closeBtn.addEventListener('click', () => {
             closeTask(element.list_id, element.id);
+        });
+        addCommentBtn.addEventListener('click', () => {
+            addFollowup(element.list_id, element.id);
         })
     }
 });
+
+/**
+ * Handles the addition of one followup to a specific task.
+ * @param {number} listId 
+ * @param {number} taskId 
+ */
+async function addFollowup(listId, taskId) {
+    const requestBody = JSON.stringify({
+        'followup': document.getElementById(`followup_${taskId}`).value,
+    });
+    const headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
+    const methodDescription = {
+        method: 'POST',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default',
+        body: requestBody
+    };
+    const response = await fetch(
+        `/todo/lists/${listId}/${taskId}/add_followup`, methodDescription);
+    const data = await response.json();
+    }
+
 
 /**
  * Handles the closure or the re-opening of a task.
