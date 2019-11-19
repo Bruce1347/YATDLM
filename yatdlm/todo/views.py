@@ -257,8 +257,10 @@ def get_followups(request, list_id=None, task_id=None):
         payload = {"errors": "No Task ID or List ID"}
     try:
         task = Task.objects.get(id=task_id, parent_list=list_id)
+        status = 200
+        payload = {"followups": [f.as_dict() for f in task.get_followups()]}
     except Task.DoesNotExist:
-        status = 4040
+        status = 404
         payload = {"errors": "Wrong Task ID or List ID"}
     return JsonResponse(payload, status=status)
 
