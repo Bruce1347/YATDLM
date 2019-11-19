@@ -99,6 +99,44 @@ async function addFollowup(listId, taskId) {
 
 
 /**
+ * This function will create an ``Element`` that will represent a single followup.
+ * @param {Object} followup The followup that needs to be translated to a DOM Node.
+ */
+function createDOMFollowup(followup) {
+    // Parent div that will contain the followup.
+    const parentNode = document.createElement('div');
+    parentNode.classList.add("marginb-normal", "single_followup");
+    const followupHeader = document.createElement('div');
+    const contentHeader = document.createElement('div');
+
+    // Common styles / classes
+    contentHeader.style.padding = "0.8em";
+    followupHeader.classList.add("b_grey");
+
+    // Specific styles classes
+    // Magic numbers here infortunately, gotta find a way to use literal strings instead.
+    parentNode.appendChild(followupHeader);
+    if (followup.type === 2) {
+        // Modification followup
+        followupHeader.classList.add("update_header");
+        followupHeader.innerHTML = `<b>${followup.writer}</b> a mis à jour la tâche le ${followup.creation_date}`;
+    } else {
+        followupHeader.classList.add("followup_header");
+        contentHeader.innerText = followup.content;
+        if (followup.type === 1) {
+            // Comment
+            followupHeader.innerHTML = `<b>${followup.writer}</b> a commenté le ${followup.creation_date}:`;
+        } else {
+            // State change
+            followupHeader.innerHTML = `<b>${followup.writer}</b> a changé la priorité de ${followup.old_priority} à ${followup.new_priority}`;
+        }
+        parentNode.appendChild(contentHeader);
+    }
+    return parentNode;
+}
+
+
+/**
  * Handles the closure or the re-opening of a task.
  * @param {Number} taskId The task that has to be closed or re-opened
  */
