@@ -95,7 +95,8 @@ async function addFollowup(listId, taskId) {
     const response = await fetch(
         `/todo/lists/${listId}/${taskId}/add_followup`, methodDescription);
     const data = await response.json();
-    }
+    await updateFollowups(listId, taskId);
+}
 
 async function updateFollowups(listId, taskId) {
     const followups = await getFollowups(listId, taskId);
@@ -170,6 +171,7 @@ async function closeTask(listId, taskId) {
     });
     Object.assign(tasks[currentTaskIdx], updatedTask);
     updateDOMTask(updatedTask);
+    updateFollowups(task.list_id, task.no);
 }
 
 /**
@@ -290,6 +292,7 @@ function createTaskEditTd(node_id, task_id) {
         Object.assign(tasks[currentTaskIdx], updatedTask);
         document.getElementById(td.id).replaceWith(task_td);
         updateDOMTask(updatedTask);
+        updateFollowups(updatedTask.list_id, updatedTask.id);
     });
     task_td.parentNode.replaceChild(td, task_td);
 }
