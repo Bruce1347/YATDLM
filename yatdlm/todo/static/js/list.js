@@ -97,6 +97,12 @@ async function addFollowup(listId, taskId) {
     const data = await response.json();
     }
 
+async function updateFollowups(listId, taskId) {
+    const followups = await getFollowups(listId, taskId);
+    const latestFollowup = createDOMFollowup(followups.followups.pop());
+    const followupsContainer = document.getElementById(`followups_${taskId}`);
+    followupsContainer.appendChild(latestFollowup);
+}
 
 /**
  * This function will create an ``Element`` that will represent a single followup.
