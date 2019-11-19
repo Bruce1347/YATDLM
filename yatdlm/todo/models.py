@@ -86,7 +86,7 @@ class Task(models.Model):
         return self.title
 
     def get_followups(self):
-        followups = FollowUp.objects.filter(task=self.id)
+        followups = FollowUp.objects.filter(task=self.id).order_by("creation_date")
         return followups
 
     def add_followup(self, followup, writer):
