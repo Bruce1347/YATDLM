@@ -133,8 +133,21 @@ async function closeTask(listId, taskId) {
  * @param {number} listId 
  * @param {number} taskId 
  */
-async function updateFollowups(listId, taskId) {
-    
+async function getFollowups(listId, taskId) {
+    const headers = new Headers({
+        'X-CSRFToken': get_cookie('csrftoken'),
+        'Content-Type': 'application/json'
+    });
+    const methodDescription = {
+        method: 'GET',
+        headers: headers,
+        mode: 'cors',
+        cache: 'default'
+    };
+    const response = await fetch(
+        `/todo/lists/${listId}/${taskId}/get_followups`, methodDescription);
+    const data = await response.json();
+    return data;
 }
 
 function edit_task_experimental(node_id, id) {
