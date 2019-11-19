@@ -148,7 +148,6 @@ function createDOMFollowup(followup) {
  * @param {Number} taskId The task that has to be closed or re-opened
  */
 async function closeTask(listId, taskId) {
-    console.log(document.getElementById(`followup_${taskId}`).value);
     const requestBody = JSON.stringify({
         'followup': document.getElementById(`followup_${taskId}`).value,
     });
@@ -201,7 +200,6 @@ function edit_task_experimental(node_id, id) {
 }
 
 function createTaskEditTd(node_id, task_id) {
-    console.log(node_id);
     /** EDIT FORM */
     var currentTask = tasks.find((elt) => {
         return elt.id === parseInt(task_id);
@@ -328,9 +326,6 @@ async function updateTask(body, task) {
  */
 function updateDOMTask(task) {
     const tr = document.getElementById(`${task.no}`);
-    console.log(task);
-    console.log(`${task.no}`);
-    console.log(tr);
     // Remove all the previous classes from the <tr>
     tr.classList.remove(...tr.classList);
     tr.classList.add("nowrap", `priority_${task.priority}`);
@@ -354,8 +349,7 @@ function updateDOMTask(task) {
         const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
         resolutionDateCell.innerText = "";
         resolutionDateCell.colSpan = 1;
-        const dueDateCell = document.createElement("td");
-        dueDateCell.id = `dued_${task.no}`;
+        const dueDateCell = document.getElementById(`dued_${task.no}`);
         resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
         closeBtn.innerText = "FERMER LA TÂCHE";
     }
