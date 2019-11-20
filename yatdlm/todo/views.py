@@ -198,9 +198,21 @@ def update_task(request, list_id=None, task_id=None):
         try:
             task = Task.objects.get(id=task_id, parent_list_id=list_id)
             body = json.loads(request.body.decode("utf-8"))
+            new_priority = int(body.get('priority'))
+            new_state = FollowUp(
+                writer=request.user, 
+                task=task, 
+                todol_id=list_id,
+                old_priority=task.priority,
+                new_priority=new_priority)
+            if new_priority is not task.priority:
+                new_state.f_type = FollowUp.STATE_CHANGE
+            else:
+                new_state.f_type = FollowUp.COMMENT 
+            new_state.save()
             task.title = body.get('title')
             task.description = body.get('description')
-            task.priority = int(body.get('priority'))
+            task.priority = new_priority
             task.save()
             resp = task.as_dict()
             resp_code = 202
