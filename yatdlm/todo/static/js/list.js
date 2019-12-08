@@ -397,6 +397,9 @@ function createNewDOMTasktr(data) {
     tdImg.width = 24;
     tdImg.height = 24;
     tdImg.src = '/static/img/icons/garbage_red.svg';
+    tdImg.addEventListener('click', () => {
+        del_task(`/todo/lists/${data.list_id}/del_task/${data.id}`, data.no);
+    });
     tdDelete.appendChild(tdImg);
 
     newTr.appendChild(tdId);
