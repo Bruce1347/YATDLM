@@ -57,29 +57,28 @@ fetch_tasks(tasks).then(() => {
     for (var i = 0; i < tasks.length; ++i) {
         const element = tasks[i];
         // Get the task id from the tr id
-        const editBtn = document.getElementById(`edit-btn_${element.id}`);
-        const closeBtn = document.getElementById(`close-btn_${element.id}`);
-        const addCommentBtn = document.getElementById(`add_followup-btn_${element.id}`);
+        const editBtn = document.getElementById(`edit-btn_${element.no}`);
+        const closeBtn = document.getElementById(`close-btn_${element.no}`);
+        const addCommentBtn = document.getElementById(`add_followup-btn_${element.no}`);
         editBtn.addEventListener('click', () => {
-            edit_task_experimental(`task_detail_${element.id}`, element.id);
+            edit_task_experimental(`task_detail_${element.no}`, element.no);
         });
         closeBtn.addEventListener('click', () => {
-            closeTask(element.list_id, element.id);
+            closeTask(element);
         });
         addCommentBtn.addEventListener('click', () => {
-            addFollowup(element.list_id, element.id);
+            addFollowup(element);
         })
     }
 });
 
 /**
  * Handles the addition of one followup to a specific task.
- * @param {number} listId 
- * @param {number} taskId 
+ * @param {Object} task  
  */
-async function addFollowup(listId, taskId) {
+async function addFollowup(task) {
     const requestBody = JSON.stringify({
-        'followup': document.getElementById(`followup_${taskId}`).value,
+        'followup': document.getElementById(`followup_${task.no}`).value,
     });
     const headers = new Headers({
         'X-CSRFToken': get_cookie('csrftoken'),
@@ -93,15 +92,20 @@ async function addFollowup(listId, taskId) {
         body: requestBody
     };
     const response = await fetch(
-        `/todo/lists/${listId}/${taskId}/add_followup`, methodDescription);
+        `/todo/lists/${task.list_id}/${task.id}/add_followup`, methodDescription);
     const data = await response.json();
-    await updateFollowups(listId, taskId);
+    await updateFollowups(task);
 }
 
-async function updateFollowups(listId, taskId) {
-    const followups = await getFollowups(listId, taskId);
+/**
+ * Updates the followups of a task and adds a new DOM node for the latest
+ * created task.
+ * @param {Object} task the task that needs its followups to be updated
+ */
+async function updateFollowups(task) {
+    const followups = await getFollowups(task.list_id, task.id);
     const latestFollowup = createDOMFollowup(followups.followups.pop());
-    const followupsContainer = document.getElementById(`followups_${taskId}`);
+    const followupsContainer = document.getElementById(`followups_${task.no}`);
     followupsContainer.appendChild(latestFollowup);
 }
 
@@ -145,11 +149,11 @@ function createDOMFollowup(followup) {
 
 /**
  * Handles the closure or the re-opening of a task.
- * @param {Number} taskId The task that has to be closed or re-opened
+ * @param {Object} task The task that has to be closed or re-opened
  */
-async function closeTask(listId, taskId) {
+async function closeTask(task) {
     const requestBody = JSON.stringify({
-        'followup': document.getElementById(`followup_${taskId}`).value,
+        'followup': document.getElementById(`followup_${task.no}`).value,
     });
     const headers = new Headers({
         'X-CSRFToken': get_cookie('csrftoken'),
@@ -163,14 +167,14 @@ async function closeTask(listId, taskId) {
         body: requestBody
     };
     const response = await fetch(
-        `/todo/lists/${listId}/${taskId}/close`, methodDescription);
+        `/todo/lists/${task.list_id}/${task.id}/close`, methodDescription);
     const updatedTask = await response.json();
     const currentTaskIdx = tasks.findIndex((t) => {
         return t.id === updatedTask.id;
     });
     Object.assign(tasks[currentTaskIdx], updatedTask);
     updateDOMTask(updatedTask);
-    updateFollowups(task.list_id, task.no);
+    updateFollowups(task);
 }
 
 /**
@@ -202,7 +206,7 @@ function edit_task_experimental(node_id, id) {
 function createTaskEditTd(node_id, task_id) {
     /** EDIT FORM */
     var currentTask = tasks.find((elt) => {
-        return elt.id === parseInt(task_id);
+        return elt.no === parseInt(task_id);
     });
     var td = document.createElement('td');
     td.id = `task_edit_${task_id}`;
