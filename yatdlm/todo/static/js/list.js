@@ -135,7 +135,7 @@ function createDOMFollowup(followup) {
             followupHeader.innerHTML = `<b>${followup.writer}</b> a commenté le ${followup.creation_date}:`;
         } else {
             // State change
-            followupHeader.innerHTML = `<b>${followup.writer}</b> a changé la priorité de ${followup.old_priority} à ${followup.new_priority}`;
+            followupHeader.innerHTML = `<b>${followup.writer}</b> a changé la priorité de ${followup.old_priority} à ${followup.new_priority}.`;
         }
         parentNode.appendChild(contentHeader);
     }
