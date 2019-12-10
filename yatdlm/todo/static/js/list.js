@@ -80,19 +80,7 @@ async function addFollowup(task) {
     const requestBody = JSON.stringify({
         'followup': document.getElementById(`followup_${task.no}`).value,
     });
-    const headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
-    });
-    const methodDescription = {
-        method: 'POST',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default',
-        body: requestBody
-    };
-    const response = await fetch(
-        `/todo/lists/${task.list_id}/${task.id}/add_followup`, methodDescription);
+    const response = await post(`/todo/lists/${task.list_id}/${task.id}/add_followup`, requestBody);
     const data = await response.json();
     await updateFollowups(task);
 }
@@ -155,19 +143,7 @@ async function closeTask(task) {
     const requestBody = JSON.stringify({
         'followup': document.getElementById(`followup_${task.no}`).value,
     });
-    const headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
-    });
-    const methodDescription = {
-        method: 'PATCH',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default',
-        body: requestBody
-    };
-    const response = await fetch(
-        `/todo/lists/${task.list_id}/${task.id}/close`, methodDescription);
+    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/close`, requestBody);
     const updatedTask = await response.json();
     const currentTaskIdx = tasks.findIndex((t) => {
         return t.id === updatedTask.id;
@@ -183,18 +159,7 @@ async function closeTask(task) {
  * @param {number} taskId 
  */
 async function getFollowups(listId, taskId) {
-    const headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
-    });
-    const methodDescription = {
-        method: 'GET',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default'
-    };
-    const response = await fetch(
-        `/todo/lists/${listId}/${taskId}/get_followups`, methodDescription);
+    const response = await get(`/todo/lists/${listId}/${taskId}/get_followups`);
     const data = await response.json();
     return data;
 }
@@ -289,7 +254,7 @@ function createTaskEditTd(node_id, task_id) {
 
         const updatedTask = await updateTask(requestBody, currentTask);
         const currentTaskIdx = tasks.findIndex((elt) => {
-            return elt.id === parseInt(task_id);
+            return elt.id === updatedTask.id;
         });
         Object.assign(tasks[currentTaskIdx], updatedTask);
         document.getElementById(td.id).replaceWith(task_td);
@@ -307,19 +272,7 @@ function createTaskEditTd(node_id, task_id) {
  * @param {Object} task The object that is subject to changes.
  */
 async function updateTask(body, task) {
-    const headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
-    });
-    const methodDescription = {
-        method: 'PATCH',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default',
-        body: body
-    };
-    const response = await fetch(
-        `/todo/lists/${task.list_id}/${task.id}/update/`, methodDescription);
+    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/update/`, body);
     const updatedTask = await response.json();
     return updatedTask;
 }
@@ -464,24 +417,12 @@ function add_task_exp(url) {
     var task_descr = document.getElementById('new_task_descr').value;
     var task_priority = document.getElementById('new_task_priority').value;
     var task_end_date = document.getElementById('new_task_due_date').value;
-
-    var headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
+    const body = JSON.stringify({
+        'title': task_title,
+        'descr': task_descr,
+        'due': task_end_date,
+        'priority': task_priority
     });
-
-    var methodDescription = {
-        method: 'POST',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default',
-        body: JSON.stringify({
-            'title': task_title,
-            'descr': task_descr,
-            'due': task_end_date,
-            'priority': task_priority
-        })
-    }
 
     const callback = async function (response) {
         var data = await response.json();
@@ -503,7 +444,7 @@ function add_task_exp(url) {
         }
     }
 
-    fetch(url, methodDescription).then((response) => {
+    post(url, body).then((response) => {
         callback(response);
     });
 }
@@ -513,20 +454,9 @@ function add_task_exp(url) {
  */
 async function fetch_tasks(arr) {
     var listId = document.getElementById('dom_list_id').value;
-    var headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken'),
-        'Content-Type': 'application/json'
-    });
 
-    var methodDescription = {
-        method: 'GET',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default'
-    }
-
-    var res = await fetch(`/todo/lists/${listId}/tasks`, methodDescription);
-    var data = await res.json();
+    const response = await get(`/todo/lists/${listId}/tasks`);
+    var data = await response.json();
     data.tasks.forEach(element => {
         arr.unshift(element);
     });
@@ -598,35 +528,23 @@ function filter_tasks() {
  * @param {string} url The URL that will be used to delete the task
  * @param {int} task_id The ID of the dom element containing the task
  */
-function del_task(url, task_id) {
+async function del_task(url, task_id) {
     if (!confirm("Voulez-vous supprimer cette tâche ?"))
         return;
 
-    var headers = new Headers({
-        'X-CSRFToken': get_cookie('csrftoken')
-    });
-
-    var methodDescription = {
-        method: 'DELETE',
-        headers: headers,
-        mode: 'cors',
-        cache: 'default'
+    const response = await _delete(url);
+    if (response.status == 200) {
+        var domTask = document.getElementById(task_id);
+        var taskSubline = document.getElementById(`task_subline_${task_id}`);
+        taskSubline.remove();
+        domTask.remove();
+        const taskIndex = tasks.findIndex((elt) => {
+            return elt.id === parseInt(task_id);
+        });
+        tasks.splice(taskIndex, 1);
+    } else {
+        alert(`Il y a eu une erreur avec l'effacement de la tâche ${task_id}`);
     }
-
-    const callback = function (response) {
-        if (response.status == 200) {
-            var domTask = document.getElementById(task_id);
-            var taskSubline = document.getElementById(`task_subline_${task_id}`);
-            taskSubline.remove();
-            domTask.remove();
-        } else {
-            alert(`Il y a eu une erreur avec l'effacement de la tâche ${task_id}`);
-        }
-    }
-
-    fetch(url, methodDescription).then((response) => {
-        callback(response);
-    });
 }
 
 
