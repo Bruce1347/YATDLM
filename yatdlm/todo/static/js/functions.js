@@ -60,3 +60,33 @@ function objectToSelect(obj, selected_id=undefined) {
     });
     return select;
 }
+
+/**
+ * This function 
+ * @param {String} text The text that may contain displayable URLs
+ */
+function findUrls(text) {
+    // url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.\=\?]+)'
+    urlRegexp = /(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.\=\?]+)/g;
+
+    const urls = new Set(text.match(urlRegexp));
+
+    urls.forEach((url) => {
+        /**
+         * We have to hack here by replacing URLs in the first time by a
+         * temporary value in order to avoid recursion.
+         * Since hrefs contains URLs, a simple loop would lead to URLs
+         * being replaced endlessly, hence the substitute value. 
+        */
+
+       // Replace forward slashes to escaped chars in order to make them 
+       // literal in the regexp.
+       const urlReplaceRegexp = new RegExp(url.replace(/\//g, '\\/'), "g"); 
+       text = text.replace(urlReplaceRegexp, "REPLACEME");
+       console.log(text);
+       const href = `<a href="${url}">${url}</a>`;
+       text = text.replace(new RegExp("REPLACEME", "g"), href);
+    });
+
+    return text;
+}

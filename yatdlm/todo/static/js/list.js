@@ -121,7 +121,7 @@ function createDOMFollowup(followup) {
         followupHeader.innerHTML = `<b>${followup.writer}</b> a mis à jour la tâche le ${followup.creation_date}`;
     } else {
         followupHeader.classList.add("followup_header");
-        contentHeader.innerText = followup.content;
+        contentHeader.innerHTML = findUrls(followup.content);
         if (followup.type === 1) {
             // Comment
             followupHeader.innerHTML = `<b>${followup.writer}</b> a commenté le ${followup.creation_date}:`;
@@ -394,7 +394,7 @@ function createNewDOMDetailTr(data) {
     spanCrDate.innerHTML = `Crée le ${data.creation_date} à ${data.creation_hour} par <b>${data.creator}</b>`;
     // Task description
     var spanDescr = document.createElement('span');
-    spanDescr.innerHTML = `<p>${data.description}</p>`
+    spanDescr.innerHTML = `<p>${findUrls(data.description)}</p>`
     // Followups
     var divFollowups = document.createElement('div');
     divFollowups.classList.add('margint-normal');
