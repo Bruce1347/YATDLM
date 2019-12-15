@@ -496,7 +496,7 @@ function filter_tasks() {
             // Check the task number
             (task_no !== "" && parseInt(task_no) !== element.no),
             // Check whether the title contains the user substring
-            (title !== "" && !element.title.includes(title)),
+            (title !== "" && !element.title.toUpperCase().includes(title.toUpperCase())),
             // Check the creation month
             (creationMonth !== -1 && eltCrDate.getMonth() + 1 !== creationMonth),
             // Check the creation year
