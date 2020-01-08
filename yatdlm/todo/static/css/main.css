@@ -62,3 +62,41 @@
         padding-right: 25px;
     }
 }
+
+.table-resp {
+    min-height: .01%;
+    overflow-x: auto;
+}
+
+@media (max-width: 1440px) and (orientation: portrait) {
+    .table-resp {
+        width: 100%;
+        overflow-y: hidden;
+        font-size: xx-large;
+    }
+
+    .todo-header {
+        font-size: xx-large;
+    }
+
+    .td-creat-date, .th-creat-date, 
+    .th-resolv-date, .td-resolv-date,
+    .th-due-date, .td-due-date,
+    .th-prio, .td-prio, 
+    .no-mob-btn {
+        display: none;
+    }
+
+    .table-resp > .table {
+        margin-bottom: 0;
+    }
+
+    .table-resp > .table > thead > tr > th,
+    .table-resp > .table > tbody > tr > th,
+    .table-resp > .table > tfoot > tr > th,
+    .table-resp > .table > thead > tr > td,
+    .table-resp > .table > tbody > tr > td,
+    .table-resp > .table > tfoot > tr > td {
+        white-space: nowrap;
+    }
+}

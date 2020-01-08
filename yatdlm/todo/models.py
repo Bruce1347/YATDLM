@@ -81,6 +81,9 @@ class Task(models.Model):
     # A task number
     task_no = models.IntegerField(default=0)
 
+    # Task's categories
+    categories = models.ManyToManyField('todo.Category')
+
     # Identify the task with its title
     def __str__(self):
         return self.title
@@ -129,6 +132,16 @@ class Task(models.Model):
         else:
             self.resolution_date = None
 
+    def get_displayable_categories(self):
+        return ", ".join([cat.get('name') for cat in self.get_categories()])
+
+    def get_categories(self):
+        return [
+            cat.as_dict()
+            for cat in
+            self.categories.all().order_by('id')
+        ]
+
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
         resp = {
@@ -143,7 +156,9 @@ class Task(models.Model):
             'creation_date': date_format(self.creation_date, dates_format),
             'creation_hour': date_format(self.creation_date, "H:i"),
             'priority': self.priority,
-            'priority_str': self.get_priority_display()
+            'priority_str': self.get_priority_display(),
+            'categories': self.get_categories(),
+            'categories_str': self.get_displayable_categories()
         }
 
         if self.due_date is not None:

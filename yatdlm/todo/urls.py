@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.urls import path
+from django.urls import path, include
 
 
 from . import views
@@ -37,5 +37,6 @@ urlpatterns = [
     # Add a followup
     path('lists/<int:list_id>/<int:task_id>/add_followup', views.add_followup),
     # Get all followups
-    path('lists/<int:list_id>/<int:task_id>/get_followups', views.get_followups)
+    path('lists/<int:list_id>/<int:task_id>/get_followups', views.get_followups),
+    path('categories/', include('todo.categories.urls'))
 ]

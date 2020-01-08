@@ -62,6 +62,26 @@ function objectToSelect(obj, selected_id=undefined) {
 }
 
 /**
+ * Takes an array of ``Object`` that respresents a backend category and
+ * transforms it into a select element.
+ * @param {Array} categories The categories that must be transformed into a
+ * select.
+ */
+function categoriesToSelect(categories) {
+    const select = document.createElement('select');
+    let empty_option = document.createElement('option');
+    empty_option.value = "-1";
+    select.appendChild(empty_option);
+    Object.keys(categories).forEach((key) => {
+        const option = document.createElement('option');
+        option.value = categories[key].id;
+        option.text = categories[key].name;
+        select.appendChild(option);
+    });
+    return select;
+}
+
+/**
  * This function 
  * @param {String} text The text that may contain displayable URLs
  */

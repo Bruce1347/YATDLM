@@ -12,6 +12,48 @@ var picker = flatpickr(document.getElementById('new_task_due_date'), {
     minDate: "today"
 });
 
+// Const DOM elements that may be useful later
+const category_to_edit = document.getElementById("category_to_edit");
+const edit_category_btn = document.getElementById("edit_category-btn");
+const delete_category_btn = document.getElementById("delete_category-btn");
+
+// Setup event listeners for buttons
+document.getElementById("add-category-form-btn").addEventListener('click', () => {
+    toggle_add_category_form();
+});
+document.getElementById("add-category-btn").addEventListener('click', () => {
+    add_new_category();
+});
+category_to_edit.addEventListener('change', () => {
+    // Disable button if the selected category doesn't exists
+    edit_category_btn.disabled = category_to_edit.value === "-1";
+    delete_category_btn.disabled = category_to_edit.value === "-1";
+    let edit_category_name = document.getElementById("edit_category_name");
+    edit_category_name.value = category_to_edit.options[category_to_edit.selectedIndex].text; 
+});
+edit_category_btn.addEventListener('click', async function() {
+    const response = await edit_category();
+    const updated_category = await response.json();
+    await fetch_categories();
+    update_categories();
+    let tasks_to_update = tasks.filter((task) => {
+        let idx = task.categories.findIndex((category) => {
+            return category.id === updated_category.id;
+        });
+        return idx !== -1;
+    });
+    tasks_to_update.forEach((task) => {
+        console.log(task);
+        var td = document.getElementById(`categories_${task.no}`);
+        td.innerText = updated_category.name;
+    });
+});
+delete_category_btn.addEventListener('click', async function() {
+    await delete_category();
+    await fetch_categories();
+    update_categories();
+});
+
 /**
  * Setup the filters events.
  */
@@ -36,6 +78,7 @@ document.getElementById("select_trmonth").addEventListener('change', filter_task
 document.getElementById("select_tdyear").addEventListener('change', filter_tasks);
 document.getElementById("select_tdmonth").addEventListener('change', filter_tasks);
 document.getElementById("select_tprio").addEventListener('change', filter_tasks);
+document.getElementById("select_tcategory").addEventListener('change', filter_tasks);
 
 // Setup togglers for sub lines inside the tbody
 document.getElementById("list-container").querySelectorAll('tr:not(.hidden)').forEach(
@@ -48,6 +91,35 @@ document.getElementById("list-container").querySelectorAll('tr:not(.hidden)').fo
         });
     }
 );
+
+// Fetch categories
+const categories = [];
+fetch_categories().then(() => {
+    update_categories();
+});
+
+function update_categories() {
+    const new_task_category = document.getElementById("new_task_category");
+    const filter_categories = document.getElementById("select_tcategory");
+    const edit_categories = document.getElementById("category_to_edit");
+
+    // Since we have the same number of categories each time, one loop is 
+    // enough to clear all the selects elements
+
+    for (let i = new_task_category.options.length - 1; i >= 1; --i) {
+        new_task_category.remove(i);
+        filter_categories.remove(i);
+        edit_categories.remove(i);
+    }
+
+    categories.forEach((element, key) => {
+        // Since a DOM node can't have multiple parents, we can't factorize
+        // this part.
+        new_task_category.add(new Option(element.name, element.id));
+        filter_categories.add(new Option(element.name, element.id));
+        edit_categories.add(new Option(element.name, element.id));
+    });
+}
 
 var tasks = [];
 const priorities = Object();
@@ -175,7 +247,7 @@ function createTaskEditTd(node_id, task_id) {
     });
     var td = document.createElement('td');
     td.id = `task_edit_${task_id}`;
-    td.colSpan = 7;
+    td.colSpan = 8;
     var editForm = document.createElement('form');
     var fieldSet = document.createElement('fieldset');
     fieldSet.classList.add('noborder');
@@ -208,20 +280,40 @@ function createTaskEditTd(node_id, task_id) {
     edit_priority_label.setAttribute('for', edit_priority.name);
     edit_priority_label.textContent = 'Priorité :';
 
+    // Category
+    let categories_container = document.createElement("div");
+    categories_container.classList.add('marginb-normal', 'fullwidth');
+    categories_container.id = `task_${task_id}_new_categories`;
+    let edit_categories = categoriesToSelect(categories);
+    edit_categories.name = `task_${task_id}_new_category`;
+    edit_categories.classList.add('fullwidth');
+    var edit_categories_label = document.createElement('label');
+    edit_categories_label.setAttribute('for', edit_categories.name);
+    edit_categories_label.textContent = 'Catégorie :';
+    categories_container.appendChild(edit_categories_label);
+    categories_container.appendChild(edit_categories);
+
     // Save and cancel buttons
-    const cancel_edit_btn = document.createElement('button');
-    cancel_edit_btn.type = 'button';
-    cancel_edit_btn.classList.add('pure-button');
-    cancel_edit_btn.classList.add('pure-button-primary');
-    cancel_edit_btn.classList.add('marginr-tiny');
     const save_task_btn = document.createElement('button');
     save_task_btn.type = 'button';
     save_task_btn.classList.add('pure-button');
     save_task_btn.classList.add('pure-button-primary');
     save_task_btn.classList.add('marginl-tiny');
+    const add_category_btn = document.createElement('button');
+    add_category_btn.type = 'button';
+    add_category_btn.classList.add('pure-button');
+    add_category_btn.classList.add('pure-button-primary');
+    add_category_btn.classList.add('marginl-tiny', 'marginr-tiny');
 
-    cancel_edit_btn.innerText = "ANNULER L'EDITION"
+    const cancel_edit_btn = document.createElement('button');
+    cancel_edit_btn.type = 'button';
+    cancel_edit_btn.classList.add('pure-button');
+    cancel_edit_btn.classList.add('pure-button-primary');
+    cancel_edit_btn.classList.add('marginr-tiny');
+
     save_task_btn.innerText = "SAUVEGARDER";
+    add_category_btn.innerText = "AJOUTER UNE CATEGORIE"
+    cancel_edit_btn.innerText = "ANNULER L'EDITION"
 
     // Assemble the form
     fieldSet.appendChild(edit_title_label);
@@ -230,8 +322,10 @@ function createTaskEditTd(node_id, task_id) {
     fieldSet.appendChild(edit_description);
     fieldSet.appendChild(edit_priority_label);
     fieldSet.appendChild(edit_priority);
-    fieldSet.appendChild(cancel_edit_btn);
+    fieldSet.appendChild(categories_container);
     fieldSet.appendChild(save_task_btn);
+    fieldSet.appendChild(add_category_btn);
+    fieldSet.appendChild(cancel_edit_btn);
     editForm.appendChild(fieldSet);
     td.appendChild(editForm);
 
@@ -246,13 +340,24 @@ function createTaskEditTd(node_id, task_id) {
     // Bind save button to a callback which will request the server to update
     // the task
     save_task_btn.addEventListener('click', async () => {
-        const requestBody = JSON.stringify({
+        const requestBody = {
             'title': edit_title.value,
             'description': edit_description.value,
             'priority': edit_priority.value
-        })
+        };
 
-        const updatedTask = await updateTask(requestBody, currentTask);
+        if (categories_container.children.length > 0) {
+            let new_categories = new Array();
+            for (var i = 0; i < categories_container.children.length; ++i) {
+                var value = categories_container.children[i].value;
+                if (value !== undefined && value !== "-1") {
+                    new_categories.push(value);
+                }
+            }
+            requestBody['categories'] = new_categories;
+        }
+
+        const updatedTask = await updateTask(JSON.stringify(requestBody), currentTask);
         const currentTaskIdx = tasks.findIndex((elt) => {
             return elt.id === updatedTask.id;
         });
@@ -262,6 +367,10 @@ function createTaskEditTd(node_id, task_id) {
         updateFollowups(updatedTask.list_id, updatedTask.id);
     });
     task_td.parentNode.replaceChild(td, task_td);
+    // Bind the add_category button
+    add_category_btn.addEventListener('click', () => {
+        add_new_task_category(categories_container.id)
+    });
 }
 
 /**
@@ -293,6 +402,15 @@ function updateDOMTask(task) {
     titleCell.innerText = task.title;
     const descriptionCell = document.getElementById(`description_${task.no}`);
     descriptionCell.querySelector("p").innerText = task.description;
+    const category_cell = document.getElementById(`categories_${task.no}`);
+    const task_categories = new Array();
+    for (var i = 0; i < task.categories.length; ++i) {
+        var category = categories.find((cat) => {
+            return cat.id === task.categories[i].id;
+        });
+        task_categories.push(category.name);
+    }
+    category_cell.innerText = task_categories.join(", ");
     // Update the resolution date and due date cells
     const closeBtn = document.getElementById(`close-btn_${task.no}`);
     if (task.is_done) {
@@ -327,6 +445,9 @@ function createNewDOMTasktr(data) {
     tdTitle.innerText = data.title_cropped;
     tdTitle.id = `${data.id}_title`;
     tdTitle.addEventListener('click', () => toggle(`task_subline_${data.no}`));
+    var tdCategories = document.createElement('td');
+    tdCategories.classList.add("pointer", "cell", "c-align");
+    tdCategories.innerText = data.categories_str;
     var tdCreationDate = document.createElement('td');
     tdCreationDate.classList.add("pointer", "cell", "c-align");
     tdCreationDate.innerText = data.creation_date;
@@ -361,10 +482,11 @@ function createNewDOMTasktr(data) {
 
     newTr.appendChild(tdId);
     newTr.appendChild(tdTitle);
+    newTr.appendChild(tdPriority);
+    newTr.appendChild(tdCategories);
     newTr.appendChild(tdCreationDate);
     newTr.appendChild(tdResolutionDate);
     newTr.appendChild(tdDeadline);
-    newTr.appendChild(tdPriority);
     newTr.appendChild(tdDelete);
 
     return newTr;
@@ -378,7 +500,7 @@ function createNewDOMDetailTr(data) {
     newSubline.classList.add('b_lightgrey');
 
     newDetail.id = `task_detail_${data.no}`;
-    newDetail.colSpan = 7;
+    newDetail.colSpan = 8;
 
     // Task title
     var divTitle = document.createElement('div');
@@ -417,12 +539,24 @@ function add_task_exp(url) {
     var task_descr = document.getElementById('new_task_descr').value;
     var task_priority = document.getElementById('new_task_priority').value;
     var task_end_date = document.getElementById('new_task_due_date').value;
-    const body = JSON.stringify({
+    let task_categories_dom = document.getElementById('new_task_categories_container');
+    task_categories_dom = task_categories_dom.getElementsByTagName("select");
+    var bodyDict = {
         'title': task_title,
         'descr': task_descr,
         'due': task_end_date,
-        'priority': task_priority
-    });
+        'priority': task_priority,
+    };
+    var task_categories = new Array();
+    if (task_categories_dom.length > 0) {
+        for (var i = 0; i < task_categories_dom.length; ++i) {
+            if (task_categories_dom[i].value !== '-1') {
+                task_categories.push(task_categories_dom[i].value);
+            }
+        }
+        bodyDict.categories = task_categories;
+    }
+    const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
         var data = await response.json();
@@ -464,6 +598,14 @@ async function fetch_tasks(arr) {
     Object.assign(priorities, data.priorities);
 }
 
+async function fetch_categories() {
+    const listId = document.getElementById('dom_list_id').value;
+
+    const response = await get(`/todo/categories/${listId}/list`);
+    const data = await response.json();
+    Object.assign(categories, data.categories);
+}
+
 /**
  * Filters the tasks inside the document with the user-set filters.
  */
@@ -477,6 +619,7 @@ function filter_tasks() {
     var dueMonth = parseInt(document.getElementById("select_tdmonth").value);
     var dueYear = parseInt(document.getElementById("select_tdyear").value);
     var priority = parseInt(document.getElementById("select_tprio").value);
+    var category = parseInt(document.getElementById("select_tcategory").value);
 
      tasks.forEach(element => {
         var currDomElt = document.getElementById(element.no);
@@ -510,7 +653,11 @@ function filter_tasks() {
             // Check the deadline year
             (dueYear !== -1 && eltDueDate !== undefined && eltDueDate.getFullYear() !== dueYear),
             // Check the priority level
-            (priority !== -1 && element.priority !== priority)
+            (priority !== -1 && element.priority !== priority),
+            // Check the categories
+            (category !== -1 && !element.categories.some((elt) => {
+                return elt.id === category;
+            }))
         ]
 
         // If any of the previous condition is met, the task and its subline are
@@ -648,6 +795,17 @@ function delete_list(url, name, xhr, elt) {
 }
 
 /**
+ * Toggles the add category form and changes the text button accordingly.
+ */
+function toggle_add_category_form() {
+    if (toggle("add-category-container")) {
+        document.getElementById("add-category-form-btn").innerText = "Fermer le formulaire";
+    } else {
+        document.getElementById("add-category-form-btn").innerText = "Gérer les catégories"
+    }
+}
+
+/**
  * Toggles the add form and changes the text button accordingly.
  * @param {string} id - The id of the add form
  * @param {string} btnId - The id of the display button
@@ -676,4 +834,51 @@ function close_details() {
                 toggle(element.id);
         }
     }
+}
+
+/**
+ * Creats a new category with the provided name.
+ */
+async function add_new_category() {
+    const body = JSON.stringify({"name": document.getElementById("new_category_name").value});
+    const list_id = document.getElementById('dom_list_id').value;
+    const response = await post(`/todo/categories/${list_id}/create`, body);
+    const new_category = await response.json();
+}
+
+/**
+ * Edits an existing category with a newer name
+ */
+function edit_category() {
+    const category_id = document.getElementById("category_to_edit").value;
+    const body = JSON.stringify({"name": document.getElementById("edit_category_name").value});
+    const list_id = document.getElementById("dom_list_id").value;
+    const url = `/todo/categories/${category_id}`;
+    return patch(url, body);
+}
+
+/**
+ * Deletes an existing category
+ */
+function delete_category() {
+    const category_id = document.getElementById("category_to_edit").value;
+    const url = `/todo/categories/${category_id}`;
+    return _delete(url);
+}
+
+/**
+ * This function adds a new DOM element that contains a select node which
+ * contains categories for a new task.
+ */
+function add_new_task_category(container_id=undefined) {
+    if (!container_id) {
+        container_id = "new_task_categories_container";
+    }
+    let categories_container = document.getElementById(container_id);
+    // Create the new nodes
+    let new_select = categoriesToSelect(categories);
+    new_select.classList.add("fullwidth");
+
+    // Append the new select to the current container
+    categories_container.appendChild(new_select);
 }

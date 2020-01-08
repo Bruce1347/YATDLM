@@ -181,6 +181,9 @@ def add_task_experimental(request, list_id=None):
             task_no=task_no
         )
         task.save()
+        if 'categories' in body:
+            for category in body['categories']:
+                task.categories.add(int(category))
         json_body = task.as_dict()
         json_body['creator'] = task.owner.username
     except TodoList.DoesNotExist:
@@ -213,6 +216,11 @@ def update_task(request, list_id=None, task_id=None):
             task.title = body.get('title')
             task.description = body.get('description')
             task.priority = new_priority
+            if 'categories' in body:
+                categories = [int(category) for category in body.get('categories')]
+                task.categories.clear()
+                # Add tasks in bulk through args unpacking
+                task.categories.add(*categories)
             task.save()
             resp = task.as_dict()
             resp_code = 202

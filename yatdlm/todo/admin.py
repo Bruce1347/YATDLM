@@ -6,8 +6,10 @@ from .models import TodoListAdmin
 from .models import TodoList
 from .models import TaskAdmin
 from .models import Task
+from .categories.models import Category, CategoryAdmin
 
 # We register our models in order to be able to modify them in the admin interface
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TodoList, TodoListAdmin)
 admin.site.register(FollowUp, FollowUpAdmin)
+admin.site.register(Category, CategoryAdmin)
