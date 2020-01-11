@@ -205,7 +205,7 @@
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
                             {% if task.is_done %}
-                                <td id="resolutiond_{{ task.task_no }}" class="pointer cell c-align" colspan="2">
+                                <td class="td-resolv-date pointer cell c-align" id="resolutiond_{{ task.task_no }}" colspan="2">
                                     Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
                                 </td>
                             {% else %}
