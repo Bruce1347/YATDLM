@@ -86,7 +86,10 @@ document.getElementById("list-container").querySelectorAll('tr:not(.hidden)').fo
         var children = element.querySelectorAll('td:not(.delete)');
         children.forEach((child) => {
             child.addEventListener('click', () => {
-                toggle(`task_subline_${element.id}`);
+                //TODO: Also use a Map for tasks and avoid linear search time.
+                fetch_task_followups_then_toggle(tasks.find((elt) => {
+                    return elt.no === parseInt(element.id);
+                }));
             });
         });
     }
@@ -140,9 +143,32 @@ fetch_tasks(tasks).then(() => {
         });
         addCommentBtn.addEventListener('click', () => {
             addFollowup(element);
-        })
+        });
     }
 });
+
+// Store the followups in a map with task id as key
+const followups = new Map();
+
+async function fetch_task_followups_then_toggle(data) {
+    //createDOMFollowup
+    var curr_followups = followups.get(data.id);
+    if (curr_followups === undefined) {
+        let resp = await getFollowups(data.list_id, data.id);
+        curr_followups = resp.followups;
+        followups.set(data.id, curr_followups);
+    }
+    if (toggle(`task_subline_${data.no}`)) {
+        const followupsContainer = document.getElementById(`followups_${data.no}`);
+        // Remove current children to avoid content duplication
+        while (followupsContainer.firstChild) {
+            followupsContainer.removeChild(followupsContainer.firstChild);
+        }
+        for (var i = 0; i < curr_followups.length; ++i) {
+            followupsContainer.appendChild(createDOMFollowup(curr_followups[i]));
+        }
+    }
+}
 
 /**
  * Handles the addition of one followup to a specific task.
@@ -182,6 +208,7 @@ function createDOMFollowup(followup) {
 
     // Common styles / classes
     contentHeader.style.padding = "0.8em";
+    contentHeader.style.hyphens = "auto";
     followupHeader.classList.add("b_grey");
 
     // Specific styles classes

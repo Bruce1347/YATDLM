@@ -52,15 +52,14 @@ def index(request, xhr):
 
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
-    todo_list = TodoList.objects.get(id=list_id)
+    todo_list = TodoList.objects.prefetch_related('task_set').get(id=list_id)
 
     # If the list is not public then we throw a 403
     if not todo_list.is_public and public:
         return HttpResponseForbidden()
 
-    tfilter = Task.objects.filter(parent_list_id=todo_list.id)
     # Retrieve the subsequent tasks
-    tasks_filter = tfilter.order_by('is_done', 'priority', '-creation_date')
+    tfilter = todo_list.task_set.order_by('is_done', 'priority', '-creation_date')
 
     # Create the context
     creation_years_filter = tfilter.dates('creation_date', 'year')
@@ -87,10 +86,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 
     context = {
         'list'  : todo_list,
-        'tasks' : [task for task in tasks_filter],
-        'followups': {
-            task.task_no: task.get_followups()
-            for task in tasks_filter},
+        'tasks' : [task for task in tfilter],
         'xhr'   : xhr,
         'isdev' : 'DEV - ' if settings.DEBUG else '',
         'title_page' : todo_list.title,
