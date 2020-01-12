@@ -124,34 +124,7 @@ def list_tasks(request, list_id=None):
     return JsonResponse(resp, status=resp_code)
 
 @login_required()
-def add_task(request, list_id=-1):
-    title = request.POST['title']
-    descr = request.POST['descr']
-    due = request.POST['due'] if request.POST['due'] is not "" else None
-    user = request.user
-    prio = int(request.POST['priority'])
-    if Task.objects.count() > 0:
-        latest_task_no = Task.objects.values_list(
-            'task_no',
-            flat=True).latest('creation_date')
-        task_no = latest_task_no + 1
-    else:
-        task_no = 1
-
-    new_task = Task(
-        owner=user,
-        title=title,
-        description=descr,
-        priority=prio,
-        parent_list_id=list_id,
-        due_date=due,
-        task_no=task_no)
-    new_task.save()
-
-    return display_list(request, list_id=list_id, xhr=True)
-
-@login_required()
-def add_task_experimental(request, list_id=None):
+def add_task(request, list_id=None):
     """Adds a task to the database for the given list"""
     responsecode = 200
     json_body = dict()
@@ -159,13 +132,7 @@ def add_task_experimental(request, list_id=None):
     body = json.loads(request.body.decode("utf-8"))
     try:
         todo = TodoList.objects.get(id=list_id)
-        if Task.objects.count() > 0:
-            latest_task_no = Task.objects.values_list(
-                'task_no',
-                flat=True).latest('creation_date')
-            task_no = latest_task_no + 1
-        else:
-            task_no = 1
+        task_no = todo.task_set.count() + 1
         # TODO: Leverage the kwargs
         task = Task(
             parent_list=todo,
