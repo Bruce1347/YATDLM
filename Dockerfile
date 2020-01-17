@@ -17,4 +17,6 @@ WORKDIR /root/yatdlm
 
 RUN python3 /root/yatdlm/docker-bootstrap.py
 
-CMD ["python3", "manage.py", "runserver"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+
+EXPOSE 8000
