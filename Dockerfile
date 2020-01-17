@@ -11,6 +11,10 @@ RUN pip3 install -r /requirements.txt
 
 COPY yatdlm /root/yatdlm
 
+COPY docker-bootstrap.py /root/yatdlm/.
+
 WORKDIR /root/yatdlm
+
+RUN python3 /root/yatdlm/docker-bootstrap.py
 
 CMD ["python3", "manage.py", "runserver"]
