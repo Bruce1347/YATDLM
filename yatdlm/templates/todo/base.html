@@ -20,7 +20,12 @@
         <script src="{% static 'js/xhr.js' %}"></script>
         <script src="{% static 'js/functions.js' %}"></script>
         <script src="{% static 'js/network.js' %}"></script>
-        <script src="{% static 'js/list.js' %}"></script>
+        {% if 'lists_index' in includes %}
+            <script src="{% static 'js/list_index.js' %}"></script>
+        {% endif %}
+        {% if 'list' in includes %}
+            <script src="{% static 'js/list.js' %}"></script>
+        {% endif %}
         {% endif %}
     </body>
 

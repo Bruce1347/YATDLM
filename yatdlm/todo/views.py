@@ -45,7 +45,8 @@ def index(request, xhr):
         'page_title' : 'Mes listes',
         'isdev' : 'DEV - ' if settings.DEBUG else '',
         'context' : table_context,
-        'xhr' : xhr
+        'xhr' : xhr,
+        'includes': ['lists_index']
     }
 
     return render(request, 'todo/index.html', context)
@@ -96,7 +97,8 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'creation_years': creation_years,
         'resolution_years': resolution_years,
         'deadlines_years': deadlines_years,
-        'months': months
+        'months': months,
+        'includes': ['list']
     }
 
     return render(request, 'todo/list.html', context)
