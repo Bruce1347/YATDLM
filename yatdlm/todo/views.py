@@ -249,32 +249,6 @@ def get_followups(request, list_id=None, task_id=None):
         payload = {"errors": "Wrong Task ID or List ID"}
     return JsonResponse(payload, status=status)
 
-@login_required()
-def mark_as_done(request, list_id=-1, task_id=-1):
-    if task_id != -1:
-        task = Task.objects.get(id=task_id)
-        task.is_done = not task.is_done
-
-        if 'followup' in request.POST:
-            followup = FollowUp(
-                writer=request.user,
-                task=task,
-                f_type=FollowUp.STATE_CHANGE,
-                todol_id=list_id,
-                content=request.POST['followup'],
-                old_priority=task.priority,
-                new_priority=Task.SOLVED)
-            followup.save()
-
-        if task.is_done:
-            task.resolution_date = make_aware(datetime.now())
-            task.priority = Task.SOLVED # Mark the task as solved
-
-        task.save()
-    else: # Raise a 404 if the task does not exists
-        raise HttpResponseNotFound("Task does not exists")
-    return display_list(request, list_id=list_id, xhr=True)
-
 def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=False):
     if task_id != -1 and list_id != -1:
         public = 'public' in request.POST and request.POST['public'] == 'true'
