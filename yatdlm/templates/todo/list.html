@@ -231,9 +231,14 @@
                                 <div class="margint-normal">
                                     <span style="font-size: 1.8em">Tâche #{{ task.task_no }} : {{ task.title }}</span>
                                 </div>
-                                <div class="marginb-normal">
-                                    <span class="b_lightgrey">
+                                <div>
+                                    <span style="display: inline-block;">
                                         Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span id="task_{{ task.task_no }}_progression_span">
+                                        Progression: <b>{{ task.subtasks_progress }}%</b>
                                     </span>
                                 </div>
                                 <hr>

@@ -29,7 +29,7 @@ category_to_edit.addEventListener('change', () => {
     edit_category_btn.disabled = category_to_edit.value === "-1";
     delete_category_btn.disabled = category_to_edit.value === "-1";
     let edit_category_name = document.getElementById("edit_category_name");
-    edit_category_name.value = category_to_edit.options[category_to_edit.selectedIndex].text; 
+    edit_category_name.value = category_to_edit.options[category_to_edit.selectedIndex].text;
 });
 edit_category_btn.addEventListener('click', async function() {
     const response = await edit_category();
@@ -105,7 +105,7 @@ function update_categories() {
     const filter_categories = document.getElementById("select_tcategory");
     const edit_categories = document.getElementById("category_to_edit");
 
-    // Since we have the same number of categories each time, one loop is 
+    // Since we have the same number of categories each time, one loop is
     // enough to clear all the selects elements
 
     for (let i = new_task_category.options.length - 1; i >= 1; --i) {
@@ -182,7 +182,7 @@ async function fetch_task_followups_then_toggle(data) {
 
 /**
  * Handles the addition of one followup to a specific task.
- * @param {Object} task  
+ * @param {Object} task
  */
 async function addFollowup(task) {
     const requestBody = JSON.stringify({
@@ -268,8 +268,8 @@ async function closeTask(task) {
 
 /**
  * Updates the followups and their DOM representation.
- * @param {number} listId 
- * @param {number} taskId 
+ * @param {number} listId
+ * @param {number} taskId
  */
 async function getFollowups(listId, taskId) {
     const response = await get(`/todo/lists/${listId}/${taskId}/get_followups`);
@@ -372,7 +372,7 @@ function createTaskEditTd(node_id, task_id) {
 
     /**
      * Replace the child and save the current child, its internal structure
-     * will be used with the newer information  */ 
+     * will be used with the newer information  */
     const task_td = document.getElementById(node_id);
     // Bind cancel button to a callback which will restore the previous state
     cancel_edit_btn.addEventListener('click', () => {
@@ -571,6 +571,12 @@ function createNewDOMDetailTr(data) {
     var spanCrDate = document.createElement('span');
     divCrDate.appendChild(spanCrDate);
     spanCrDate.innerHTML = `Crée le ${data.creation_date} à ${data.creation_hour} par <b>${data.creator}</b>`;
+    // Task subtasks progression
+    var div_progression = document.createElement('div');
+    div_progression.id = `task_${data.no}_progression_span`;
+    var span_progression = document.createElement('span');
+    span_progression.innerHTML = `Progression: <b>${data.subtasks_progress}%</b>`
+    div_progression.appendChild(span_progression);
     // Task description
     var spanDescr = document.createElement('span');
     spanDescr.innerHTML = `<p>${findUrls(data.description)}</p>`
@@ -582,6 +588,7 @@ function createNewDOMDetailTr(data) {
 
     newDetail.appendChild(divTitle);
     newDetail.appendChild(spanCrDate);
+    newDetail.appendChild(div_progression);
     newDetail.appendChild(document.createElement('hr'));
     newDetail.appendChild(spanDescr);
     newDetail.appendChild(document.createElement('hr'));
@@ -605,7 +612,7 @@ function add_task_exp(url) {
         'descr': task_descr,
         'due': task_end_date,
         'priority': task_priority,
-        
+
     };
     var task_categories = new Array();
     if (task_categories_dom.length > 0) {
@@ -625,7 +632,7 @@ function add_task_exp(url) {
     const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
-        var data = await response.json();        
+        var data = await response.json();
         if (response.status == 200) {
             var domTasks = document.querySelectorAll(`tr.priority_${task_priority}`);
             var firstElt = domTasks.item(0);
@@ -767,7 +774,7 @@ async function del_task(url, task_id) {
 
 /**
  * Function that changes the boolean value `is_done` to its opposite (in order to mark a task as done or not)
- * 
+ *
  * url : the specific needed url
  * btn : optional arg, if defined then we add to the postdata the followup added by the user
  */
@@ -796,7 +803,7 @@ function edit_task(task_id, url) {
 
 /**
  * Function that displays or masks the followups
- * 
+ *
  */
 function display_followups(id) {
     if (toggle('followups_' + id))
@@ -807,7 +814,7 @@ function display_followups(id) {
 
 /**
  * Function that allows the user to only add a followup
- * 
+ *
  * url : the needed url in order to post the data to the server
  * id : the task id
  */
