@@ -43,7 +43,6 @@ edit_category_btn.addEventListener('click', async function() {
         return idx !== -1;
     });
     tasks_to_update.forEach((task) => {
-        console.log(task);
         var td = document.getElementById(`categories_${task.no}`);
         td.innerText = updated_category.name;
     });
@@ -148,15 +147,10 @@ fetch_tasks(tasks).then(() => {
         // Add the task to the subtasks select
         var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
         parent_tasks_container.add(parent_tasks_option);
-        for (subtask of element.subtasks) {
+        for (let subtask of element.subtasks) {
             // Attach a callback to its corresponding checkbox
             var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
-            console.log(`subtask_${subtask.id}_btn`);
-            console.log(checkbox_btn);
-            checkbox_btn.addEventListener('change', () => {
-                console.log(subtask.is_done);
-                console.log(checkbox_btn.value);
-                subtask.is_done = !subtask.is_done;
+            checkbox_btn.addEventListener('click', () => {
                 closeTask(subtask);
             })
         }
@@ -483,7 +477,7 @@ function updateDOMTask(task) {
         const subtask_checkbox = tr.children.item(0).children.item(0);
         // The task title is always the second child of the tr element
         const subtask_title = tr.children.item(1);
-        if (task.is_done) {
+        if (task.is_done === true) {
             subtask_checkbox.checked = true;
             subtask_title.classList.add('strikethrough');
         } else {
@@ -631,20 +625,24 @@ function add_task_exp(url) {
     const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
-        var data = await response.json();
-        tasks.unshift(data);
+        var data = await response.json();        
         if (response.status == 200) {
             var domTasks = document.querySelectorAll(`tr.priority_${task_priority}`);
             var firstElt = domTasks.item(0);
             var newTr = createNewDOMTasktr(data);
             var newDetail = createNewDOMDetailTr(data);
-            if (firstElt === null) {
-                firstElt = document.getElementById('list-container');
-                firstElt.appendChild(newTr);
-                firstElt.appendChild(newDetail);
+            if (data.is_subtask) {
+                // TODO: Update the DOM with the new subtask
             } else {
-                firstElt.parentNode.insertBefore(newTr, firstElt);
-                firstElt.parentNode.insertBefore(newDetail, newTr.nextSibling);
+                tasks.unshift(data);
+                if (firstElt === null) {
+                    firstElt = document.getElementById('list-container');
+                    firstElt.appendChild(newTr);
+                    firstElt.appendChild(newDetail);
+                } else {
+                    firstElt.parentNode.insertBefore(newTr, firstElt);
+                    firstElt.parentNode.insertBefore(newDetail, newTr.nextSibling);
+                }
             }
         } else {
         }

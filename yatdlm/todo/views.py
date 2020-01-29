@@ -230,7 +230,7 @@ def close_task(request, list_id=None, task_id=None):
         status = 404
         payload = {"errors": "Task ID or List ID missing"}
     try:
-        task = Task.objects.get(id=task_id, parent_list=list_id)
+        task = Task.objects.get(id=task_id, parent_list_id=list_id)
         body = json.loads(request.body.decode('utf-8'))
         if 'followup' in body:
             comment = body.get('followup')
