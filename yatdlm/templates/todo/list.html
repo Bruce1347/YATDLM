@@ -8,7 +8,7 @@
     <input class="hidden" id="dom_ispublicjs" value="{{ publicjs }}">
     <div class="todo-header" style="max-width: 40em; margin: auto;" id="todo_header">
         <h1>{{ list.title }}</h1>
-        <p style="">Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
+        <p>Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
         <div>
             {{ list.description|display_urls|linebreaks }}
         </div>
@@ -32,6 +32,10 @@
                     <input class="marginb-normal" type="text" id="new_task_title" style="width: 100%">
                     <label for="new_task_descr">Description :</label>
                     <textarea class="marginb-normal" id="new_task_descr" rows="8" style="width: 100%"></textarea>
+                    <label class="margint-normal" for="new_task_parent_task">Est une sous tâche de :</label>
+                    <select class="marginb-normal fullwidth" id="new_task_parent_task">
+                        <option value="-1"></option>
+                    </select>
                     <div class="marginb-normal fullwidth" style="display: flex;">
                         <div style="flex: 1; margin-right: 10px;">
                             <label for="new_task_due_date">Date de fin :</label>
@@ -227,15 +231,35 @@
                                 <div class="margint-normal">
                                     <span style="font-size: 1.8em">Tâche #{{ task.task_no }} : {{ task.title }}</span>
                                 </div>
-                                <div class="marginb-normal">
-                                    <span class="b_lightgrey">
+                                <div>
+                                    <span style="display: inline-block;">
                                         Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span id="task_{{ task.task_no }}_progression_span">
+                                        Progression: <b>{{ task.subtasks_progress }}%</b>
                                     </span>
                                 </div>
                                 <hr>
                                 <div class="fullwidth" id="description_{{ task.task_no }}">
                                     {{ task.description|linebreaks|display_urls }}
                                 </div>
+
+                                <table>
+                                    {% for subtask in task.subtasks %}
+                                        <tr class="subtask" id="subtask_{{ subtask.id }}">
+                                            {% if subtask.is_done %}
+                                                <td><input id="subtask_{{ subtask.id }}_btn" checked type="checkbox"></td>
+                                                <td class="strikethrough fullwidth">{{ subtask.title }}</td>
+                                            {% else %}
+                                                <td><input id="subtask_{{ subtask.id }}_btn" type="checkbox"></td>
+                                                <td class="fullwidth">{{ subtask.title }}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+
                                 <hr>
                                 <div class="margint-normal followups_container" id="followups_{{ task.task_no }}">
                                 </div>

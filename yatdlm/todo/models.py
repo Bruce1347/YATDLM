@@ -13,7 +13,7 @@ class TodoList(models.Model):
 
     # A short description of the todo list (mandatory)
     title = models.CharField(max_length=100, blank=False)
-    
+
     # The full description of the todo list (optional)
     description = models.TextField(max_length=600, blank=True)
 
@@ -88,6 +88,24 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def subtasks(self):
+        return [task for task in self.task_set.order_by('creation_date').all()]
+
+    @property
+    def is_subtask(self):
+        return self.parent_task is not None
+
+    @property
+    def subtasks_progress(self):
+        """Return the percentage of done tasks"""
+
+        tasks_count = self.task_set.count()
+        if tasks_count ==  0:
+            return 0
+        tasks_done = self.task_set.filter(is_done=True).count()
+        return 100.0 * (tasks_done / tasks_count)
+
     def get_followups(self):
         followups = FollowUp.objects.filter(task=self.id).order_by("creation_date")
         return followups
@@ -126,7 +144,7 @@ class Task(models.Model):
             new_priority=new_priority)
         followup.save()
         self.priority = new_priority
-        
+
         if self.is_done:
             self.resolution_date = make_aware(datetime.now())
         else:
@@ -158,12 +176,15 @@ class Task(models.Model):
             'priority': self.priority,
             'priority_str': self.get_priority_display(),
             'categories': self.get_categories(),
-            'categories_str': self.get_displayable_categories()
+            'categories_str': self.get_displayable_categories(),
+            'is_subtask': self.is_subtask,
+            'subtasks': [subtask.as_dict() for subtask in self.subtasks],
+            'subtasks_progress': self.subtasks_progress * 100.0
         }
 
         if self.due_date is not None:
             resp['due_date'] = date_format(self.due_date, dates_format)
-        
+
         if self.resolution_date is not None:
             resp['resolution_date'] = date_format(self.resolution_date, dates_format)
             resp['resolution_hour'] = date_format(self.resolution_date, "H:i")
@@ -186,7 +207,7 @@ class FollowUp(models.Model):
 
     # The user that wrote the Follow-up
     writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
- 
+
     # Type of follow up (State change or comment)
     f_type = models.IntegerField(choices=possible_follow_ups, default=1)
 
@@ -194,7 +215,7 @@ class FollowUp(models.Model):
     old_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
     new_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
 
-    # The task and list that the Follow-up refers to 
+    # The task and list that the Follow-up refers to
     task = models.ForeignKey('Task', on_delete=models.CASCADE, null=False)
     todol = models.ForeignKey('TodoList', on_delete=models.CASCADE, null=False)
 

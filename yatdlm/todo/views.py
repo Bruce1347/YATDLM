@@ -12,7 +12,7 @@ from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
 
 from .models import FollowUp, Task, TodoList
-from .utils import yesnojs
+from .utils import yesnojs, yesnopython
 
 
 @login_required()
@@ -61,6 +61,8 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 
     # Retrieve the subsequent tasks
     tfilter = todo_list.task_set.order_by('is_done', 'priority', '-creation_date')
+    # Do not include subtasks
+    tfilter = tfilter.filter(parent_task__isnull=True)
 
     # Create the context
     creation_years_filter = tfilter.dates('creation_date', 'year')
@@ -84,10 +86,11 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
+    tasks = [task for task in tfilter]
 
     context = {
         'list'  : todo_list,
-        'tasks' : [task for task in tfilter],
+        'tasks' : tasks,
         'xhr'   : xhr,
         'isdev' : 'DEV - ' if settings.DEBUG else '',
         'title_page' : todo_list.title,
@@ -107,9 +110,15 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 def list_tasks(request, list_id=None):
     try:
         tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
+        #TODO: Use a validator for this verification
         todo = TodoList.objects.get(id=list_id)
         if not todo.is_public:
             return JsonResponse({'errors': 'Non.'}, status=403)
+        # Check if the user requests all the tasks or only the meta tasks
+        # (without any parent task)
+        meta_tasks_param = yesnopython(request.GET.get('meta_tasks', 'false'))
+        if meta_tasks_param:
+            tasks = tasks.filter(parent_task__isnull=True)
         priorities = {
             name: value
             for name, value in Task.priority_levels
@@ -145,10 +154,12 @@ def add_task(request, list_id=None):
             owner=request.user,
             task_no=task_no
         )
-        task.save()
         if 'categories' in body:
             for category in body['categories']:
                 task.categories.add(int(category))
+        if 'parent_task' in body:
+            task.parent_task_id = int(body['parent_task'])
+        task.save()
         json_body = task.as_dict()
         json_body['creator'] = task.owner.username
     except TodoList.DoesNotExist:
@@ -175,12 +186,12 @@ def update_task(request, list_id=None, task_id=None):
                 new_priority=new_priority)
             if new_priority is not task.priority:
                 new_state.f_type = FollowUp.STATE_CHANGE
+                task.priority = new_priority
             else:
                 new_state.f_type = FollowUp.COMMENT 
             new_state.save()
             task.title = body.get('title')
             task.description = body.get('description')
-            task.priority = new_priority
             if 'categories' in body:
                 categories = [int(category) for category in body.get('categories')]
                 task.categories.clear()
@@ -219,7 +230,7 @@ def close_task(request, list_id=None, task_id=None):
         status = 404
         payload = {"errors": "Task ID or List ID missing"}
     try:
-        task = Task.objects.get(id=task_id, parent_list=list_id)
+        task = Task.objects.get(id=task_id, parent_list_id=list_id)
         body = json.loads(request.body.decode('utf-8'))
         if 'followup' in body:
             comment = body.get('followup')

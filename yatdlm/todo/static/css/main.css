@@ -5,6 +5,8 @@
 .c-align        { text-align: center; }
 .noborder       { border-style: none; }
 .nowrap         { white-space: nowrap; }
+.strikethrough  { text-decoration: line-through; }
+.subtask        { }
 
 .fullwidth      { width: 100%; }
 .midwidth       { width: 50%; }
