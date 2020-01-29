@@ -81,7 +81,7 @@ document.getElementById("select_tprio").addEventListener('change', filter_tasks)
 document.getElementById("select_tcategory").addEventListener('change', filter_tasks);
 
 // Setup togglers for sub lines inside the tbody
-document.getElementById("list-container").querySelectorAll('tr:not(.hidden)').forEach(
+document.getElementById("list-container").querySelectorAll('tr:not(.hidden):not(.subtask)').forEach(
     (element) => {
         var children = element.querySelectorAll('td:not(.delete)');
         children.forEach((child) => {
@@ -128,6 +128,7 @@ var tasks = [];
 const priorities = Object();
 // Fetch tasks when the page is loaded
 fetch_tasks(tasks).then(() => {
+    const parent_tasks_container = document.getElementById('new_task_parent_task');
     // Setup togglers for each task detail
     for (var i = 0; i < tasks.length; ++i) {
         const element = tasks[i];
@@ -144,6 +145,21 @@ fetch_tasks(tasks).then(() => {
         addCommentBtn.addEventListener('click', () => {
             addFollowup(element);
         });
+        // Add the task to the subtasks select
+        var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
+        parent_tasks_container.add(parent_tasks_option);
+        for (subtask of element.subtasks) {
+            // Attach a callback to its corresponding checkbox
+            var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
+            console.log(`subtask_${subtask.id}_btn`);
+            console.log(checkbox_btn);
+            checkbox_btn.addEventListener('change', () => {
+                console.log(subtask.is_done);
+                console.log(checkbox_btn.value);
+                subtask.is_done = !subtask.is_done;
+                closeTask(subtask);
+            })
+        }
     }
 });
 
@@ -239,17 +255,21 @@ function createDOMFollowup(followup) {
  * @param {Object} task The task that has to be closed or re-opened
  */
 async function closeTask(task) {
-    const requestBody = JSON.stringify({
-        'followup': document.getElementById(`followup_${task.no}`).value,
-    });
-    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/close`, requestBody);
+    let close_followup = document.getElementById(`followup_${task.no}`);
+    const requestBody = new Object();
+    if (close_followup) {
+        requestBody.followup = close_followup.value;
+    }
+    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/close`, JSON.stringify(requestBody));
     const updatedTask = await response.json();
     const currentTaskIdx = tasks.findIndex((t) => {
         return t.id === updatedTask.id;
     });
-    Object.assign(tasks[currentTaskIdx], updatedTask);
     updateDOMTask(updatedTask);
-    updateFollowups(task);
+    if (!updatedTask.is_subtask) {
+        Object.assign(tasks[currentTaskIdx], updatedTask);
+        updateFollowups(task);
+    }
 }
 
 /**
@@ -418,42 +438,58 @@ async function updateTask(body, task) {
  * @param {Object} task The task subject to modifications
  */
 function updateDOMTask(task) {
-    const tr = document.getElementById(`${task.no}`);
-    // Remove all the previous classes from the <tr>
-    tr.classList.remove(...tr.classList);
-    tr.classList.add("nowrap", `priority_${task.priority}`);
-    // Replace all the visible text by their updated versions
-    const priorityCell = document.getElementById(`priority_${task.no}`);
-    priorityCell.innerText = task.priority_str;
-    const titleCell = document.getElementById(`title_${task.no}`);
-    titleCell.innerText = task.title;
-    const descriptionCell = document.getElementById(`description_${task.no}`);
-    descriptionCell.querySelector("p").innerText = task.description;
-    const category_cell = document.getElementById(`categories_${task.no}`);
-    const task_categories = new Array();
-    for (var i = 0; i < task.categories.length; ++i) {
-        var category = categories.find((cat) => {
-            return cat.id === task.categories[i].id;
-        });
-        task_categories.push(category.name);
-    }
-    category_cell.innerText = task_categories.join(", ");
-    // Update the resolution date and due date cells
-    const closeBtn = document.getElementById(`close-btn_${task.no}`);
-    if (task.is_done) {
-        const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
-        resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
-        resolutionDateCell.colSpan = 2;
-        const dueDateCell = document.getElementById(`dued_${task.no}`);
-        dueDateCell.remove();
-        closeBtn.innerText = "ROUVRIR LA TÂCHE";
+    if (!task.is_subtask) {
+        const tr = document.getElementById(`${task.no}`);
+        // Remove all the previous classes from the <tr>
+        tr.classList.remove(...tr.classList);
+        tr.classList.add("nowrap", `priority_${task.priority}`);
+        // Replace all the visible text by their updated versions
+        const priorityCell = document.getElementById(`priority_${task.no}`);
+        priorityCell.innerText = task.priority_str;
+        const titleCell = document.getElementById(`title_${task.no}`);
+        titleCell.innerText = task.title;
+        const descriptionCell = document.getElementById(`description_${task.no}`);
+        descriptionCell.querySelector("p").innerText = task.description;
+        const category_cell = document.getElementById(`categories_${task.no}`);
+        const task_categories = new Array();
+        for (var i = 0; i < task.categories.length; ++i) {
+            var category = categories.find((cat) => {
+                return cat.id === task.categories[i].id;
+            });
+            task_categories.push(category.name);
+        }
+        category_cell.innerText = task_categories.join(", ");
+        // Update the resolution date and due date cells
+        const closeBtn = document.getElementById(`close-btn_${task.no}`);
+        if (task.is_done) {
+            const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
+            resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
+            resolutionDateCell.colSpan = 2;
+            const dueDateCell = document.getElementById(`dued_${task.no}`);
+            dueDateCell.remove();
+            closeBtn.innerText = "ROUVRIR LA TÂCHE";
+        } else {
+            const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
+            resolutionDateCell.innerText = "";
+            resolutionDateCell.colSpan = 1;
+            const dueDateCell = document.getElementById(`dued_${task.no}`);
+            resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
+            closeBtn.innerText = "FERMER LA TÂCHE";
+        }
     } else {
-        const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
-        resolutionDateCell.innerText = "";
-        resolutionDateCell.colSpan = 1;
-        const dueDateCell = document.getElementById(`dued_${task.no}`);
-        resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
-        closeBtn.innerText = "FERMER LA TÂCHE";
+        const tr = document.getElementById(`subtask_${task.no}`);
+        // The check box is always the first child, and it's the only child of
+        // its parent td, hence the fixed indexes here.
+        const subtask_checkbox = tr.children.item(0).children.item(0);
+        // The task title is always the second child of the tr element
+        const subtask_title = tr.children.item(1);
+        if (task.is_done) {
+            subtask_checkbox.checked = true;
+            subtask_title.classList.add('strikethrough');
+        } else {
+            subtask_checkbox.checked = false;
+            subtask_title.classList.remove('strikethrough');
+        }
     }
 }
 
@@ -568,11 +604,14 @@ function add_task_exp(url) {
     var task_end_date = document.getElementById('new_task_due_date').value;
     let task_categories_dom = document.getElementById('new_task_categories_container');
     task_categories_dom = task_categories_dom.getElementsByTagName("select");
+    let parent_task = document.getElementById('new_task_parent_task').value;
+
     var bodyDict = {
         'title': task_title,
         'descr': task_descr,
         'due': task_end_date,
         'priority': task_priority,
+        
     };
     var task_categories = new Array();
     if (task_categories_dom.length > 0) {
@@ -583,6 +622,12 @@ function add_task_exp(url) {
         }
         bodyDict.categories = task_categories;
     }
+
+    // If the user sets a parent task, add it to the body
+    if (parent_task !== "-1") {
+        bodyDict.parent_task = parent_task;
+    }
+
     const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
@@ -616,7 +661,7 @@ function add_task_exp(url) {
 async function fetch_tasks(arr) {
     var listId = document.getElementById('dom_list_id').value;
 
-    const response = await get(`/todo/lists/${listId}/tasks`);
+    const response = await get(`/todo/lists/${listId}/tasks?meta_tasks=true`);
     var data = await response.json();
     data.tasks.forEach(element => {
         arr.unshift(element);

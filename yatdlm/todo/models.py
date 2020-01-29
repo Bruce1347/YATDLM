@@ -88,6 +88,14 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def subtasks(self):
+        return [task for task in self.task_set.order_by('creation_date').all()]
+
+    @property
+    def is_subtask(self):
+        return self.parent_task is not None
+
     def get_followups(self):
         followups = FollowUp.objects.filter(task=self.id).order_by("creation_date")
         return followups
@@ -158,7 +166,9 @@ class Task(models.Model):
             'priority': self.priority,
             'priority_str': self.get_priority_display(),
             'categories': self.get_categories(),
-            'categories_str': self.get_displayable_categories()
+            'categories_str': self.get_displayable_categories(),
+            'is_subtask': self.is_subtask,
+            'subtasks': [subtask.as_dict() for subtask in self.subtasks]
         }
 
         if self.due_date is not None:
