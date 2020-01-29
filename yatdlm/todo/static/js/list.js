@@ -477,7 +477,7 @@ function updateDOMTask(task) {
             closeBtn.innerText = "FERMER LA TÂCHE";
         }
     } else {
-        const tr = document.getElementById(`subtask_${task.no}`);
+        const tr = document.getElementById(`subtask_${task.id}`);
         // The check box is always the first child, and it's the only child of
         // its parent td, hence the fixed indexes here.
         const subtask_checkbox = tr.children.item(0).children.item(0);
