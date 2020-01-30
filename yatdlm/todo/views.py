@@ -60,7 +60,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         return HttpResponseForbidden()
 
     # Retrieve the subsequent tasks
-    tfilter = todo_list.task_set.order_by('is_done', 'priority', '-creation_date')
+    tfilter = todo_list.task_set.order_by('is_done', 'priority', '-resolution_date', '-creation_date')
     # Do not include subtasks
     tfilter = tfilter.filter(parent_task__isnull=True)
 
