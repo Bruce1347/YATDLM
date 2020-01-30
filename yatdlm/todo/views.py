@@ -154,12 +154,12 @@ def add_task(request, list_id=None):
             owner=request.user,
             task_no=task_no
         )
-        if 'categories' in body:
-            for category in body['categories']:
-                task.categories.add(int(category))
         if 'parent_task' in body:
             task.parent_task_id = int(body['parent_task'])
         task.save()
+        if 'categories' in body:
+            for category in body['categories']:
+                task.categories.add(int(category))
         json_body = task.as_dict()
         json_body['creator'] = task.owner.username
     except TodoList.DoesNotExist:
