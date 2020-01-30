@@ -169,7 +169,7 @@ class Task(models.Model):
             'title': self.title,
             'is_done': self.is_done,
             # Provide the user a shorter title for display
-            'title_cropped': self.title[:40],
+            'title_cropped': self.title[:39] + "…",
             'description': self.description,
             'creation_date': date_format(self.creation_date, dates_format),
             'creation_hour': date_format(self.creation_date, "H:i"),

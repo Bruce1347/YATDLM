@@ -441,7 +441,7 @@ function updateDOMTask(task) {
         const priorityCell = document.getElementById(`priority_${task.no}`);
         priorityCell.innerText = task.priority_str;
         const titleCell = document.getElementById(`title_${task.no}`);
-        titleCell.innerText = task.title;
+        titleCell.innerText = task.title_cropped;
         const descriptionCell = document.getElementById(`description_${task.no}`);
         descriptionCell.querySelector("p").innerText = task.description;
         const category_cell = document.getElementById(`categories_${task.no}`);
