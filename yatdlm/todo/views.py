@@ -112,7 +112,7 @@ def list_tasks(request, list_id=None):
         tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
         #TODO: Use a validator for this verification
         todo = TodoList.objects.get(id=list_id)
-        if not todo.is_public:
+        if not todo.is_public and not request.user.is_authenticated:
             return JsonResponse({'errors': 'Non.'}, status=403)
         # Check if the user requests all the tasks or only the meta tasks
         # (without any parent task)
