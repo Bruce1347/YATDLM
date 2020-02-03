@@ -240,3 +240,8 @@ class FollowUp(models.Model):
 
 class FollowUpAdmin(admin.ModelAdmin):
     readonly_fields = ('creation_date',)
+
+class NotOwner(Exception):
+    """Raised when a task is fetched by a user but that user is not its
+    owner"""
+    pass

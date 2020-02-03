@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
 
-from .models import FollowUp, Task, TodoList
+from .models import FollowUp, Task, TodoList, NotOwner
 from .utils import yesnojs, yesnopython
 
 
@@ -400,14 +400,20 @@ def user_login(request):
 
     return HttpResponseNotFound()
 
+@login_required()
+@require_http_methods(['DELETE'])
 def delete_list(request, list_id):
     try:
-        xhr = request.POST['xhr'] == 'True'
         del_list = TodoList.objects.get(id=list_id)
+        if del_list.owner != request.user:
+            raise NotOwner
         del_list.delete()
-        if not xhr:
-            return HttpResponse()
-        else:
-            return index(request, xhr=True)
+        status_code = 204
+        payload = {}
     except ObjectDoesNotExist:
-        return HttpResponseForbidden()
+        status_code = 404
+        payload = {"errors": "Given list does not exists"}
+    except NotOwner:
+        status_code = 403
+        payload = {"errors": "The logged user is not the owner of the List"}
+    return JsonResponse(payload, status=status_code)
