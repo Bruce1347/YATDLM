@@ -912,3 +912,13 @@ function add_new_task_category(container_id=undefined) {
     // Append the new select to the current container
     categories_container.appendChild(new_select);
 }
+
+/**
+ * Deletes the list pointed by ``list_id``.
+ *
+ * @param {Number} list_id The list that the user wants to delete
+ */
+async function delete_list(list_id) {
+    await _delete(`/todo/lists/delete/${list_id}`);
+    window.location.href = '/todo';
+}
