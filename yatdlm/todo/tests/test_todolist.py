@@ -9,12 +9,13 @@ class TodoListTestCase(TestCase):
         cls.other_user = auth_models.User.objects.create_user('test2', password='1234')
         cls.list_ = TodoList(owner=cls.user)
         cls.list_.save()
+        cls.url = '/todo/lists/delete/{}'
 
     def test_delete_list(self):
         list_ = TodoList(owner=self.user)
         list_.save()
         self.client.login(username='test', password='1234')
-        response = self.client.delete('/todo/lists/delete/{}'.format(list_.id))
+        response = self.client.delete(self.url.format(list_.id))
         self.assertEqual(response.status_code, 204)
         with self.assertRaises(TodoList.DoesNotExist):
             TodoList.objects.get(id=list_.id)
@@ -23,13 +24,13 @@ class TodoListTestCase(TestCase):
         list_ = TodoList(owner=self.other_user)
         list_.save()
         self.client.login(username='test', password='1234')
-        response = self.client.delete('/todo/lists/delete/{}'.format(list_.id))
+        response = self.client.delete(self.url.format(list_.id))
         self.assertEqual(response.status_code, 403)
         self.assertIsNotNone(TodoList.objects.get(id=list_.id))
 
     def test_delete_list_wrong_verb(self):
         self.client.login(username='test', password='1234')
-        response = self.client.post('/todo/lists/delete/{}'.format(self.list_.id))
+        response = self.client.post(self.url.format(self.list_.id))
         # Expect a Method not allowed
         self.assertEqual(response.status_code, 405)
         self.assertIsNotNone(TodoList.objects.get(id=self.list_.id))
