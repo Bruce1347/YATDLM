@@ -28,6 +28,10 @@ class TodoListTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertIsNotNone(TodoList.objects.get(id=list_.id))
 
+    def test_delete_list_user_not_logged(self):
+        response = self.client.delete(self.url.format(self.list_.id))
+        self.assertEqual(response.status_code, 302)
+
     def test_delete_list_wrong_verb(self):
         self.client.login(username='test', password='1234')
         response = self.client.post(self.url.format(self.list_.id))
