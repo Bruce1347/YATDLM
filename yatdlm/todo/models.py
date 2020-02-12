@@ -42,10 +42,12 @@ class Task(models.Model):
     NORMAL = 2
     TOCONSIDER = 3
     SOLVED = 4
+    REJECTED = 5
     priority_levels = ((URGENT, "Urgent"),
                        (NORMAL, "Normal"),
                        (TOCONSIDER, "A considérer"),
-                       (SOLVED, "Résolu"))
+                       (SOLVED, "Résolu"),
+                       (REJECTED, "Rejeté"))
 
     # Admin definitions
     fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
