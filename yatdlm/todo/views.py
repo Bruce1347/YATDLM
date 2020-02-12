@@ -14,6 +14,8 @@ from django.views.decorators.http import require_http_methods
 from .models import FollowUp, Task, TodoList, NotOwner
 from .utils import yesnojs, yesnopython
 
+from .helpers.routes_validators import task_ownership
+
 
 @login_required()
 def index(request, xhr):
@@ -417,3 +419,14 @@ def delete_list(request, list_id):
         status_code = 403
         payload = {"errors": "The logged user is not the owner of the List"}
     return JsonResponse(payload, status=status_code)
+
+
+@login_required()
+@require_http_methods(['PATCH'])
+@task_ownership
+def reject_task(request, list_id, task_id):
+    try:
+        task = Task.objects.get(parent_list_id=list_id, id=task_id)
+    except Task.DoesNotExist:
+        pass
+    return JsonResponse(None, status_code=status_code)
