@@ -271,6 +271,11 @@
                                     AJOUTER UN COMMENTAIRE
                                 </button>
                                 {% if not task.is_done %}
+                                    {% if not task.is_rejected %}
+                                        <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject_task-btn_{{ task.task_no }}">
+                                            REJETER LA TÂCHE
+                                        </button>
+                                    {% endif %}
                                     <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.task_no }}">
                                         FERMER LA TÂCHE
                                     </button>
