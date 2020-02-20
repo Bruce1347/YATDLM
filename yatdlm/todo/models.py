@@ -111,6 +111,10 @@ class Task(models.Model):
         tasks_done = self.task_set.filter(is_done=True).count()
         return 100.0 * (tasks_done / tasks_count)
 
+    @property
+    def is_rejected(self):
+        return self.priority == Task.REJECTED
+
     def reject(self, writer=None, followup=''):
         """Rejects a method that is not acceptable in the current scope of the
         todolist.
@@ -198,6 +202,7 @@ class Task(models.Model):
             'no': self.task_no,
             'title': self.title,
             'is_done': self.is_done,
+            'is_rejected': self.is_rejected,
             # Provide the user a shorter title for display
             'title_cropped': self.title[:39] + "…",
             'description': self.description,
