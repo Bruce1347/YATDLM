@@ -90,6 +90,9 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    def is_owned(self, user):
+        return self.owner == user
+
     @property
     def subtasks(self):
         return [task for task in self.task_set.order_by('creation_date').all()]
@@ -108,7 +111,7 @@ class Task(models.Model):
         tasks_done = self.task_set.filter(is_done=True).count()
         return 100.0 * (tasks_done / tasks_count)
 
-    def reject(self, writer=None, followup=None):
+    def reject(self, writer=None, followup=''):
         """Rejects a method that is not acceptable in the current scope of the
         todolist.
 
@@ -116,7 +119,7 @@ class Task(models.Model):
         since the relationship User <-> FollowUp forbids the none-ness of the
         writer field, if the field is none then this method will fail at
         runtime.
-        :param str followup: The reason of the rejection, can be None.
+        :param str followup: The reason of the rejection, can be empty.
         """
         if self.priority == self.REJECTED:
             # Do not reject a task that was already rejected
