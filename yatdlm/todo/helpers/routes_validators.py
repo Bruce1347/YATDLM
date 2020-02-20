@@ -15,11 +15,10 @@ def task_exists(view):
 
 def task_ownership(view):
     @wraps(view)
-    def validate_ownership(*args, **kwargs):
-        task = Task.objects.get(id=task_id, parent_list_id=list_id)
-        if not task.is_owned(request.user):
-            if not request.errors:
-                request.errors = []
-            request.errors.append(NotOwner)
-        view(*args, **kwargs)
-    return validate_ownership
+    def validate_task_ownership(request, list_id, task_id, *args, **kwargs):
+        task = request.task
+        if task.is_owned(request.user):
+            return view(request, list_id, task_id, *args, **kwargs)
+        else:
+            return JsonResponse({"errors": "The given task is not owned by the user."}, status=403)
+    return validate_task_ownership
