@@ -36,5 +36,6 @@ urlpatterns = [
     path('lists/<int:list_id>/<int:task_id>/add_followup', views.add_followup),
     # Get all followups
     path('lists/<int:list_id>/<int:task_id>/get_followups', views.get_followups),
+    path('lists/<int:list_id>/<int:task_id>/reject', views.reject_task),
     path('categories/', include('todo.categories.urls'))
 ]

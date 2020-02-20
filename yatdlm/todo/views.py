@@ -11,7 +11,8 @@ from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
 
-from .models import FollowUp, Task, TodoList, NotOwner
+from .helpers.routes_validators import task_exists, task_ownership
+from .models import FollowUp, NotOwner, Task, TodoList
 from .utils import yesnojs, yesnopython
 
 
@@ -417,3 +418,19 @@ def delete_list(request, list_id):
         status_code = 403
         payload = {"errors": "The logged user is not the owner of the List"}
     return JsonResponse(payload, status=status_code)
+
+
+@login_required()
+@require_http_methods(['PATCH'])
+@task_exists
+@task_ownership
+def reject_task(request, list_id, task_id):
+    task = request.task
+    followup = ''
+    raw_body = request.body.decode("utf-8")
+    if raw_body:
+        body = json.loads(raw_body)
+        if 'followup' in body:
+            followup = body['followup']
+    task.reject(request.user, followup)
+    return JsonResponse(task.as_dict(), status=202)

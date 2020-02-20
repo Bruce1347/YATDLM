@@ -144,6 +144,17 @@ fetch_tasks(tasks).then(() => {
         addCommentBtn.addEventListener('click', () => {
             addFollowup(element);
         });
+        if (element.is_done !== true && element.is_rejected !== true) {
+            const reject_task_btn = document.getElementById(`reject_task-btn_${element.no}`);
+            reject_task_btn.addEventListener('click', () => {
+                let dom_followup = document.getElementById(`followup_${element.no}`);
+                let followup = null;
+                if (dom_followup && dom_followup.value !== '') {
+                    followup = dom_followup.value;
+                }
+                reject_task(element.list_id, element.id, followup);
+            });
+        }
         // Add the task to the subtasks select
         var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
         parent_tasks_container.add(parent_tasks_option);
@@ -200,9 +211,14 @@ async function addFollowup(task) {
  */
 async function updateFollowups(task) {
     const followups = await getFollowups(task.list_id, task.id);
-    const latestFollowup = createDOMFollowup(followups.followups.pop());
     const followupsContainer = document.getElementById(`followups_${task.no}`);
-    followupsContainer.appendChild(latestFollowup);
+    // Remove all children
+    followupsContainer.innerHTML = '';
+    for (let followup of followups.followups) {
+        console.log(followup);
+        let dom_followup = createDOMFollowup(followup);
+        followupsContainer.appendChild(dom_followup);
+    }
 }
 
 /**
@@ -921,4 +937,29 @@ function add_new_task_category(container_id=undefined) {
 async function delete_list(list_id) {
     await _delete(`/todo/lists/delete/${list_id}`);
     window.location.href = '/todo';
+}
+
+/**
+ * Rejects a task and updates the DOM.
+ * @param {Number} list_id The current todo list
+ * @param {Number} task_id The task that has to be rejected
+ * @param {String} followup An eventual reason for the rejection
+ */
+async function reject_task(list_id, task_id, followup = null) {
+    let url = `/todo/lists/${list_id}/${task_id}/reject`;
+    let body = '';
+    if (followup !== null) {
+        body = JSON.stringify({
+            'followup': followup
+        });
+    }
+    let result = await patch(url, body);
+    let updated_task = await result.json();
+    // Update the DOM
+    updateDOMTask(updated_task);
+    updateFollowups(updated_task);
+    let reject_button = document.getElementById(`reject_task-btn_${updated_task.no}`);
+    if (reject_button) {
+        reject_button.remove();
+    }
 }

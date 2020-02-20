@@ -42,10 +42,12 @@ class Task(models.Model):
     NORMAL = 2
     TOCONSIDER = 3
     SOLVED = 4
+    REJECTED = 5
     priority_levels = ((URGENT, "Urgent"),
                        (NORMAL, "Normal"),
                        (TOCONSIDER, "A considérer"),
-                       (SOLVED, "Résolu"))
+                       (SOLVED, "Résolu"),
+                       (REJECTED, "Rejeté"))
 
     # Admin definitions
     fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
@@ -88,6 +90,9 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    def is_owned(self, user):
+        return self.owner == user
+
     @property
     def subtasks(self):
         return [task for task in self.task_set.order_by('creation_date').all()]
@@ -105,6 +110,35 @@ class Task(models.Model):
             return 0
         tasks_done = self.task_set.filter(is_done=True).count()
         return 100.0 * (tasks_done / tasks_count)
+
+    @property
+    def is_rejected(self):
+        return self.priority == Task.REJECTED
+
+    def reject(self, writer=None, followup=''):
+        """Rejects a method that is not acceptable in the current scope of the
+        todolist.
+
+        :param User writer: The user that has rejected the task, cannot be None
+        since the relationship User <-> FollowUp forbids the none-ness of the
+        writer field, if the field is none then this method will fail at
+        runtime.
+        :param str followup: The reason of the rejection, can be empty.
+        """
+        if self.priority == self.REJECTED:
+            # Do not reject a task that was already rejected
+            return
+        followup = FollowUp(
+            old_priority=self.priority,
+            new_priority=self.REJECTED,
+            f_type=FollowUp.STATE_CHANGE,
+            writer=writer,
+            task=self,
+            todol=self.parent_list,
+            content=followup)
+        self.priority = self.REJECTED
+        self.save()
+        followup.save()
 
     def get_followups(self):
         followups = FollowUp.objects.filter(task=self.id).order_by("creation_date")
@@ -168,6 +202,7 @@ class Task(models.Model):
             'no': self.task_no,
             'title': self.title,
             'is_done': self.is_done,
+            'is_rejected': self.is_rejected,
             # Provide the user a shorter title for display
             'title_cropped': self.title[:39] + "…",
             'description': self.description,
