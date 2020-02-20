@@ -200,9 +200,14 @@ async function addFollowup(task) {
  */
 async function updateFollowups(task) {
     const followups = await getFollowups(task.list_id, task.id);
-    const latestFollowup = createDOMFollowup(followups.followups.pop());
     const followupsContainer = document.getElementById(`followups_${task.no}`);
-    followupsContainer.appendChild(latestFollowup);
+    // Remove all children
+    followupsContainer.innerHTML = '';
+    for (let followup of followups.followups) {
+        console.log(followup);
+        let dom_followup = createDOMFollowup(followup);
+        followupsContainer.appendChild(dom_followup);
+    }
 }
 
 /**
