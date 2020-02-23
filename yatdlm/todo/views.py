@@ -323,47 +323,6 @@ def add_followup(request, list_id=None, task_id=None):
         payload = {"errors": "Wrong Task ID or List ID"}
     return JsonResponse(payload, status=status)
 
-@login_required()
-def get_task_detail(request, list_id=-1, task_id=-1):
-    if list_id != -1 and task_id != -1:
-        task = Task.objects.get(id=task_id, parent_list_id=list_id)
-        parent_list = task.parent_list
-
-        context = {
-            'task' : task,
-            'list' : parent_list,
-            'priority_levels' : Task.priority_levels
-        }
-
-        return render(request, 'todo/xhr/task_edit.html', context)
-    else:
-        return HttpResponseNotFound("NOPE.")
-
-@login_required()
-def task_update(request, list_id=-1, task_id=-1):
-    if list_id != -1 and task_id != -1:
-        task = Task.objects.get(id=task_id, parent_list_id=list_id)
-
-        new_title = request.POST['title']
-        new_description = request.POST['descr']
-        new_priority = int(request.POST['prio'])
-
-        new_state = FollowUp(writer=request.user, f_type=2,
-                             task=task, todol_id=list_id,
-                             old_priority=task.priority,
-                             new_priority=new_priority)
-
-        task.title = new_title
-        task.description = new_description
-        task.priority = new_priority
-
-        task.save()
-        new_state.save()
-
-        return display_detail(request, list_id=list_id, task_id=task_id, xhr=True)
-    else:
-        return HttpResponseNotFound("NOPE.")
-
 @login_required
 def add_list(request):
     list_title = request.POST['title']
