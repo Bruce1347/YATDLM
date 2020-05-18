@@ -393,3 +393,18 @@ def reject_task(request, list_id, task_id):
             followup = body['followup']
     task.reject(request.user, followup)
     return JsonResponse(task.as_dict(), status=202)
+
+
+@require_http_methods(['GET'])
+@login_required
+@task_exists
+@task_ownership
+def display_task(request, list_id, task_id):
+    if 'json' in request.GET:
+        return JsonResponse(request.task.as_dict(), status=202)
+    context = {
+        'task': request.task,
+        'includes': ['single_task', 'list_common'],
+        'followups': request.task.get_followups()
+    }
+    return render(request, 'todo/task.html', context)

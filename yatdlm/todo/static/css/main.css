@@ -7,6 +7,7 @@
 .nowrap         { white-space: nowrap; }
 .strikethrough  { text-decoration: line-through; }
 .subtask        { }
+.task_button    { }
 
 .fullwidth      { width: 100%; }
 .midwidth       { width: 50%; }
@@ -19,8 +20,11 @@
 .marginl-medium   { margin-left: 10px; }
 .marginr-medium   { margin-right: 10px; }
 
+.margint-ultratiny { margin-top: 3px; }
+.margint-tiny   { margin-top: 5px; }
 .margint-normal { margin-top: 20px; }
 .marginb-normal { margin-bottom: 20px; }
+.marginb-tiny   { margin-bottom: 5px;}
 
 .b_white        { background: #FFFFFF; }
 .b_lightgrey    { background: #e5e2e2; }
@@ -56,6 +60,34 @@
                         padding: 0.8em;
                     }
 
+.tooltip {
+    display:inline-block;
+    position:relative;
+    text-align: center;
+}
+
+.tooltip .top {
+    top:-20px;
+    left: 50%;
+    margin-right:20px;
+    transform:translate(-50%, -100%);
+    padding:5px;
+    color:#666666;
+    background-color:#FFFFE0;
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    position:absolute;
+    z-index:99999999;
+    box-sizing:border-box;
+    display:none;
+    border:1px solid #DCA;
+}
+
+.tooltip:hover .top {
+    display:block;
+}
+
 @media (max-width: 480px)
 {
     .page-body {
@@ -81,10 +113,10 @@
         font-size: xx-large;
     }
 
-    .td-creat-date, .th-creat-date, 
+    .td-creat-date, .th-creat-date,
     .th-resolv-date, .td-resolv-date,
     .th-due-date, .td-due-date,
-    .th-prio, .td-prio, 
+    .th-prio, .td-prio,
     .no-mob-btn {
         display: none;
     }

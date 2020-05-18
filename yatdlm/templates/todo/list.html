@@ -197,7 +197,7 @@
                                 {{ task.task_no }}
                             </td>
                             <td id="title_{{ task.task_no }}" class="pointer cell l-align" style="white-space: nowrap;">
-                                <span title="{{ task.title }}">{{ task.title|truncatechars:40 }}</span>
+                                <span title="{{ task.title }}"><a href="{{ task.id }}">{{ task.title|truncatechars:40 }}</a></span>
                             </td>
                             <td class="td-prio" id="priority_{{ task.task_no }}" class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;">
                                 {{ task.get_priority_display }}

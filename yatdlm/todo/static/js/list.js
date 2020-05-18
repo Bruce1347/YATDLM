@@ -261,7 +261,7 @@ function createDOMFollowup(followup) {
 
 
 /**
- * Handles the closure or the re-opening of a task.
+ * DEPRECATED: Handles the closure or the re-opening of a task.
  * @param {Object} task The task that has to be closed or re-opened
  */
 async function closeTask(task) {

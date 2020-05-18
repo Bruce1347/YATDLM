@@ -23,6 +23,12 @@
         {% if 'lists_index' in includes %}
             <script src="{% static 'js/list_index.js' %}"></script>
         {% endif %}
+        {% if 'list_common' in includes %}
+            <script src="{% static 'js/list_common.js'%}"></script>
+        {% endif %}
+        {% if 'single_task' in includes %}
+            <script src="{% static 'js/task.js'%}" onload="setup();"></script>
+        {% endif %}
         {% if 'list' in includes %}
             <script src="{% static 'js/models/list.js' %}"></script>
             <script src="{% static 'js/list.js' %}"></script>
