@@ -94,6 +94,10 @@ class Task(models.Model):
         return self.owner == user
 
     @property
+    def url(self):
+        return '/todo/lists/{}/{}'.format(self.parent_list.id, self.id)
+
+    @property
     def subtasks(self):
         return [task for task in self.task_set.order_by('creation_date').all()]
 
@@ -142,7 +146,7 @@ class Task(models.Model):
 
     def get_followups(self):
         followups = FollowUp.objects.filter(task=self.id).order_by("creation_date")
-        return followups
+        return list(followups)
 
     def add_followup(self, followup, writer):
         followup = FollowUp(
@@ -214,7 +218,8 @@ class Task(models.Model):
             'categories_str': self.get_displayable_categories(),
             'is_subtask': self.is_subtask,
             'subtasks': [subtask.as_dict() for subtask in self.subtasks],
-            'subtasks_progress': self.subtasks_progress * 100.0
+            'subtasks_progress': self.subtasks_progress * 100.0,
+            'url': self.url
         }
 
         if self.due_date is not None:
