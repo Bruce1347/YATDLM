@@ -191,6 +191,13 @@ class Task(models.Model):
     def get_displayable_categories(self):
         return ", ".join([cat.get('name') for cat in self.get_categories()])
 
+    @property
+    def priorities(self):
+        return {
+            priority[0]: priority[1]
+            for priority in self.priority_levels
+        }
+
     def get_categories(self):
         return [
             cat.as_dict()
@@ -212,6 +219,7 @@ class Task(models.Model):
             'description': self.description,
             'creation_date': date_format(self.creation_date, dates_format),
             'creation_hour': date_format(self.creation_date, "H:i"),
+            'priorities': self.priorities,
             'priority': self.priority,
             'priority_str': self.get_priority_display(),
             'categories': self.get_categories(),
