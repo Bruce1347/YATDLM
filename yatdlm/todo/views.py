@@ -189,7 +189,7 @@ def update_task(request, list_id=None, task_id=None):
                 new_state.f_type = FollowUp.STATE_CHANGE
                 task.priority = new_priority
             else:
-                new_state.f_type = FollowUp.COMMENT 
+                new_state.f_type = FollowUp.MODIFICATION
             new_state.save()
             task.title = body.get('title')
             task.description = body.get('description')
