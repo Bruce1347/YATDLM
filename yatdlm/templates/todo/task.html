@@ -5,59 +5,66 @@
 <div class="marginb-normal">
     <div style="margin: auto; max-width: 70em;">
         <h1>Tâche #{{ task.task_no }}: {{ task.title }}</h1>
-        <h4>
-            Fait partie de <a href=".">{{ task.parent_list.title }}</a>
-            {% if task.is_subtask %}
-                et est une sous tâche de <a href="{{ task.parent_task.url }}">{{ task.parent_task.title }}</a>
+        <div id="contents_{{ task.id }}">
+            <h4>
+                Fait partie de <a href=".">{{ task.parent_list.title }}</a>
+                {% if task.is_subtask %}
+                    et est une sous tâche de <a href="{{ task.parent_task.url }}">{{ task.parent_task.title }}</a>
+                {% endif %}
+            </h4>
+            <p>Tâche crée le <b>{{ task.creation_date|date:"d/m/Y à H:i" }}</b> par <b>{{ task.owner }}</b></p>
+            <div id="priority_{{ task.id }}">
+                <p>Priorité: <b>{{ task.get_priority_display }}</b></p>
+            </div>
+            <div id="categories_{{ task.id }}">
+                {% if task.get_displayable_categories %}
+                    <p>Catégories: <b>{{ task.get_displayable_categories }}</b></p>
+                {% endif %}
+            </div>
+            <div id="description_{{ task.id }}">
+                {% if task.description %}
+                    {{ task.description|display_urls|linebreaks }}
+                {% endif %}
+            </div>
+            <!-- TODO: Ajouter les sous tâches -->
+            {% if task.subtasks %}
+                <p>Sous tâches :</p>
+                <table class="pure-table pure-table-bordered">
+                    {% for subtask in task.subtasks %}
+                        <tr class="subtask" id="subtask_{{ subtask.id }}">
+                            {% if subtask.is_done %}
+                                <td><input id="subtask_{{ subtask.id }}_btn" checked type="checkbox"></td>
+                                <td class="strikethrough fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
+                            {% else %}
+                                <td><input id="subtask_{{ subtask.id }}_btn" type="checkbox"></td>
+                                <td class="fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
             {% endif %}
-        </h4>
-        <p>Tâche crée le <b>{{ task.creation_date|date:"d/m/Y à H:i" }}</b> par <b>{{ task.owner }}</b></p>
-        <div id="priority_{{ task.id }}">
-            <p>Priorité: <b>{{ task.get_priority_display }}</b></p>
+            <div class="marginb-tiny tooltip">
+                <div id="followups_title_{{ task.id }}">Commentaires :</div>
+                <div class="top">Afficher/masquer les commentaires</div>
+            </div>
+            <div class="followups_container" id="followups_{{ task.id }}">
+            </div>
+            <label style="display: block;" for="followup_{{ task.id }}">Ajouter un commentaire :</label>
+            <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.id }}"></textarea>
+            <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit_btn_{{ task.id }}">
+                EDITER LA TÂCHE
+            </button>
+            <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.id }}">
+                AJOUTER UN COMMENTAIRE
+            </button>
+            <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject-btn_{{ task.id }}">
+                REJETER LA TÂCHE
+            </button>
+            <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.id }}">
+                FERMER LA TÂCHE
+            </button>
+            <!-- TODO: Ajouter les boutons pour les actions -->
         </div>
-        <div id="description_{{ task.id }}">
-            {% if task.description %}
-                {{ task.description|display_urls|linebreaks }}
-            {% endif %}
-        </div>
-        <!-- TODO: Ajouter les sous tâches -->
-        {% if task.subtasks %}
-            <p>Sous tâches :</p>
-            <table class="pure-table pure-table-bordered">
-                {% for subtask in task.subtasks %}
-                    <tr class="subtask" id="subtask_{{ subtask.id }}">
-                        {% if subtask.is_done %}
-                            <td><input id="subtask_{{ subtask.id }}_btn" checked type="checkbox"></td>
-                            <td class="strikethrough fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
-                        {% else %}
-                            <td><input id="subtask_{{ subtask.id }}_btn" type="checkbox"></td>
-                            <td class="fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-        <div class="marginb-tiny tooltip">
-            <div id="followups_title_{{ task.id }}">Commentaires :</div>
-            <div class="top">Afficher/masquer les commentaires</div>
-        </div>
-        <div class="followups_container" id="followups_{{ task.id }}">
-        </div>
-        <label style="display: block;" for="followup_{{ task.id }}">Ajouter un commentaire :</label>
-        <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.id }}"></textarea>
-        <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit_btn_{{ task.id }}">
-            EDITER LA TÂCHE
-        </button>
-        <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.id }}">
-            AJOUTER UN COMMENTAIRE
-        </button>
-        <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject-btn_{{ task.id }}">
-            REJETER LA TÂCHE
-        </button>
-        <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.id }}">
-            FERMER LA TÂCHE
-        </button>
-        <!-- TODO: Ajouter les boutons pour les actions -->
     </div>
 </div>
 {% endblock %}

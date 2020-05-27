@@ -38,8 +38,8 @@ function createDOMFollowup(followup) {
 
 /**
  * Gets the followups of a specific task
- * @param {Number} listId 
- * @param {Number} taskId 
+ * @param {Number} listId
+ * @param {Number} taskId
  */
 async function getFollowups(listId, taskId) {
     const response = await get(`/todo/lists/${listId}/${taskId}/get_followups`);
@@ -78,8 +78,8 @@ async function add_followup(task) {
 
 /**
  * Fetches one task and returns its object.
- * @param {Number} list_id 
- * @param {Number} task_id 
+ * @param {Number} list_id
+ * @param {Number} task_id
  */
 async function get_task(list_id, task_id) {
     const response = await get(`/todo/lists/${list_id}/${task_id}?json`);
@@ -98,7 +98,7 @@ async function close_task(task) {
         body.followup = followup.value;
     }
     const response = await patch(
-        `/todo/lists/${task.list_id}/${task.id}/close`, 
+        `/todo/lists/${task.list_id}/${task.id}/close`,
         JSON.stringify(body)
     );
     const updated_task = await response.json();
@@ -108,7 +108,7 @@ async function close_task(task) {
 
 /**
  * Rejects a task and returns the updated task.
- * @param {Object} task The task that has to be rejected 
+ * @param {Object} task The task that has to be rejected
  * @param {String} followup An eventual reason for the rejection
  */
 async function reject_task_common(task, followup) {
@@ -121,5 +121,40 @@ async function reject_task_common(task, followup) {
     }
     let response = await patch(url, body);
     let updated_task = await response.json();
+    return updated_task;
+}
+
+/**
+ * Gets a JSON list of the categories associated to a specific todo list.
+ * @param {Number} list_id The id of the list
+ */
+async function get_categories(list_id) {
+    const response = await get(`/todo/categories/${list_id}/list`);
+    const data = await response.json();
+    return data.categories;
+}
+
+/**
+ * A function that will add a new ``Select`` element to the ``container_id`` container.
+ * This function shall be used for task edition.
+ * @param {String} container_id The div that contains all the categories associated to a Task
+ * @param {Array<Object>} categories An array of categories
+ */
+function add_new_category_to_task(container_id, categories) {
+    let categories_container = document.getElementById(container_id);
+    let new_select = categoriesToSelect(categories);
+    new_select.classList.add("fullwidth");
+    categories_container.appendChild(new_select);
+}
+
+/**
+ * Function that will make a request against the backend in order to update as specific task.
+ * @param {String} body The body of the request, this must be a stringified Object.
+ * @param {Object} task The Task that will be updated.
+ */
+async function update_task(body, task) {
+    let url = `/todo/lists/${task.list_id}/${task.id}/update/`;
+    const response = await patch(url, body);
+    const updated_task = await response.json();
     return updated_task;
 }
