@@ -23,7 +23,7 @@ function setup() {
     setup_filters_events();
     setup_sublines_togglers();
     setup_categories(public);
-    setup_tasks(public);
+    setup_tasks_buttons_events(public);
 }
 
 function setup_event_listeners_buttons(public) {
@@ -123,9 +123,11 @@ function setup_categories(public) {
     }
 }
 
-async function setup_tasks(public = false) {
+async function setup_tasks_buttons_events(public = false) {
     // Fetch tasks when the page is loaded
     await fetch_tasks(tasks);
+    if (public === true)
+        return;
     const parent_tasks_container = document.getElementById('new_task_parent_task');
     // Setup togglers for each task detail
     for (var i = 0; i < tasks.length; ++i) {
@@ -154,18 +156,15 @@ async function setup_tasks(public = false) {
                 reject_task(element.list_id, element.id, followup);
             });
         }
-
-        if (public === false) {
-            // Add the task to the subtasks select
-            var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
-            parent_tasks_container.add(parent_tasks_option);
-            for (let subtask of element.subtasks) {
-                // Attach a callback to its corresponding checkbox
-                var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
-                checkbox_btn.addEventListener('click', () => {
-                    closeTask(subtask);
-                })
-            }
+        // Add the task to the subtasks select
+        var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
+        parent_tasks_container.add(parent_tasks_option);
+        for (let subtask of element.subtasks) {
+            // Attach a callback to its corresponding checkbox
+            var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
+            checkbox_btn.addEventListener('click', () => {
+                closeTask(subtask);
+            })
         }
     }
 }
