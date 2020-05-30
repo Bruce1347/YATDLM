@@ -17,6 +17,12 @@ const category_to_edit = document.getElementById("category_to_edit");
 const edit_category_btn = document.getElementById("edit_category-btn");
 const delete_category_btn = document.getElementById("delete_category-btn");
 
+const categories = [];
+// Store the followups in a map with task id as key
+const followups = new Map();
+var tasks = [];
+const priorities = Object();
+
 function setup() {
     const public = document.getElementById('dom_ispublicjs').value === 'true';
     setup_event_listeners_buttons(public);
@@ -113,7 +119,6 @@ function setup_sublines_togglers() {
 
 }
 
-const categories = [];
 function setup_categories(public) {
     if (public === false) {
         // Fetch categories
@@ -169,9 +174,6 @@ async function setup_tasks_buttons_events(public = false) {
     }
 }
 
-var tasks = [];
-const priorities = Object();
-
 function update_categories() {
     const new_task_category = document.getElementById("new_task_category");
     const filter_categories = document.getElementById("select_tcategory");
@@ -194,9 +196,6 @@ function update_categories() {
         edit_categories.add(new Option(element.name, element.id));
     });
 }
-
-// Store the followups in a map with task id as key
-const followups = new Map();
 
 async function fetch_task_followups_then_toggle(data) {
     //createDOMFollowup
