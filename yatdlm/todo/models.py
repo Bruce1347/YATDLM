@@ -229,7 +229,7 @@ class Task(models.Model):
             'is_subtask': self.is_subtask,
             'subtasks': [subtask.as_dict() for subtask in self.subtasks],
             'subtasks_progress': self.subtasks_progress * 100.0,
-            'url': self.url
+            'url': self.url()
         }
 
         if self.due_date is not None:
