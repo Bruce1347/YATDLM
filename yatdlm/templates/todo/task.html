@@ -35,10 +35,10 @@
                         <tr class="subtask" id="subtask_{{ subtask.id }}">
                             {% if subtask.is_done %}
                                 <td><input id="subtask_{{ subtask.id }}_btn" checked type="checkbox"></td>
-                                <td class="strikethrough fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
+                                <td class="strikethrough fullwidth"><a href="{{ subtask|get_url_from_context:public }}">{{ subtask.title }}</a></td>
                             {% else %}
                                 <td><input id="subtask_{{ subtask.id }}_btn" type="checkbox"></td>
-                                <td class="fullwidth"><a href="{{ subtask.url }}">{{ subtask.title }}</a></td>
+                                <td class="fullwidth"><a href="{{ subtask|get_url_from_context:public }}">{{ subtask.title }}</a></td>
                             {% endif %}
                         </tr>
                     {% endfor %}

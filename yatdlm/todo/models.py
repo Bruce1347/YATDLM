@@ -93,9 +93,11 @@ class Task(models.Model):
     def is_owned(self, user):
         return self.owner == user
 
-    @property
-    def url(self):
-        return '/todo/lists/{}/{}'.format(self.parent_list.id, self.id)
+    def url(self, public=False):
+        base_url = '/todo/lists'
+        if public:
+            return base_url + '/public/{}/{}'.format(self.parent_list.id, self.id)
+        return base_url + '/{}/{}'.format(self.parent_list.id, self.id)
 
     @property
     def subtasks(self):

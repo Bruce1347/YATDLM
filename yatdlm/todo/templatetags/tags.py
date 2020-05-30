@@ -17,6 +17,18 @@ def get_value_from_tuple_list(l, first_value):
 
     return None
 
+@register.filter
+def get_url_from_context(task, public):
+    """Returns a url for task according to its context
+
+    :param task: The task with an URL that should be displayed.
+    :param public: The current context of the page
+    :return: A string containing the URL according to the context
+    """
+    if public:
+        return task.url(public=True)
+    return task.url
+
 # Custom filter that inserts hrefs into the given string then returns it
 @register.filter
 @stringfilter
