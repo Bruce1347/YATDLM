@@ -23,8 +23,10 @@ const followups = new Map();
 var tasks = [];
 const priorities = Object();
 
-function setup() {
+async function setup() {
     const public = document.getElementById('dom_ispublicjs').value === 'true';
+    // Fetch tasks when the page is loaded
+    await fetch_tasks(tasks);
     setup_event_listeners_buttons(public);
     setup_filters_events();
     setup_sublines_togglers();
@@ -129,8 +131,6 @@ function setup_categories(public) {
 }
 
 async function setup_tasks_buttons_events(public = false) {
-    // Fetch tasks when the page is loaded
-    await fetch_tasks(tasks);
     if (public === true)
         return;
     const parent_tasks_container = document.getElementById('new_task_parent_task');
