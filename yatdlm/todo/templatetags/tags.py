@@ -27,7 +27,7 @@ def get_url_from_context(task, public):
     """
     if public:
         return task.url(public=True)
-    return task.url
+    return task.url()
 
 # Custom filter that inserts hrefs into the given string then returns it
 @register.filter
