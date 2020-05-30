@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+<input class="hidden" id="dom_ispublicjs" value="{{ publicjs }}">
 <div class="marginb-normal">
     <div style="margin: auto; max-width: 70em;">
         <h1>Tâche #{{ task.task_no }}: {{ task.title }}</h1>
@@ -49,20 +50,22 @@
             </div>
             <div class="followups_container" id="followups_{{ task.id }}">
             </div>
-            <label style="display: block;" for="followup_{{ task.id }}">Ajouter un commentaire :</label>
-            <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.id }}"></textarea>
-            <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit_btn_{{ task.id }}">
-                EDITER LA TÂCHE
-            </button>
-            <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.id }}">
-                AJOUTER UN COMMENTAIRE
-            </button>
-            <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject-btn_{{ task.id }}">
-                REJETER LA TÂCHE
-            </button>
-            <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.id }}">
-                FERMER LA TÂCHE
-            </button>
+            {% if not public %}
+                <label style="display: block;" for="followup_{{ task.id }}">Ajouter un commentaire :</label>
+                <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.id }}"></textarea>
+                <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit_btn_{{ task.id }}">
+                    EDITER LA TÂCHE
+                </button>
+                <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.id }}">
+                    AJOUTER UN COMMENTAIRE
+                </button>
+                <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject-btn_{{ task.id }}">
+                    REJETER LA TÂCHE
+                </button>
+                <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.id }}">
+                    FERMER LA TÂCHE
+                </button>
+            {% endif %}
             <!-- TODO: Ajouter les boutons pour les actions -->
         </div>
     </div>

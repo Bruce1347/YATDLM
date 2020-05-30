@@ -246,7 +246,6 @@ def close_task(request, list_id=None, task_id=None):
         payload = {"errors": "Wrong Task ID or List ID"}
     return JsonResponse(payload, status=status)
 
-@login_required()
 @require_http_methods(['GET'])
 def get_followups(request, list_id=None, task_id=None):
     if not list_id or not task_id:
@@ -404,6 +403,26 @@ def display_task(request, list_id, task_id):
         return JsonResponse(request.task.as_dict(), status=202)
     context = {
         'task': request.task,
+        'public': False,
+        'publicjs': yesnojs(False),
+        'includes': ['single_task', 'list_common'],
+        'followups': request.task.get_followups()
+    }
+    return render(request, 'todo/task.html', context)
+
+@require_http_methods(['GET'])
+@task_exists
+def display_task_public(request, list_id, task_id):
+    """Public version of ``display_task``, this is a duplicate function because
+    of the usage of login dependant decorators in the previous function. This
+    function ensures that the displayed task is displayed in a read-only mode.
+    """
+    if 'json' in request.GET:
+        return JsonResponse(request.task.as_dict(), status=202)
+    context = {
+        'task': request.task,
+        'public': True,
+        'publicjs': yesnojs(True),
         'includes': ['single_task', 'list_common'],
         'followups': request.task.get_followups()
     }

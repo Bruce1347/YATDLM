@@ -264,25 +264,29 @@
                                 <div class="margint-normal followups_container" id="followups_{{ task.task_no }}">
                                 </div>
 
-                                <label for="followup_{{ task.task_no}}">Ajouter un commentaire :</label>
-                                <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.task_no }}"></textarea>
-                                <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit-btn_{{ task.task_no }}">EDITER</button>
-                                <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.task_no }}">
-                                    AJOUTER UN COMMENTAIRE
-                                </button>
-                                {% if not task.is_done %}
-                                    {% if not task.is_rejected %}
-                                        <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject_task-btn_{{ task.task_no }}">
-                                            REJETER LA TÂCHE
+                                {% if not public %}
+                                    <label for="followup_{{ task.task_no}}">Ajouter un commentaire :</label>
+                                    <textarea class="marginb-normal margint-normal fullwidth" id="followup_{{ task.task_no }}"></textarea>
+                                    <button class="marginr-tiny pure-button pure-button-primary" type="button" id="edit-btn_{{ task.task_no }}">
+                                        EDITER
+                                    </button>
+                                    <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="add_followup-btn_{{ task.task_no }}">
+                                        AJOUTER UN COMMENTAIRE
+                                    </button>
+                                    {% if not task.is_done %}
+                                        {% if not task.is_rejected %}
+                                            <button class="marginl-tiny marginr-tiny pure-button pure-button-primary" type="button" id="reject_task-btn_{{ task.task_no }}">
+                                                REJETER LA TÂCHE
+                                            </button>
+                                        {% endif %}
+                                        <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.task_no }}">
+                                            FERMER LA TÂCHE
+                                        </button>
+                                    {% else %}
+                                        <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.task_no }}">
+                                            ROUVRIR LA TÂCHE
                                         </button>
                                     {% endif %}
-                                    <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.task_no }}">
-                                        FERMER LA TÂCHE
-                                    </button>
-                                {% else %}
-                                    <button class="marginl-tiny pure-button pure-button-primary" type="button" id="close-btn_{{ task.task_no }}">
-                                        ROUVRIR LA TÂCHE
-                                    </button>
                                 {% endif %}
                             </td>
                         </tr>

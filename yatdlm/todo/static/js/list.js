@@ -17,116 +17,115 @@ const category_to_edit = document.getElementById("category_to_edit");
 const edit_category_btn = document.getElementById("edit_category-btn");
 const delete_category_btn = document.getElementById("delete_category-btn");
 
-// Setup event listeners for buttons
-document.getElementById("add-category-form-btn").addEventListener('click', () => {
-    toggle_add_category_form();
-});
-document.getElementById("add-category-btn").addEventListener('click', () => {
-    add_new_category();
-});
-category_to_edit.addEventListener('change', () => {
-    // Disable button if the selected category doesn't exists
-    edit_category_btn.disabled = category_to_edit.value === "-1";
-    delete_category_btn.disabled = category_to_edit.value === "-1";
-    let edit_category_name = document.getElementById("edit_category_name");
-    edit_category_name.value = category_to_edit.options[category_to_edit.selectedIndex].text;
-});
-edit_category_btn.addEventListener('click', async function() {
-    const response = await edit_category();
-    const updated_category = await response.json();
-    await fetch_categories();
-    update_categories();
-    let tasks_to_update = tasks.filter((task) => {
-        let idx = task.categories.findIndex((category) => {
-            return category.id === updated_category.id;
-        });
-        return idx !== -1;
+function setup() {
+    const public = document.getElementById('dom_ispublicjs').value === 'true';
+    setup_event_listeners_buttons(public);
+    setup_filters_events();
+    setup_sublines_togglers();
+    setup_categories(public);
+    setup_tasks(public);
+}
+
+function setup_event_listeners_buttons(public) {
+    // If we're in public mode, do nothing
+    if (public === true)
+        return;
+    // Setup event listeners for buttons
+    document.getElementById("add-category-form-btn").addEventListener('click', () => {
+        toggle_add_category_form();
     });
-    tasks_to_update.forEach((task) => {
-        var td = document.getElementById(`categories_${task.no}`);
-        td.innerText = updated_category.name;
+    document.getElementById("add-category-btn").addEventListener('click', () => {
+        add_new_category();
     });
-});
-delete_category_btn.addEventListener('click', async function() {
-    await delete_category();
-    await fetch_categories();
-    update_categories();
-});
-
-/**
- * Setup the filters events.
- */
-document.getElementById("input_tid").addEventListener('keyup', function () {
-    this.classList.remove("red_border");
-    var pattern = this.getAttribute("pattern");
-    var value = this.value;
-
-    var validator = new RegExp(pattern);
-
-    if (validator.test(value)) {
-        filter_tasks();
-    } else {
-        this.classList.add("red_border");
-    }
-});
-document.getElementById("input_tname").addEventListener('keyup', filter_tasks);
-document.getElementById("select_tcyear").addEventListener('change', filter_tasks);
-document.getElementById("select_tcmonth").addEventListener('change', filter_tasks);
-document.getElementById("select_tryear").addEventListener('change', filter_tasks);
-document.getElementById("select_trmonth").addEventListener('change', filter_tasks);
-document.getElementById("select_tdyear").addEventListener('change', filter_tasks);
-document.getElementById("select_tdmonth").addEventListener('change', filter_tasks);
-document.getElementById("select_tprio").addEventListener('change', filter_tasks);
-document.getElementById("select_tcategory").addEventListener('change', filter_tasks);
-
-// Setup togglers for sub lines inside the tbody
-document.getElementById("list-container").querySelectorAll('tr:not(.hidden):not(.subtask)').forEach(
-    (element) => {
-        var children = element.querySelectorAll('td:not(.delete)');
-        children.forEach((child) => {
-            child.addEventListener('click', () => {
-                //TODO: Also use a Map for tasks and avoid linear search time.
-                fetch_task_followups_then_toggle(tasks.find((elt) => {
-                    return elt.no === parseInt(element.id);
-                }));
+    category_to_edit.addEventListener('change', () => {
+        // Disable button if the selected category doesn't exists
+        edit_category_btn.disabled = category_to_edit.value === "-1";
+        delete_category_btn.disabled = category_to_edit.value === "-1";
+        let edit_category_name = document.getElementById("edit_category_name");
+        edit_category_name.value = category_to_edit.options[category_to_edit.selectedIndex].text;
+    });
+    edit_category_btn.addEventListener('click', async function() {
+        const response = await edit_category();
+        const updated_category = await response.json();
+        await fetch_categories();
+        update_categories();
+        let tasks_to_update = tasks.filter((task) => {
+            let idx = task.categories.findIndex((category) => {
+                return category.id === updated_category.id;
             });
+            return idx !== -1;
         });
-    }
-);
-
-// Fetch categories
-const categories = [];
-fetch_categories().then(() => {
-    update_categories();
-});
-
-function update_categories() {
-    const new_task_category = document.getElementById("new_task_category");
-    const filter_categories = document.getElementById("select_tcategory");
-    const edit_categories = document.getElementById("category_to_edit");
-
-    // Since we have the same number of categories each time, one loop is
-    // enough to clear all the selects elements
-
-    for (let i = new_task_category.options.length - 1; i >= 1; --i) {
-        new_task_category.remove(i);
-        filter_categories.remove(i);
-        edit_categories.remove(i);
-    }
-
-    categories.forEach((element, key) => {
-        // Since a DOM node can't have multiple parents, we can't factorize
-        // this part.
-        new_task_category.add(new Option(element.name, element.id));
-        filter_categories.add(new Option(element.name, element.id));
-        edit_categories.add(new Option(element.name, element.id));
+        tasks_to_update.forEach((task) => {
+            var td = document.getElementById(`categories_${task.no}`);
+            td.innerText = updated_category.name;
+        });
+    });
+    delete_category_btn.addEventListener('click', async function() {
+        await delete_category();
+        await fetch_categories();
+        update_categories();
     });
 }
 
-var tasks = [];
-const priorities = Object();
-// Fetch tasks when the page is loaded
-fetch_tasks(tasks).then(() => {
+function setup_filters_events() {
+    /**
+     * Setup the filters events.
+     */
+    document.getElementById("input_tid").addEventListener('keyup', function () {
+        this.classList.remove("red_border");
+        var pattern = this.getAttribute("pattern");
+        var value = this.value;
+
+        var validator = new RegExp(pattern);
+
+        if (validator.test(value)) {
+            filter_tasks();
+        } else {
+            this.classList.add("red_border");
+        }
+    });
+    document.getElementById("input_tname").addEventListener('keyup', filter_tasks);
+    document.getElementById("select_tcyear").addEventListener('change', filter_tasks);
+    document.getElementById("select_tcmonth").addEventListener('change', filter_tasks);
+    document.getElementById("select_tryear").addEventListener('change', filter_tasks);
+    document.getElementById("select_trmonth").addEventListener('change', filter_tasks);
+    document.getElementById("select_tdyear").addEventListener('change', filter_tasks);
+    document.getElementById("select_tdmonth").addEventListener('change', filter_tasks);
+    document.getElementById("select_tprio").addEventListener('change', filter_tasks);
+    document.getElementById("select_tcategory").addEventListener('change', filter_tasks);
+}
+
+function setup_sublines_togglers() {
+    // Setup togglers for sub lines inside the tbody
+    document.getElementById("list-container").querySelectorAll('tr:not(.hidden):not(.subtask)').forEach(
+        (element) => {
+            var children = element.querySelectorAll('td:not(.delete)');
+            children.forEach((child) => {
+                child.addEventListener('click', () => {
+                    //TODO: Also use a Map for tasks and avoid linear search time.
+                    fetch_task_followups_then_toggle(tasks.find((elt) => {
+                        return elt.no === parseInt(element.id);
+                    }));
+                });
+            });
+        }
+    );
+
+}
+
+const categories = [];
+function setup_categories(public) {
+    if (public === false) {
+        // Fetch categories
+        fetch_categories().then(() => {
+            update_categories();
+        });
+    }
+}
+
+async function setup_tasks(public = false) {
+    // Fetch tasks when the page is loaded
+    await fetch_tasks(tasks);
     const parent_tasks_container = document.getElementById('new_task_parent_task');
     // Setup togglers for each task detail
     for (var i = 0; i < tasks.length; ++i) {
@@ -155,18 +154,47 @@ fetch_tasks(tasks).then(() => {
                 reject_task(element.list_id, element.id, followup);
             });
         }
-        // Add the task to the subtasks select
-        var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
-        parent_tasks_container.add(parent_tasks_option);
-        for (let subtask of element.subtasks) {
-            // Attach a callback to its corresponding checkbox
-            var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
-            checkbox_btn.addEventListener('click', () => {
-                closeTask(subtask);
-            })
+
+        if (public === false) {
+            // Add the task to the subtasks select
+            var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
+            parent_tasks_container.add(parent_tasks_option);
+            for (let subtask of element.subtasks) {
+                // Attach a callback to its corresponding checkbox
+                var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
+                checkbox_btn.addEventListener('click', () => {
+                    closeTask(subtask);
+                })
+            }
         }
     }
-});
+}
+
+var tasks = [];
+const priorities = Object();
+
+function update_categories() {
+    const new_task_category = document.getElementById("new_task_category");
+    const filter_categories = document.getElementById("select_tcategory");
+    const edit_categories = document.getElementById("category_to_edit");
+
+    // Since we have the same number of categories each time, one loop is
+    // enough to clear all the selects elements
+
+    for (let i = new_task_category.options.length - 1; i >= 1; --i) {
+        new_task_category.remove(i);
+        filter_categories.remove(i);
+        edit_categories.remove(i);
+    }
+
+    categories.forEach((element, key) => {
+        // Since a DOM node can't have multiple parents, we can't factorize
+        // this part.
+        new_task_category.add(new Option(element.name, element.id));
+        filter_categories.add(new Option(element.name, element.id));
+        edit_categories.add(new Option(element.name, element.id));
+    });
+}
 
 // Store the followups in a map with task id as key
 const followups = new Map();

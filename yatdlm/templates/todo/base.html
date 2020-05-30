@@ -31,7 +31,7 @@
         {% endif %}
         {% if 'list' in includes %}
             <script src="{% static 'js/models/list.js' %}"></script>
-            <script src="{% static 'js/list.js' %}"></script>
+            <script src="{% static 'js/list.js' %}" onload="setup();"></script>
         {% endif %}
         {% endif %}
     </body>

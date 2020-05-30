@@ -156,7 +156,7 @@ async function edit_task(task) {
     contents_dom.parentNode.replaceChild(form, contents_dom);
 }
 
-function set_buttons_listeners(task) {
+function set_buttons_listeners(task, public = false) {
     const followups_paragraph = document.getElementById(`followups_title_${task.id}`)
     const edit_task_btn = document.getElementById(`edit_btn_${task.id}`);
     const add_followup_btn = document.getElementById(`add_followup-btn_${task.id}`);
@@ -187,7 +187,8 @@ let task = new Object();
 let followups = new Map();
 
 async function setup() {
-    Object.assign(task, await get_task(list_id, task_id));
+    let public = document.getElementById('dom_ispublicjs').value === 'true';
+    Object.assign(task, await get_task(list_id, task_id, public));
     await fetch_task_followups(list_id, task_id);
-    set_buttons_listeners(task);
+    set_buttons_listeners(task, public);
 }

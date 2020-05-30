@@ -81,8 +81,13 @@ async function add_followup(task) {
  * @param {Number} list_id
  * @param {Number} task_id
  */
-async function get_task(list_id, task_id) {
-    const response = await get(`/todo/lists/${list_id}/${task_id}?json`);
+async function get_task(list_id, task_id, public = false) {
+    if (public === false) {
+        var url = `/todo/lists/${list_id}/${task_id}?json`;
+    } else {
+        var url = `/todo/lists/public/${list_id}/${task_id}?json`;
+    }
+    const response = await get(url);
     const data = await response.json();
     return data;
 }
