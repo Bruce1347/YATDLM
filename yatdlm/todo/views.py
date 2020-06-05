@@ -56,7 +56,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
     prefetch_fields = [
         'task_set',
-        'owner'
+        'owner',
     ]
     todo_list = TodoList.objects.prefetch_related(*prefetch_fields).get(id=list_id)
 
@@ -66,11 +66,9 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 
     # Retrieve the subsequent tasks
     tfilter = todo_list.task_set
-    tfilter = tfilter.prefetch_related('categories', 'task_set')
-    tfilter = tfilter.select_related('owner')
+    tfilter = tfilter.select_related('owner', 'parent_task')
+    tfilter = tfilter.prefetch_related('task_set', 'categories')
     tfilter = tfilter.order_by('is_done', 'priority', '-resolution_date', '-creation_date')
-    # Do not include subtasks
-    tfilter = tfilter.filter(parent_task__isnull=True)
 
     # Create the context
     creation_years_filter = tfilter.dates('creation_date', 'year')
@@ -94,10 +92,30 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
-    tasks = [task for task in tfilter]
+    # Do not include subtasks
+    subtasks = [task for task in list(tfilter.filter(parent_task__isnull=False))]
+
+    tfilter = tfilter.filter(parent_task__isnull=True)
+    tasks = {
+        task.id: task
+        for task in list(tfilter)
+    }
+
+    for task in subtasks:
+        parent_task = tasks[task.parent_task.id]
+        if not hasattr(parent_task, 'subtasks_render'):
+            setattr(parent_task, 'subtasks_render', list())
+        parent_task.subtasks_render.append(task)
+
+    tasks = [task for _, task in tasks.items()]
 
     for task in tasks:
         setattr(task, 'str_owner', task.owner.username)
+        str_categories = ", ".join((
+            category.name
+            for category in task.categories.all()
+        ))
+        setattr(task, 'str_categories', str_categories)
 
     context = {
         'list'  : todo_list,

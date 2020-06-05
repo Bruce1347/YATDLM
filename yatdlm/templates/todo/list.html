@@ -203,7 +203,7 @@
                                 {{ task.get_priority_display }}
                             </td>
                             <td id="categories_{{ task.task_no }}" class="pointer cell c-align">
-                                {{ task.get_displayable_categories }}
+                                {{ task.str_categories }}
                             </td>
                             <td class="td-creat-date pointer cell c-align">
                                 {{ task.creation_date|date:"d/m/Y" }}
@@ -247,7 +247,7 @@
                                 </div>
 
                                 <table>
-                                    {% for subtask in task.subtasks %}
+                                    {% for subtask in task.subtasks_render %}
                                         <tr class="subtask" id="subtask_{{ subtask.id }}">
                                             {% if subtask.is_done %}
                                                 <td><input id="subtask_{{ subtask.id }}_btn" checked type="checkbox"></td>
