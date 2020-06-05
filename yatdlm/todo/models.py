@@ -111,11 +111,12 @@ class Task(models.Model):
     def subtasks_progress(self):
         """Return the percentage of done tasks"""
 
-        tasks_count = self.task_set.count()
-        if tasks_count ==  0:
+        tasks = list(self.task_set.all())
+        nb_tasks = len(tasks)
+        if not nb_tasks:
             return 0
-        tasks_done = self.task_set.filter(is_done=True).count()
-        return 100.0 * (tasks_done / tasks_count)
+        tasks_done = sum(1 for task in tasks if task.is_done is True)
+        return 100.0 * (tasks_done / nb_tasks)
 
     @property
     def is_rejected(self):
@@ -191,7 +192,11 @@ class Task(models.Model):
             self.resolution_date = None
 
     def get_displayable_categories(self):
-        return ", ".join([cat.get('name') for cat in self.get_categories()])
+        categories = [
+            cat
+            for cat in self.categories.all().order_by('id').values_list('name', flat=True)
+        ]
+        return ", ".join(categories)
 
     @property
     def priorities(self):

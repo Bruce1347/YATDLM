@@ -54,14 +54,21 @@ def index(request, xhr):
 
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
-    todo_list = TodoList.objects.prefetch_related('task_set').get(id=list_id)
+    prefetch_fields = [
+        'task_set',
+        'owner'
+    ]
+    todo_list = TodoList.objects.prefetch_related(*prefetch_fields).get(id=list_id)
 
     # If the list is not public then we throw a 403
     if not todo_list.is_public and public:
         return HttpResponseForbidden()
 
     # Retrieve the subsequent tasks
-    tfilter = todo_list.task_set.order_by('is_done', 'priority', '-resolution_date', '-creation_date')
+    tfilter = todo_list.task_set
+    tfilter = tfilter.prefetch_related('categories', 'task_set')
+    tfilter = tfilter.select_related('owner')
+    tfilter = tfilter.order_by('is_done', 'priority', '-resolution_date', '-creation_date')
     # Do not include subtasks
     tfilter = tfilter.filter(parent_task__isnull=True)
 
@@ -89,8 +96,12 @@ def display_list(request, list_id=-1, xhr=False, public=False):
     )
     tasks = [task for task in tfilter]
 
+    for task in tasks:
+        setattr(task, 'str_owner', task.owner.username)
+
     context = {
         'list'  : todo_list,
+        'list_owner': todo_list.owner.username,
         'tasks' : tasks,
         'xhr'   : xhr,
         'isdev' : 'DEV - ' if settings.DEBUG else '',

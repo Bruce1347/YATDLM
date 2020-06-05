@@ -8,7 +8,7 @@
     <input class="hidden" id="dom_ispublicjs" value="{{ publicjs }}">
     <div class="todo-header" style="max-width: 40em; margin: auto;" id="todo_header">
         <h1>{{ list.title }}</h1>
-        <p>Crée par <b>{{ list.owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
+        <p>Crée par <b>{{ list_owner }}</b> le {{ list.creation_date|date:"d/m/Y à H:i" }}</p>
         <div>
             {{ list.description|display_urls|linebreaks }}
         </div>
@@ -233,7 +233,7 @@
                                 </div>
                                 <div>
                                     <span style="display: inline-block;">
-                                        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.owner }}</b>
+                                        Crée le {{ task.creation_date|date:"d/m/Y" }} à {{ task.creation_date|date:"H:i" }} par <b>{{ task.str_owner }}</b>
                                     </span>
                                 </div>
                                 <div>
