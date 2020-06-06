@@ -92,13 +92,13 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
-    # Do not include subtasks
-    subtasks = [task for task in list(tfilter.filter(parent_task__isnull=False))]
+    all_tasks = list(tfilter)
+    subtasks = [task for task in all_tasks if task.parent_task is not None]
+    tasks = [task for task in all_tasks if task.parent_task is None]
 
-    tfilter = tfilter.filter(parent_task__isnull=True)
     tasks = {
         task.id: task
-        for task in list(tfilter)
+        for task in tasks
     }
 
     for task in subtasks:
