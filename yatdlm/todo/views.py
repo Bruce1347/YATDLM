@@ -92,7 +92,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
-    all_tasks = list(tfilter)
+    all_tasks = [task for task in tfilter]
     subtasks = [task for task in all_tasks if task.parent_task is not None]
     tasks = [task for task in all_tasks if task.parent_task is None]
 
@@ -139,16 +139,26 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 @require_http_methods(['GET'])
 def list_tasks(request, list_id=None):
     try:
-        tasks = Task.objects.filter(parent_list_id=list_id).order_by('task_no')
         #TODO: Use a validator for this verification
         todo = TodoList.objects.get(id=list_id)
         if not todo.is_public and not request.user.is_authenticated:
             return JsonResponse({'errors': 'Non.'}, status=403)
+        tasks = todo.task_set
+        # Prefetch related objects
+        tasks = tasks.prefetch_related(
+            'task_set',
+            'task_set__categories',
+            'categories'
+        )
+        # Order by task number
+        tasks = tasks.order_by('task_no')
+        # Execute the query
+        tasks = [task for fask in tasks]
         # Check if the user requests all the tasks or only the meta tasks
         # (without any parent task)
         meta_tasks_param = yesnopython(request.GET.get('meta_tasks', 'false'))
         if meta_tasks_param:
-            tasks = tasks.filter(parent_task__isnull=True)
+            tasks = [task for task in tasks if task.parent_task is None]
         priorities = {
             name: value
             for name, value in Task.priority_levels
