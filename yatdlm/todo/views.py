@@ -153,7 +153,7 @@ def list_tasks(request, list_id=None):
         # Order by task number
         tasks = tasks.order_by('task_no')
         # Execute the query
-        tasks = [task for fask in tasks]
+        tasks = [task for task in tasks]
         # Check if the user requests all the tasks or only the meta tasks
         # (without any parent task)
         meta_tasks_param = yesnopython(request.GET.get('meta_tasks', 'false'))
