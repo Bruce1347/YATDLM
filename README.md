@@ -1,37 +1,23 @@
 # YATDLM - Yet Another ToDo Lists Manager
 
-This project aims to be a light and flexible todo lists manager.
+## What is this project
+
+This project is a todo lists manager.
+
+## Why
+
+* Fun
+* In order to self host my own todo list manager
+* Write python and build a django application on my free time
 
 ## Development
 
-The Python dependencies are in the requirements file, you can install them with pip :
-```bash
-    $ pip3 install -r requirements.txt
-```
+This project uses [Poetry](https://python-poetry.org/) for dependency management.
 
-I use a virtualenv for the development, thanks to virtualenvwrapper, this part is simpler.
+If you'd like to contribute or just launch YATDLM in your own local setup do the following:
 
-If you are on a Debian based OS, you'll have to set some environment variables :
-```bash
-    $ export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
-```
+* Install [Poetry](https://python-poetry.org/docs/#installation)
+* At the root of the cloned repository, run `poetry install`
+* After the first install, just run `poetry shell` to spawn a shell inside the virtualenv created by Poetry
 
-Then :
-```bash
-    $ mkvirtualenv -r requirements.txt --python=python3.6 yatdlm
-```
-
-This will create a new virtualenv named `yatdlm` with a python 3.6 interpreter and then install the requirements specified in the requirements file.
-
-Except for the first time, you will need to activate the virtualenv each time you want to launch the developement webserver or make your migration. You will have to do the following :
-```bash
-    $ source /usr/local/bin/virtualenvwrapper.sh
-    $ workon yatdlm
-```
-
-Once you're in the virtualenv you can use pip as you want in order to manage the packages that are *inside* the virtualenv. When you are finished, you can deactivate the virtualenv simply by using :
-```bash
-    $ deactivate
-```
-
-If you are a french reader, you can follow the progress of YATDLM [here](http://todo.wormholextreme.net/todo/lists/public/1/)
+If you are a french reader, you can follow the progress of YATDLM [here](http://todo.wormholextreme.net/todo/lists/public/1/).
