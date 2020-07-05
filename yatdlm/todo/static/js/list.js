@@ -16,6 +16,7 @@ var picker = flatpickr(document.getElementById('new_task_due_date'), {
 const category_to_edit = document.getElementById("category_to_edit");
 const edit_category_btn = document.getElementById("edit_category-btn");
 const delete_category_btn = document.getElementById("delete_category-btn");
+const add_category_to_new_task_btn = document.getElementById("add_new_task_category");
 
 const categories = [];
 // Store the followups in a map with task id as key
@@ -72,6 +73,11 @@ function setup_event_listeners_buttons(public) {
         await delete_category();
         await fetch_categories();
         update_categories();
+    });
+    add_category_to_new_task_btn.addEventListener('click', function() {
+        let cat_select = categoriesToSelect(categories);
+        cat_select.classList.add("fullwidth");
+        document.getElementById("new_task_categories_container").appendChild(cat_select);
     });
 }
 
