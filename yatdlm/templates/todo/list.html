@@ -208,11 +208,14 @@
                             <td class="td-creat-date pointer cell c-align">
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
+                            {% if task.is_rejected %}
+                                <td colspan="2"></td>
+                            {% endif %}
                             {% if task.is_done %}
                                 <td class="td-resolv-date pointer cell c-align" id="resolutiond_{{ task.task_no }}" colspan="2">
                                     Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
                                 </td>
-                            {% else %}
+                            {% elif not task.is_rejected %}
                                 <td class="td-resolv-date" id="resolutiond_{{ task.task_no }}" class="pointer cell c-align">
                                 {{ task.resolution_date|date:"d/m/Y" }}
                                 </td>
