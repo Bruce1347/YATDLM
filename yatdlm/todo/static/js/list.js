@@ -956,16 +956,6 @@ function add_new_task_category(container_id=undefined) {
 }
 
 /**
- * Deletes the list pointed by ``list_id``.
- *
- * @param {Number} list_id The list that the user wants to delete
- */
-async function delete_list(list_id) {
-    await _delete(`/todo/lists/delete/${list_id}`);
-    window.location.href = '/todo';
-}
-
-/**
  * Rejects a task and updates the DOM.
  * @param {Number} list_id The current todo list
  * @param {Number} task_id The task that has to be rejected

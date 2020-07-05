@@ -163,3 +163,19 @@ async function update_task(body, task) {
     const updated_task = await response.json();
     return updated_task;
 }
+
+/**
+ * Attempts a deletion of the list with ``list_id`` being its id.
+ *
+ * @param {Number} list_id The id of the list that shall be deleted
+ */
+async function delete_list(list_id) {
+    // Ask the user for a manual confirmation
+    if (!confirm(`Voulez-vous effacer cette liste ?`)) {
+        // Allow a rollback to the current window if they hit the cancel button
+        return;
+    }
+
+    await _delete(`/todo/lists/delete/${list_id}`);
+    window.location.href = '/todo';
+}

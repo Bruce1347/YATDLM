@@ -131,7 +131,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         'resolution_years': resolution_years,
         'deadlines_years': deadlines_years,
         'months': months,
-        'includes': ['list']
+        'includes': ['list', 'list_common']
     }
 
     return render(request, 'todo/list.html', context)
