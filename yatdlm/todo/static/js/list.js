@@ -223,6 +223,41 @@ async function fetch_task_followups_then_toggle(data) {
     }
 }
 
+function reset_task_add_form() {
+    /**
+     * Find programatically the default value for the default priority instead
+     * of hardcoding it.
+     * This allows the backend to stay the unique source of truth.
+     * However, the backend shall return the id when an API request is made to
+     * retrieve the list and its informations.
+     * The following 3 lines are just meant to be a temporary fix until the
+     * backend returns the default priority id in its response.
+     */
+    let default_priority_id = Object.keys(priorities).find((key) => {
+        return priorities[key] == 'Normal';
+    });
+
+    let task_title = document.getElementById("new_task_title");
+    let task_description = document.getElementById("new_task_descr");
+    let parent_task = document.getElementById("new_task_parent_task");
+    let priority = document.getElementById("new_task_priority");
+    let due_date = document.getElementById("new_task_due_date");
+    let categories_container = document.getElementById("new_task_categories_container");
+    let categories = categories_container.querySelectorAll("select");
+
+    task_title.value = "";
+    task_description.value = "";
+    parent_task.value = "-1";
+    priority.value = default_priority_id;
+    due_date.value = "";
+    for (let category of categories) {
+        categories_container.removeChild(category);
+    }
+    let new_category_select = categoriesToSelect(categories);
+    new_category_select.classList.add("fullwidth");
+    categories_container.appendChild(new_category_select);
+}
+
 /**
  * Handles the addition of one followup to a specific task.
  * @param {Object} task
@@ -699,6 +734,7 @@ function add_task_exp(url) {
                     firstElt.parentNode.insertBefore(newDetail, newTr.nextSibling);
                 }
             }
+            reset_task_add_form();
         } else {
         }
     }
