@@ -113,9 +113,9 @@
                         <th class="cell c-align">Tâche</th>
                         <th class="th-prio cell c-align" style="max-width: 10%">Priorité</th>
                         <th class="th-category cell c-align">Catégorie</th>
-                        <th class="th-creat-date cell c-align">Création</th>
-                        <th class="th-resolv-date cell c-align">Résolution</th>
-                        <th class="th-due-date cell c-align">Échéance</th>
+                        <th class="th-creat-date cell c-align hidden">Création</th>
+                        <th class="th-resolv-date cell c-align hidden">Résolution</th>
+                        <th class="th-due-date cell c-align hidden">Échéance</th>
                         {% if not public %}
                         <th class="no-mob-btn cell c-align">
                         </th>
@@ -141,7 +141,7 @@
                                 <option value="-1" select></option>
                             </select>
                         </th>
-                        <th class="th-creat-date">
+                        <th class="th-creat-date hidden">
                             <div class="flexdiv">
                                 <select class="flex1 marginr-tiny" name="search_tcmonth" id="select_tcmonth">
                                     <option value="-1" label=" " selected></option>
@@ -157,7 +157,7 @@
                                 </select>
                             </div>
                         </th>
-                        <th class="th-resolv-date">
+                        <th class="th-resolv-date hidden">
                             <div class="flexdiv">
                                 <select class="flex1 marginr-tiny" name="search_trmonth" id="select_trmonth">
                                     <option value="-1" label=" " selected></option>
@@ -173,7 +173,7 @@
                                 </select>
                             </div>
                         </th>
-                        <th class="th-due-date">
+                        <th class="th-due-date hidden">
                             <div class="flexdiv">
                                 <select class="flex1 marginr-tiny" name="search_tdmonth" id="select_tdmonth">
                                     <option value="-1" label=" " selected></option>
@@ -207,24 +207,24 @@
                             <td class="td-prio" id="priority_{{ task.task_no }}" class="pointer cell c-align" style="white-space: nowrap; padding-left: 1em; padding-right: 1em;">
                                 {{ task.get_priority_display }}
                             </td>
-                            <td id="categories_{{ task.task_no }}" class="pointer cell c-align">
+                            <td id="categories_{{ task.task_no }}" class="td-category pointer cell c-align">
                                 {{ task.str_categories }}
                             </td>
-                            <td class="td-creat-date pointer cell c-align">
+                            <td class="td-creat-date pointer cell c-align hidden">
                                 {{ task.creation_date|date:"d/m/Y" }}
                             </td>
                             {% if task.is_rejected %}
-                                <td colspan="2"></td>
+                                <td class="hidden" colspan="2"></td>
                             {% endif %}
                             {% if task.is_done %}
-                                <td class="td-resolv-date pointer cell c-align" id="resolutiond_{{ task.task_no }}" colspan="2">
+                                <td class="td-resolv-date pointer cell c-align hidden" id="resolutiond_{{ task.task_no }}" colspan="2">
                                     Résolu le {{ task.resolution_date|date:"d/m/Y" }} à {{ task.resolution_date|date:"H:i" }}
                                 </td>
                             {% elif not task.is_rejected %}
-                                <td class="td-resolv-date" id="resolutiond_{{ task.task_no }}" class="pointer cell c-align">
+                                <td class="td-resolv-date pointer cell c-align hidden" id="resolutiond_{{ task.task_no }}">
                                 {{ task.resolution_date|date:"d/m/Y" }}
                                 </td>
-                                <td class="td-due-date" id="dued_{{ task.task_no }}" class="pointer cell c-align">
+                                <td class="td-due-date pointer cell c-align hidden" id="dued_{{ task.task_no }}">
                                     {{ task.due_date|date:"d/m/Y" }}
                                 </td>
                             {% endif %}
