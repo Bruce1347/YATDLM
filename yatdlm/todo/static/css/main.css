@@ -117,6 +117,7 @@
     .th-resolv-date, .td-resolv-date,
     .th-due-date, .td-due-date,
     .th-prio, .td-prio,
+    .th-category, .td-category,
     .no-mob-btn {
         display: none;
     }

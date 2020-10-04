@@ -105,14 +105,14 @@
         {% endif %}
     {% endif %}
         <div class="marginb-normal">
-            <table class="fullwidth pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
+            <table class="fullwidth pure-table pure-table-bordered" style="max-width: 45em; margin: auto;">
                 {% if not search and not xhr %}
                 <thead>
                     <tr class="low_black_border">
                         <th class="cell c-align">#</th>
                         <th class="cell c-align">Tâche</th>
                         <th class="th-prio cell c-align" style="max-width: 10%">Priorité</th>
-                        <th class="cell c-align">Catégorie</th>
+                        <th class="th-category cell c-align">Catégorie</th>
                         <th class="th-creat-date cell c-align">Création</th>
                         <th class="th-resolv-date cell c-align">Résolution</th>
                         <th class="th-due-date cell c-align">Échéance</th>
@@ -136,7 +136,7 @@
                                 {% endfor %}
                             </select>
                         </th>
-                        <th>
+                        <th class="th-category">
                             <select class="fullwidth" name="search_tcategory" id="select_tcategory">
                                 <option value="-1" select></option>
                             </select>
