@@ -589,16 +589,16 @@ function createNewDOMTasktr(data) {
     tdCategories.classList.add("pointer", "cell", "c-align");
     tdCategories.innerText = data.categories_str;
     var tdCreationDate = document.createElement('td');
-    tdCreationDate.classList.add("pointer", "cell", "c-align");
+    tdCreationDate.classList.add("pointer", "cell", "c-align", "hidden");
     tdCreationDate.innerText = data.creation_date;
     tdCreationDate.id = `${data.id}_creationd`;
     tdCreationDate.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdResolutionDate = document.createElement('td');
-    tdResolutionDate.classList.add("pointer", "cell", "c-align");
+    tdResolutionDate.classList.add("pointer", "cell", "c-align", "hidden");
     tdResolutionDate.id = `${data.id}_resolutiond`;
     tdResolutionDate.addEventListener('click', () => toggle(`task_subline_${data.no}`));
     var tdDeadline = document.createElement('td');
-    tdDeadline.classList.add("pointer", "cell", "c-align");
+    tdDeadline.classList.add("pointer", "cell", "c-align", "hidden");
     if (data.due_date !== undefined)
         tdDeadline.innerText = data.due_date;
     tdDeadline.id = `${data.id}_deadline`;
