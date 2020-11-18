@@ -114,6 +114,8 @@
     }
 
     .td-creat-date, .th-creat-date,
+    .td-list-creation-date, .th-list-creation-date,
+    .td-list-open-tasks-count, .th-list-open-tasks-count,
     .th-resolv-date, .td-resolv-date,
     .th-due-date, .td-due-date,
     .th-prio, .td-prio,

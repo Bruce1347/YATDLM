@@ -34,13 +34,13 @@
 
     <div class="margint-normal" id="lists_container">
     {% if lists %}
-        <table class="pure-table pure-table-bordered" style="max-width: 90em; margin: auto;">
+        <table class="fullwidth pure-table pure-table-bordered" style="max-width: 45em; margin: auto;">
             <thead>
                 <tr>
                     <th>Liste</th>
-                    <th>Tâches ouvertes</th>
+                    <th class="th-list-open-tasks-count">Tâches ouvertes</th>
                     <th>Complétion</th>
-                    <th>Date de création</th>
+                    <th class="th-list-creation-date">Date de création</th>
                     <th></th>
                 </tr>
             </thead>
@@ -52,9 +52,9 @@
                                 {{ context|get_value:list|get_value:'title' }}
                             </a>
                         </td>
-                        <td>{{ context|get_value:list|get_value:'opened_tasks' }}</td>
+                        <td class="td-list-open-tasks-count">{{ context|get_value:list|get_value:'opened_tasks' }}</td>
                         <td>{{ context|get_value:list|get_value:'completion' }} %</td>
-                        <td>{{ context|get_value:list|get_value:'creation_date'|date:"d/m/Y à H:i" }}</td>
+                        <td class="td-list-creation-date">{{ context|get_value:list|get_value:'creation_date'|date:"d/m/Y à H:i" }}</td>
                         <td><img class="pointer icon" src="{% static 'img/icons/garbage_red.svg' %}" alt="Delete" onclick="delete_list(`/todo/lists/delete/{{ context|get_value:list|get_value:'id' }}`, '{{ list }}', true, 'lists_container');"></td>
                     </tr>
                 {% endfor %}
