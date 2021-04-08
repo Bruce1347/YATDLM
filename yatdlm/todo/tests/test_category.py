@@ -22,7 +22,7 @@ class CategoryTestCase(TestCase):
             json.dumps({"name": "Jon Moxley"}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            {"id": 1, "list_id": 1, "name": "Jon Moxley"}, 
+            {"id": self.category.id, "list_id": self.list_.id, "name": "Jon Moxley"},
             json.loads(response.content))
 
     def test_patch_non_existent_category(self):
