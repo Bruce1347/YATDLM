@@ -15,6 +15,7 @@ from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
 from .utils import yesnojs, yesnopython
 
+from django.contrib.auth.models import User
 
 @login_required()
 def index(request, xhr):
@@ -216,6 +217,8 @@ def update_task(request, list_id=None, task_id=None):
     else:
         try:
             task = Task.objects.get(id=task_id, parent_list_id=list_id)
+            if request.user != task.owner:
+                raise Task.IsNotOwner()
             body = json.loads(request.body.decode("utf-8"))
             new_priority = int(body.get('priority'))
             new_state = FollowUp(
@@ -243,6 +246,9 @@ def update_task(request, list_id=None, task_id=None):
         except TodoList.DoesNotExist:
             resp = {'errors': 'Wrong task ID or list ID'}
             resp_code = 404
+        except Task.IsNotOwner:
+            resp = {'errors': 'Unauthorized'}
+            resp_code = 403
     return JsonResponse(resp, status=resp_code)
 
 @login_required()

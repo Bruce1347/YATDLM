@@ -86,6 +86,11 @@ class Task(models.Model):
     # Task's categories
     categories = models.ManyToManyField('todo.Category')
 
+    # Boilerplate exception class
+    class IsNotOwner(Exception):
+        pass
+
+
     # Identify the task with its title
     def __str__(self):
         return self.title
