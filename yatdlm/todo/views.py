@@ -12,7 +12,7 @@ from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
 
 from .helpers.routes_validators import task_exists, task_ownership
-from .models import FollowUp, NotOwner, Task, TodoList
+from .models import FollowUp, NotOwner, Subtask, Task, TodoList
 from .utils import yesnojs, yesnopython
 
 from django.contrib.auth.models import User
@@ -55,11 +55,7 @@ def index(request, xhr):
 
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
-    prefetch_fields = [
-        'task_set',
-        'owner',
-    ]
-    todo_list = TodoList.objects.prefetch_related(*prefetch_fields).get(id=list_id)
+    todo_list = TodoList.objects.prefetch_related('owner').get(id=list_id)
 
     # If the list is not public then we throw a 403
     if not todo_list.is_public and public:
@@ -141,15 +137,20 @@ def display_list(request, list_id=-1, xhr=False, public=False):
 def list_tasks(request, list_id=None):
     try:
         #TODO: Use a validator for this verification
-        todo = TodoList.objects.get(id=list_id)
+        todo = TodoList.objects.prefetch_related('task_set', 'category_set').get(id=list_id)
         if not todo.is_public and not request.user.is_authenticated:
             return JsonResponse({'errors': 'Non.'}, status=403)
         tasks = todo.task_set
         # Prefetch related objects
+        tasks = tasks.select_related(
+            'parent_task',
+            'parent_list',
+        )
         tasks = tasks.prefetch_related(
             'task_set',
+            'task_set__task_set',
             'task_set__categories',
-            'categories'
+            'categories',   
         )
         # Order by task number
         tasks = tasks.order_by('task_no')
@@ -164,11 +165,40 @@ def list_tasks(request, list_id=None):
             name: value
             for name, value in Task.priority_levels
         }
+        categories = [
+            cat.as_dict()
+            for cat in todo.category_set.all()
+        ]
+        categories_str = [
+            cat.name
+            for cat in todo.category_set.all()
+        ]
         resp = {
-            'tasks': [
-                task.as_dict(dates_format="Y/m/d")
-                for task in tasks],
-            'priorities': priorities}
+            'tasks': [],
+            'priorities': priorities,
+        }
+        subtasks = {}
+        for sub in Task.objects.prefetch_related('parent_task').filter(parent_task_id__in=[task.id for task in tasks]):
+            if sub.parent_task_id not in subtasks:
+                subtasks[sub.parent_task_id] = []
+            subtasks[sub.parent_task_id].append(sub.as_dict())
+
+        for task in tasks:
+            task_dict = task.as_dict(dates_format="Y/m/d")
+            task_dict['categories'] = categories
+            task_dict['categories_str'] = categories_str
+            if task.id in subtasks:
+                task_dict['subtasks'] = subtasks[task.id]
+                subtasks_done = [
+                    1
+                    for sub in subtasks[task.id]
+                    if sub['is_done']
+                ]
+                task_dict['subtasks_progress'] = 100.0 * sum(subtasks_done) / len(subtasks[task.id])
+            else:
+                task_dict['subtasks'] = None
+                task_dict['subtasks_progress'] = None
+            resp['tasks'].append(task_dict)
         resp_code = 200
     except Task.DoesNotExist:
         resp = {'errors': 'Invalid list ID'}

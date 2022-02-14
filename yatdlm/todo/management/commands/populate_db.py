@@ -48,13 +48,15 @@ class Command(BaseCommand):
         TodoList.objects.bulk_create(lists)
         # Retrieve all the saved lists, this is a mandatory step since django's
         # bulk_create will NOT populate the model's primary key after insertion.
-        lists = TodoList.objects.filter(title__in=todolist_names)
+        lists = TodoList.objects
+        if todolist_names:
+            lists = lists.filter(title__in=todolist_names)
 
         tasks = []
         subtasks = []
 
         # First step: Create the tasks
-        for todolist in lists:
+        for todolist in lists.all():
             for i in range(nb_tasks):
                 task = Task(owner=owner, parent_list=todolist, title=str(i))
                 tasks.append(task)

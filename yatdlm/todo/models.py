@@ -7,6 +7,8 @@ from datetime import datetime
 
 from django.utils.formats import date_format
 
+from .categories.models import Category
+
 class TodoList(models.Model):
     # The owner of the todo list
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
@@ -101,8 +103,8 @@ class Task(models.Model):
     def url(self, public=False):
         base_url = '/todo/lists'
         if public:
-            return base_url + '/public/{}/{}'.format(self.parent_list.id, self.id)
-        return base_url + '/{}/{}'.format(self.parent_list.id, self.id)
+            return base_url + '/public/{}/{}'.format(self.parent_list_id, self.id)
+        return base_url + '/{}/{}'.format(self.parent_list_id, self.id)
 
     @property
     def subtasks(self):
@@ -116,12 +118,11 @@ class Task(models.Model):
     def subtasks_progress(self):
         """Return the percentage of done tasks"""
 
-        tasks = list(self.task_set.all())
-        nb_tasks = len(tasks)
-        if not nb_tasks:
+        total_tasks = self.task_set.count()
+        if total_tasks == 0:
             return 0
-        tasks_done = sum(1 for task in tasks if task.is_done is True)
-        return 100.0 * (tasks_done / nb_tasks)
+        tasks_done = self.task_set.filter(is_done=True).count()
+        return 100.0 * (tasks_done / total_tasks)
 
     @property
     def is_rejected(self):
@@ -211,17 +212,20 @@ class Task(models.Model):
         }
 
     def get_categories(self):
+        categories = Category.objects.filter(
+            todolist_id=self.parent_list_id,
+        ).select_related('todolist').order_by('id')
+
         return [
             cat.as_dict()
-            for cat in
-            self.categories.all().order_by('id')
+            for cat in categories
         ]
 
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
         resp = {
             'id' : self.id,
-            'list_id': self.parent_list.id,
+            'list_id': self.parent_list_id,
             'no': self.task_no,
             'title': self.title,
             'is_done': self.is_done,
@@ -234,11 +238,7 @@ class Task(models.Model):
             'priorities': self.priorities,
             'priority': self.priority,
             'priority_str': self.get_priority_display(),
-            'categories': self.get_categories(),
-            'categories_str': self.get_displayable_categories(),
             'is_subtask': self.is_subtask,
-            'subtasks': [subtask.as_dict() for subtask in self.subtasks],
-            'subtasks_progress': self.subtasks_progress * 100.0,
             'url': self.url()
         }
 

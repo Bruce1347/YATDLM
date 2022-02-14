@@ -14,7 +14,7 @@ class Category(models.Model):
     def as_dict(self):
         return {
             "id": self.id,
-            "list_id": self.todolist.id,
+            "list_id": self.todolist_id,
             "name": self.name
         }
 
