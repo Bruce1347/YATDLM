@@ -12,7 +12,7 @@ from django.utils.timezone import make_aware
 from django.views.decorators.http import require_http_methods
 
 from .helpers.routes_validators import task_exists, task_ownership
-from .models import FollowUp, NotOwner, Subtask, Task, TodoList
+from .models import FollowUp, NotOwner, Task, TodoList
 from .utils import yesnojs, yesnopython
 
 from django.contrib.auth.models import User
