@@ -36,6 +36,12 @@ class TodoListAdmin(admin.ModelAdmin):
     readonly_fields=('creation_date',)
 
 class Task(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=['parent_task_id']),
+            models.Index(fields=['parent_list_id']),
+            models.Index(fields=['id']),
+        ]
     # The user that created the task
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
 
