@@ -131,7 +131,7 @@ async function edit_task(task) {
             }
             request_body['categories'] = new_categories;
         }
-        const updated_task = await update_task(JSON.stringify(request_body), task);
+        const updated_task = await update_task(JSON.stringify(request_body), task.list_id, task.id);
         Object.assign(task, updated_task);
         // Restore the previous DOM state
         document.getElementById(form.id).replaceWith(contents_dom);

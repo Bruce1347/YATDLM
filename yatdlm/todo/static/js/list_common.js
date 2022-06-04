@@ -157,8 +157,8 @@ function add_new_category_to_task(container_id, categories) {
  * @param {String} body The body of the request, this must be a stringified Object.
  * @param {Object} task The Task that will be updated.
  */
-async function update_task(body, task) {
-    let url = `/todo/lists/${task.list_id}/${task.id}/update/`;
+async function update_task(body, task_list_id, task_id) {
+    let url = `/todo/lists/${task_list_id}/${task_id}/update/`;
     const response = await patch(url, body);
     const updated_task = await response.json();
     return updated_task;
