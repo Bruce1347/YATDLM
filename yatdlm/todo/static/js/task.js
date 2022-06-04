@@ -33,7 +33,9 @@ async function update_displayed_priority(task, updated_task) {
 
 function update_displayed_categories(task) {
     let displayed_categories = document.getElementById(`categories_${task.id}`);
-    displayed_categories.querySelector("b").innerText = task.categories_str;
+    if (typeof task.categories !== 'undefined') {
+        displayed_categories.querySelector("b").innerText = task.categories_str;
+    }
 }
 
 function update_displayed_description(task) {
@@ -81,12 +83,14 @@ async function create_dom_edit_form(task) {
     categories_div.classList.add('fullwidth', 'marginb-normal');
     // Iterate over the categories and add them to the categories_div
     let list_categories = await get_categories(list_id);
-    Object.entries(task.categories).forEach(([key, category]) => {
-        let select = categoriesToSelect(list_categories);
-        select.classList.add("fullwidth");
-        select.value = category.id;
-        categories_div.appendChild(select);
-    });
+    if (typeof task.categories !== 'undefined') {
+        Object.entries(task.categories).forEach(([key, category]) => {
+            let select = categoriesToSelect(list_categories);
+            select.classList.add("fullwidth");
+            select.value = category.id;
+            categories_div.appendChild(select);
+        });
+    }
 
     // Assemble the form
     div.appendChild(title_input_label);
