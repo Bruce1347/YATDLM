@@ -170,7 +170,7 @@ async function setup_tasks_buttons_events(public = false) {
         // Add the task to the subtasks select
         var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
         parent_tasks_container.add(parent_tasks_option);
-        if (typeof element.subtasks !== 'undefined') {
+        if (element.subtasks !== null) {
             for (let subtask of element.subtasks) {
                 // Attach a callback to its corresponding checkbox
                 var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
