@@ -55,25 +55,27 @@ def index(request, xhr):
 
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
-    todo_list = TodoList.objects.prefetch_related('owner').get(id=list_id)
+    todo_list = TodoList.objects.select_related('owner').get(id=list_id)
 
     # If the list is not public then we throw a 403
     if not todo_list.is_public and public:
         return HttpResponseForbidden()
 
     # Retrieve the subsequent tasks
-    tfilter = todo_list.task_set
-    tfilter = tfilter.select_related('owner', 'parent_task')
-    tfilter = tfilter.prefetch_related('task_set', 'categories')
-    tfilter = tfilter.order_by('is_done', 'priority', '-resolution_date', '-creation_date')
+    tfilter = (
+        Task.objects.filter(parent_list_id=todo_list.id)
+        .select_related("owner", "parent_task")
+        .prefetch_related("task_set", "categories")
+        .order_by("is_done", "priority", "-resolution_date", "-creation_date")
+        .all()
+    )
+
+    all_tasks = [task for task in tfilter]
 
     # Create the context
-    creation_years_filter = tfilter.dates('creation_date', 'year')
-    deadlines_years_filter = tfilter.dates('due_date', 'year')
-    resolution_years_filter = tfilter.dates('resolution_date', 'year')
-    creation_years = [date.year for date in creation_years_filter]
-    resolution_years = [date.year for date in resolution_years_filter]
-    deadlines_years = [date.year for date in deadlines_years_filter]
+    creation_years = set(sorted([task.creation_date.year for task in all_tasks]))
+    resolution_years = set(sorted([task.resolution_date.year for task in all_tasks if task.resolution_date]))
+    deadlines_years = set(sorted([task.due_date.year for task in all_tasks if task.due_date]))
 
     months = (
         ('Jan', 1),
@@ -89,7 +91,6 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         ('Nov', 11),
         ('Dec', 12)
     )
-    all_tasks = [task for task in tfilter]
     subtasks = [task for task in all_tasks if task.parent_task is not None]
     tasks = [task for task in all_tasks if task.parent_task is None]
 
