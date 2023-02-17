@@ -1,9 +1,57 @@
 from ..factories import TaskFactory, UserFactory
 from http import HTTPStatus
+from ..helpers.routes_validators import task_exists, task_ownership
+from django.http import JsonResponse
+from collections import namedtuple
 
 from django.test import TestCase
 
+def dummy_view(request, list_id, task_id, *args, **kwargs):
+    return JsonResponse({"foo": "bar"}, status=HTTPStatus.OK)
+
+
 class TestTaskExistsValidator(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.task = TaskFactory()
+
+    def test_task_exists(self):
+        res = task_exists(dummy_view)(object(), self.task.parent_list.id, self.task.id)
+
+        assert isinstance(res, JsonResponse)
+        assert res.status_code == HTTPStatus.OK
+
+    def test_task_not_exists(self):
+        res = task_exists(dummy_view)(object(), self.task.parent_list.id, 1337)
+
+        assert isinstance(res, JsonResponse)
+        assert res.status_code == HTTPStatus.NOT_FOUND
+
+
+class TestTaskOwnershipValidator(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.task = TaskFactory()
+        cls.dummy_request_type = namedtuple("request", "user")
+
+    def test_task_being_owned_by_current_user(self):
+        request = self.dummy_request_type(self.task.owner)
+
+        res = task_ownership(dummy_view)(request, self.task.parent_list.id, self.task.id)
+
+        assert isinstance(res, JsonResponse)
+        assert res.status_code == HTTPStatus.OK
+
+    def test_task_not_owned_by_current_user(self):
+        request = self.dummy_request_type(UserFactory())
+
+        res = task_ownership(dummy_view)(request, self.task.parent_list.id, self.task.id)
+
+        assert isinstance(res, JsonResponse)
+        assert res.status_code == HTTPStatus.FORBIDDEN
+
+
+class TestTaskExistsValidatorIntegration(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.task = TaskFactory()
@@ -35,7 +83,7 @@ class TestTaskExistsValidator(TestCase):
 
 
 
-class TestOwnershipValidator(TestCase):
+class TestOwnershipValidatorIntegration(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.task = TaskFactory()

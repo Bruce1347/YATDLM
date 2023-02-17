@@ -458,8 +458,8 @@ def delete_list(request, list_id):
 @require_http_methods(['PATCH'])
 @task_exists
 @task_ownership
-def reject_task(request, list_id, task_id):
-    task = request.task
+def reject_task(request, list_id, task_id, **kwargs):
+    task = Task.objects.get(id=task_id, parent_list_id=list_id)
     followup = ''
     raw_body = request.body.decode("utf-8")
     if raw_body:
@@ -475,14 +475,15 @@ def reject_task(request, list_id, task_id):
 @task_exists
 @task_ownership
 def display_task(request, list_id, task_id):
+    task = Task.objects.get(id=task_id, parent_list_id=list_id)
     if 'json' in request.GET:
-        return JsonResponse(request.task.as_dict(), status=202)
+        return JsonResponse(task.as_dict(), status=202)
     context = {
-        'task': request.task,
+        'task': task,
         'public': False,
         'publicjs': yesnojs(False),
         'includes': ['single_task', 'list_common'],
-        'followups': request.task.get_followups()
+        'followups': task.get_followups()
     }
     return render(request, 'todo/task.html', context)
 
@@ -493,13 +494,14 @@ def display_task_public(request, list_id, task_id):
     of the usage of login dependant decorators in the previous function. This
     function ensures that the displayed task is displayed in a read-only mode.
     """
+    task = Task.objects.get(id=task_id, parent_list_id=list_id)
     if 'json' in request.GET:
-        return JsonResponse(request.task.as_dict(), status=202)
+        return JsonResponse(task.as_dict(), status=202)
     context = {
-        'task': request.task,
+        'task': task,
         'public': True,
         'publicjs': yesnojs(True),
         'includes': ['single_task', 'list_common'],
-        'followups': request.task.get_followups()
+        'followups': task.get_followups()
     }
     return render(request, 'todo/task.html', context)
