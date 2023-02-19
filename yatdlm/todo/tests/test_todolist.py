@@ -7,6 +7,30 @@ from todo.factories import TodoListFactory, UserFactory
 from todo.models import TodoList
 
 
+class TodoListCreate(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.url = "/todo/lists/add"
+
+    def test_create_list(self):
+        payload = {
+            "title": "A todo list",
+            "description": "A description for the said todo list.",
+            "visibility": True,
+        }
+
+        self.client.login(username="test", password=self.users_password),
+
+        response = self.client.post(self.url, data=payload)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
 class TodoListDelete(TestCase):
     @classmethod
     def setUpTestData(cls):
