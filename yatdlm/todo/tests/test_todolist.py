@@ -30,6 +30,27 @@ class TodoListCreate(TestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
+    def test_create_list_empty_title(self):
+        import json
+
+        payload = {
+            "title": "",
+            "description": "A description for the said todo list.",
+            "visibility": True,
+        }
+
+        self.client.login(username="test", password=self.users_password)
+
+        import ipdb
+
+        ipdb.set_trace()
+
+        response = self.client.post(
+            self.url, json.dumps(payload), content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
 
 class TodoListDelete(TestCase):
     @classmethod
