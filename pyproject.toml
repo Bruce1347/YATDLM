@@ -9,6 +9,7 @@ python = ">=3.8.1"
 django = ">=3.0.2"
 psycopg2-binary = "^2.8.5"
 Django = "^4.0.4"
+pydantic = "^1.10.5"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.3.0"
@@ -19,6 +20,7 @@ django-debug-toolbar = "^3.4.0"
 factory-boy = "^3.2.1"
 black = "^23.1.0"
 flake8 = "^6.0.0"
+ipdb = "^0.13.11"
 
 [flake8]
 max-line-length = 90
