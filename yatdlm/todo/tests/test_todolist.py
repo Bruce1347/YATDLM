@@ -1,5 +1,6 @@
-from django.test import TestCase
 from django.contrib.auth import models as auth_models
+from django.test import TestCase
+
 from todo.models import TodoList
 
 

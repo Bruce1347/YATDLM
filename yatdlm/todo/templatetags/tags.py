@@ -1,8 +1,8 @@
+import re
+
+from django.template.defaultfilters import stringfilter
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
-from django.template.defaultfilters import stringfilter
-
-import re
 
 
 # Custom filter in order to use dictionaries inside django templates

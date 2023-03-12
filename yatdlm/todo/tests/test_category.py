@@ -1,8 +1,10 @@
-from django.test import TestCase
+import json
+
 from django.contrib.auth import models as auth_models
+from django.test import TestCase
+
 from todo.categories.models import Category
 from todo.models import TodoList
-import json
 
 
 class CategoryTestCase(TestCase):

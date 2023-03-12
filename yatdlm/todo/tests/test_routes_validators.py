@@ -1,10 +1,11 @@
-from ..factories import TaskFactory, UserFactory
-from http import HTTPStatus
-from ..helpers.routes_validators import task_exists, task_ownership
-from django.http import JsonResponse
 from collections import namedtuple
+from http import HTTPStatus
 
+from django.http import JsonResponse
 from django.test import TestCase
+
+from ..factories import TaskFactory, UserFactory
+from ..helpers.routes_validators import task_exists, task_ownership
 
 
 def dummy_view(request, list_id, task_id, *args, **kwargs):

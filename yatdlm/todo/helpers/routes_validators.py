@@ -1,6 +1,8 @@
 from functools import wraps
-from todo.models import Task, NotOwner
+
 from django.http import JsonResponse
+
+from todo.models import NotOwner, Task
 
 
 def task_exists(view):

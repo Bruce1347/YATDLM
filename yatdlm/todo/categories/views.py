@@ -1,11 +1,13 @@
-from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
 import json
-from .models import Category
-from django.http import JsonResponse
+
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from ..models import TodoList
+from django.http import JsonResponse
 from django.views import View
+from django.views.decorators.http import require_http_methods
+
+from ..models import TodoList
+from .models import Category
 
 
 @login_required()
