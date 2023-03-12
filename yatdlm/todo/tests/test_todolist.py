@@ -30,6 +30,73 @@ class TodoListCreate(TestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
+    def test_create_list_empty_name(self):
+        payload = {
+            "title": "",
+            "description": "A description for the said todo list",
+            "visibility": True,
+        }
+
+        self.client.login(username="test", password=self.users_password)
+
+        response = self.client.post(self.url, data=payload)
+
+        self.assertEqual(response.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
+
+        # Todolist should not be created
+        assert TodoList.objects.count() == 0
+
+    def test_create_list_null_name(self):
+        payload = {
+            "description": "A description for the said todo list",
+            "visibility": True,
+        }
+
+        self.client.login(username="test", password=self.users_password)
+
+        response = self.client.post(self.url, data=payload)
+
+        self.assertEqual(response.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
+
+        # Todolist should not be created
+        assert TodoList.objects.count() == 0
+
+    def test_create_list_null_description(self):
+        payload = {
+            "title": "Todolist",
+            "visibility": True,
+        }
+
+        self.client.login(username="test", password=self.users_password)
+
+        response = self.client.post(self.url, data=payload)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        # List should be created
+        assert TodoList.objects.count() == 1
+        todolist = TodoList.objects.first()
+
+        assert todolist.title == "Todolist"
+        assert todolist.description == ""
+        assert todolist.is_public
+
+    def test_create_list_no_visibility(self):
+        payload = {
+            "title": "Todolist",
+        }
+
+        self.client.login(username="test", password=self.users_password)
+
+        response = self.client.post(self.url, data=payload)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        # List should be created
+        assert TodoList.objects.filter(
+            title="Todolist", description="", is_public=False
+        ).exists()
+
 
 class TodoListDelete(TestCase):
     @classmethod
