@@ -5,20 +5,37 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0014_auto_20180116_0123'),
+        ("todo", "0014_auto_20180116_0123"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FollowUp',
+            name="FollowUp",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('creation_date', models.DateTimeField(auto_now_add=True)),
-                ('content', models.TextField(blank=True, max_length=1000)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.Task')),
-                ('todol', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.TodoList')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("creation_date", models.DateTimeField(auto_now_add=True)),
+                ("content", models.TextField(blank=True, max_length=1000)),
+                (
+                    "task",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="todo.Task"
+                    ),
+                ),
+                (
+                    "todol",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="todo.TodoList"
+                    ),
+                ),
             ],
         ),
     ]

@@ -7,12 +7,13 @@ from django.db import IntegrityError
 from ..models import TodoList
 from django.views import View
 
+
 @login_required()
 @require_http_methods(["POST"])
 def create_category(request, list_id):
     try:
         body = json.loads(request.body.decode("utf-8"))
-        category = Category(name=body.get('name'), todolist_id=list_id)
+        category = Category(name=body.get("name"), todolist_id=list_id)
         category.save()
         status_code = 201
         response = category.as_dict()
@@ -20,6 +21,7 @@ def create_category(request, list_id):
         status_code = 400
         response = {"error": "The List ID refers to a non existing list."}
     return JsonResponse(response, status=status_code)
+
 
 @login_required()
 @require_http_methods(["GET"])
@@ -33,6 +35,7 @@ def list_categories(request, list_id):
         status_code = 500
         response = {}
     return JsonResponse(response, status=status_code)
+
 
 class CategoryView(View):
     def delete(self, request, category_id, *args, **kwargs):

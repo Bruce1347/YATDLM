@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0017_auto_20180118_0203'),
+        ("todo", "0017_auto_20180118_0203"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='followup',
-            name='f_type',
-            field=models.IntegerField(choices=[(1, 'Commentaire'), (2, "Changement d'État")], default=1),
+            model_name="followup",
+            name="f_type",
+            field=models.IntegerField(
+                choices=[(1, "Commentaire"), (2, "Changement d'État")], default=1
+            ),
         ),
         migrations.AddField(
-            model_name='followup',
-            name='new_priority',
-            field=models.IntegerField(choices=[(1, 'Commentaire'), (2, "Changement d'État")], default=None),
+            model_name="followup",
+            name="new_priority",
+            field=models.IntegerField(
+                choices=[(1, "Commentaire"), (2, "Changement d'État")], default=None
+            ),
         ),
         migrations.AddField(
-            model_name='followup',
-            name='old_priority',
-            field=models.IntegerField(choices=[(1, 'Commentaire'), (2, "Changement d'État")], default=None),
+            model_name="followup",
+            name="old_priority",
+            field=models.IntegerField(
+                choices=[(1, "Commentaire"), (2, "Changement d'État")], default=None
+            ),
         ),
     ]

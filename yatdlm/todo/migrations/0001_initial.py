@@ -6,39 +6,60 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('description', models.CharField(blank=True, max_length=300)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("description", models.CharField(blank=True, max_length=300)),
             ],
         ),
         migrations.CreateModel(
-            name='TodoList',
+            name="TodoList",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('description', models.CharField(blank=True, max_length=600)),
-                ('creation_date', models.DateTimeField(auto_now_add=True)),
-                ('due_date', models.DateTimeField(blank=True, default=django.utils.timezone.now)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("description", models.CharField(blank=True, max_length=600)),
+                ("creation_date", models.DateTimeField(auto_now_add=True)),
+                (
+                    "due_date",
+                    models.DateTimeField(blank=True, default=django.utils.timezone.now),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='task',
-            name='parent_list',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.TodoList'),
+            model_name="task",
+            name="parent_list",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="todo.TodoList"
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='parent_task',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.Task'),
+            model_name="task",
+            name="parent_task",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="todo.Task"
+            ),
         ),
     ]

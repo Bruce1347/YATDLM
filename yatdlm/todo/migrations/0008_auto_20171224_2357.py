@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0007_task_is_done'),
+        ("todo", "0007_task_is_done"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='due_date',
+            model_name="task",
+            name="due_date",
             field=models.DateTimeField(blank=True, default=None, null=True),
         ),
     ]

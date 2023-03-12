@@ -4,18 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0029_auto_20200229_1018'),
+        ("todo", "0029_auto_20200229_1018"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='task',
-            index=models.Index(fields=['parent_task_id'], name='todo_task_parent__f0e23a_idx'),
+            model_name="task",
+            index=models.Index(
+                fields=["parent_task_id"], name="todo_task_parent__f0e23a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='task',
-            index=models.Index(fields=['id'], name='todo_task_id_815c4d_idx'),
+            model_name="task",
+            index=models.Index(fields=["id"], name="todo_task_id_815c4d_idx"),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0006_auto_20171218_2055'),
+        ("todo", "0006_auto_20171218_2055"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='is_done',
+            model_name="task",
+            name="is_done",
             field=models.BooleanField(default=False),
         ),
     ]

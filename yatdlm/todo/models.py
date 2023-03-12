@@ -9,6 +9,7 @@ from django.utils.formats import date_format
 
 from .categories.models import Category
 
+
 class TodoList(models.Model):
     # The owner of the todo list
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
@@ -23,7 +24,9 @@ class TodoList(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     # The user may want the todo list completed upon a certain date (optional)
-    due_date = models.DateTimeField(auto_now_add=False, default=timezone.now, blank=True, null=True)
+    due_date = models.DateTimeField(
+        auto_now_add=False, default=timezone.now, blank=True, null=True
+    )
 
     # Define if the list should be private or not (by default, yes)
     is_public = models.BooleanField(blank=False, null=False, default=False)
@@ -32,16 +35,19 @@ class TodoList(models.Model):
     def __str__(self):
         return self.title
 
+
 class TodoListAdmin(admin.ModelAdmin):
-    readonly_fields=('creation_date',)
+    readonly_fields = ("creation_date",)
+
 
 class Task(models.Model):
     class Meta:
         indexes = [
-            models.Index(fields=['parent_task_id']),
-            models.Index(fields=['parent_list_id']),
-            models.Index(fields=['id']),
+            models.Index(fields=["parent_task_id"]),
+            models.Index(fields=["parent_list_id"]),
+            models.Index(fields=["id"]),
         ]
+
     # The user that created the task
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
 
@@ -51,23 +57,36 @@ class Task(models.Model):
     TOCONSIDER = 3
     SOLVED = 4
     REJECTED = 5
-    priority_levels = ((URGENT, "Urgent"),
-                       (NORMAL, "Normal"),
-                       (TOCONSIDER, "A considérer"),
-                       (SOLVED, "Résolu"),
-                       (REJECTED, "Rejeté"))
+    priority_levels = (
+        (URGENT, "Urgent"),
+        (NORMAL, "Normal"),
+        (TOCONSIDER, "A considérer"),
+        (SOLVED, "Résolu"),
+        (REJECTED, "Rejeté"),
+    )
 
     # Admin definitions
-    fields = ['owner', 'parent_list', 'parent_task', 'creation_date', 'due_date',
-              'resolution_date', 'title', 'description', 'is_done', 'priority']
+    fields = [
+        "owner",
+        "parent_list",
+        "parent_task",
+        "creation_date",
+        "due_date",
+        "resolution_date",
+        "title",
+        "description",
+        "is_done",
+        "priority",
+    ]
 
     # The primary key to the list that contains this task
-    parent_list = models.ForeignKey('TodoList', on_delete=models.CASCADE)
+    parent_list = models.ForeignKey("TodoList", on_delete=models.CASCADE)
 
     # The primary key to the parent task, since a task can have subtasks, this is a recursive
     # relationship
-    parent_task = models.ForeignKey('self', on_delete=models.CASCADE,
-                                    null=True, blank=True)
+    parent_task = models.ForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     # Creation date (mandatory, automatically created and inalterable)
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -75,7 +94,9 @@ class Task(models.Model):
     # The user may want to complete the task within a certain time (optional)
     due_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
 
-    resolution_date = models.DateTimeField(auto_now=False, default=None, null=True, blank=True)
+    resolution_date = models.DateTimeField(
+        auto_now=False, default=None, null=True, blank=True
+    )
 
     # A short description of the task (mandatory)
     title = models.CharField(max_length=300, blank=False)
@@ -92,12 +113,11 @@ class Task(models.Model):
     task_no = models.IntegerField(default=0)
 
     # Task's categories
-    categories = models.ManyToManyField('todo.Category')
+    categories = models.ManyToManyField("todo.Category")
 
     # Boilerplate exception class
     class IsNotOwner(Exception):
         pass
-
 
     # Identify the task with its title
     def __str__(self):
@@ -107,14 +127,14 @@ class Task(models.Model):
         return self.owner == user
 
     def url(self, public=False):
-        base_url = '/todo/lists'
+        base_url = "/todo/lists"
         if public:
-            return base_url + '/public/{}/{}'.format(self.parent_list_id, self.id)
-        return base_url + '/{}/{}'.format(self.parent_list_id, self.id)
+            return base_url + "/public/{}/{}".format(self.parent_list_id, self.id)
+        return base_url + "/{}/{}".format(self.parent_list_id, self.id)
 
     @property
     def subtasks(self):
-        return [task for task in self.task_set.order_by('creation_date').all()]
+        return [task for task in self.task_set.order_by("creation_date").all()]
 
     @property
     def is_subtask(self):
@@ -134,7 +154,7 @@ class Task(models.Model):
     def is_rejected(self):
         return self.priority == Task.REJECTED
 
-    def reject(self, writer=None, followup=''):
+    def reject(self, writer=None, followup=""):
         """Rejects a method that is not acceptable in the current scope of the
         todolist.
 
@@ -154,7 +174,8 @@ class Task(models.Model):
             writer=writer,
             task=self,
             todol=self.parent_list,
-            content=followup)
+            content=followup,
+        )
         self.priority = self.REJECTED
         self.save()
         followup.save()
@@ -169,7 +190,8 @@ class Task(models.Model):
             writer=writer,
             content=followup,
             todol=self.parent_list,
-            task=self)
+            task=self,
+        )
         followup.save()
 
     def change_state(self, comment=None, writer=None):
@@ -194,7 +216,8 @@ class Task(models.Model):
             todol=self.parent_list,
             content=comment,
             old_priority=self.priority,
-            new_priority=new_priority)
+            new_priority=new_priority,
+        )
         followup.save()
         self.priority = new_priority
 
@@ -206,70 +229,78 @@ class Task(models.Model):
     def get_displayable_categories(self):
         categories = [
             cat
-            for cat in self.categories.all().order_by('id').values_list('name', flat=True)
+            for cat in self.categories.all()
+            .order_by("id")
+            .values_list("name", flat=True)
         ]
         return ", ".join(categories)
 
     @property
     def priorities(self):
-        return {
-            priority[0]: priority[1]
-            for priority in self.priority_levels
-        }
+        return {priority[0]: priority[1] for priority in self.priority_levels}
 
     def get_categories(self):
-        categories = Category.objects.filter(
-            todolist_id=self.parent_list_id,
-        ).select_related('todolist').order_by('id')
+        categories = (
+            Category.objects.filter(
+                todolist_id=self.parent_list_id,
+            )
+            .select_related("todolist")
+            .order_by("id")
+        )
 
-        return [
-            cat.as_dict()
-            for cat in categories
-        ]
+        return [cat.as_dict() for cat in categories]
 
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
         resp = {
-            'id' : self.id,
-            'list_id': self.parent_list_id,
-            'no': self.task_no,
-            'title': self.title,
-            'is_done': self.is_done,
-            'is_rejected': self.is_rejected,
+            "id": self.id,
+            "list_id": self.parent_list_id,
+            "no": self.task_no,
+            "title": self.title,
+            "is_done": self.is_done,
+            "is_rejected": self.is_rejected,
             # Provide the user a shorter title for display
-            'title_cropped': self.title[:39] + "…",
-            'description': self.description,
-            'creation_date': date_format(self.creation_date, dates_format),
-            'creation_hour': date_format(self.creation_date, "H:i"),
-            'priorities': self.priorities,
-            'priority': self.priority,
-            'priority_str': self.get_priority_display(),
-            'is_subtask': self.is_subtask,
-            'url': self.url()
+            "title_cropped": self.title[:39] + "…",
+            "description": self.description,
+            "creation_date": date_format(self.creation_date, dates_format),
+            "creation_hour": date_format(self.creation_date, "H:i"),
+            "priorities": self.priorities,
+            "priority": self.priority,
+            "priority_str": self.get_priority_display(),
+            "is_subtask": self.is_subtask,
+            "url": self.url(),
         }
 
         if self.due_date is not None:
-            resp['due_date'] = date_format(self.due_date, dates_format)
+            resp["due_date"] = date_format(self.due_date, dates_format)
 
         if self.resolution_date is not None:
-            resp['resolution_date'] = date_format(self.resolution_date, dates_format)
-            resp['resolution_hour'] = date_format(self.resolution_date, "H:i")
+            resp["resolution_date"] = date_format(self.resolution_date, dates_format)
+            resp["resolution_hour"] = date_format(self.resolution_date, "H:i")
 
         return resp
 
 
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ('creation_date',)
-    list_display= ('title', 'creation_date', 'priority', 'is_done',)
+    readonly_fields = ("creation_date",)
+    list_display = (
+        "title",
+        "creation_date",
+        "priority",
+        "is_done",
+    )
+
 
 class FollowUp(models.Model):
     # Kinds of Follow-ups
     COMMENT = 1
     MODIFICATION = 2
     STATE_CHANGE = 3
-    possible_follow_ups = ((COMMENT, "Commentaire"),
-                           (MODIFICATION, "Modification"),
-                           (STATE_CHANGE, "Changement d'État"))
+    possible_follow_ups = (
+        (COMMENT, "Commentaire"),
+        (MODIFICATION, "Modification"),
+        (STATE_CHANGE, "Changement d'État"),
+    )
 
     # The user that wrote the Follow-up
     writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
@@ -278,12 +309,16 @@ class FollowUp(models.Model):
     f_type = models.IntegerField(choices=possible_follow_ups, default=1)
 
     # We keep the changes if there is a priority state change
-    old_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
-    new_priority = models.IntegerField(choices=Task.priority_levels, null=True, blank=True, default=None)
+    old_priority = models.IntegerField(
+        choices=Task.priority_levels, null=True, blank=True, default=None
+    )
+    new_priority = models.IntegerField(
+        choices=Task.priority_levels, null=True, blank=True, default=None
+    )
 
     # The task and list that the Follow-up refers to
-    task = models.ForeignKey('Task', on_delete=models.CASCADE, null=False)
-    todol = models.ForeignKey('TodoList', on_delete=models.CASCADE, null=False)
+    task = models.ForeignKey("Task", on_delete=models.CASCADE, null=False)
+    todol = models.ForeignKey("TodoList", on_delete=models.CASCADE, null=False)
 
     # Creation date (mandatory, automatically created and inalterable)
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -293,21 +328,24 @@ class FollowUp(models.Model):
 
     def as_dict(self):
         return {
-            'writer': self.writer.username,
-            'creation_date': date_format(self.creation_date, "d/m/Y à H:i"),
-            'content': self.content,
-            'old_priority': self.get_old_priority_display(),
-            'new_priority': self.get_new_priority_display(),
-            'type': self.f_type
+            "writer": self.writer.username,
+            "creation_date": date_format(self.creation_date, "d/m/Y à H:i"),
+            "content": self.content,
+            "old_priority": self.get_old_priority_display(),
+            "new_priority": self.get_new_priority_display(),
+            "type": self.f_type,
         }
 
     # Admin fields
-    fields = ['task', 'todol']
+    fields = ["task", "todol"]
+
 
 class FollowUpAdmin(admin.ModelAdmin):
-    readonly_fields = ('creation_date',)
+    readonly_fields = ("creation_date",)
+
 
 class NotOwner(Exception):
     """Raised when a task is fetched by a user but that user is not its
     owner"""
+
     pass

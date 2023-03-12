@@ -5,27 +5,39 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0027_auto_20181224_1533'),
+        ("todo", "0027_auto_20181224_1533"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=64)),
-                ('todolist', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.TodoList')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=64)),
+                (
+                    "todolist",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="todo.TodoList"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Category',
-                'verbose_name_plural': 'Categories',
+                "verbose_name": "Category",
+                "verbose_name_plural": "Categories",
             },
         ),
         migrations.AddField(
-            model_name='task',
-            name='categories',
-            field=models.ManyToManyField(to='todo.Category'),
+            model_name="task",
+            name="categories",
+            field=models.ManyToManyField(to="todo.Category"),
         ),
     ]

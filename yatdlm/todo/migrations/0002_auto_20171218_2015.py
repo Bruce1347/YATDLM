@@ -5,15 +5,16 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0001_initial'),
+        ("todo", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='parent_task',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='todo.Task'),
+            model_name="task",
+            name="parent_task",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to="todo.Task"
+            ),
         ),
     ]
