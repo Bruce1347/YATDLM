@@ -2,10 +2,11 @@
 
 from django.db import migrations, models
 
+
 def migrate_from_previous_state(apps, schema_editor):
     """
-        Updates the tasks that had "Y a vraiment le temps" as a priority
-        to "Y a le temps"
+    Updates the tasks that had "Y a vraiment le temps" as a priority
+    to "Y a le temps"
     """
     # Retrieve the base class
     task_class = apps.get_model("todo", "Task")
@@ -18,26 +19,61 @@ def migrate_from_previous_state(apps, schema_editor):
         task.priority = 4
         task.save()
 
+
 class Migration(migrations.Migration):
     dependencies = [
-        ('todo', '0022_auto_20180131_1829'),
+        ("todo", "0022_auto_20180131_1829"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followup',
-            name='new_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (6, 'A considérer'), (7, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="new_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (6, "A considérer"),
+                    (7, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='followup',
-            name='old_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (6, 'A considérer'), (7, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="old_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (6, "A considérer"),
+                    (7, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='priority',
-            field=models.IntegerField(choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (6, 'A considérer'), (7, 'Résolu')], default=3),
+            model_name="task",
+            name="priority",
+            field=models.IntegerField(
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (6, "A considérer"),
+                    (7, "Résolu"),
+                ],
+                default=3,
+            ),
         ),
-        migrations.RunPython(migrate_from_previous_state)
+        migrations.RunPython(migrate_from_previous_state),
     ]

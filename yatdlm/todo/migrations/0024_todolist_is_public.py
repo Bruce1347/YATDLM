@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0023_auto_20180213_1316'),
+        ("todo", "0023_auto_20180213_1316"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='todolist',
-            name='is_public',
+            model_name="todolist",
+            name="is_public",
             field=models.BooleanField(default=True),
         ),
     ]

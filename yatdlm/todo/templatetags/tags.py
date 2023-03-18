@@ -1,13 +1,15 @@
+import re
+
+from django.template.defaultfilters import stringfilter
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
-from django.template.defaultfilters import stringfilter
 
-import re
 
 # Custom filter in order to use dictionaries inside django templates
 @register.filter
 def get_value(dict, key):
     return dict.get(key)
+
 
 @register.filter
 def get_value_from_tuple_list(l, first_value):
@@ -16,6 +18,7 @@ def get_value_from_tuple_list(l, first_value):
             return t[1]
 
     return None
+
 
 @register.filter
 def get_url_from_context(task, public):
@@ -29,12 +32,13 @@ def get_url_from_context(task, public):
         return task.url(public=True)
     return task.url()
 
+
 # Custom filter that inserts hrefs into the given string then returns it
 @register.filter
 @stringfilter
 def display_urls(desc):
     # Regex that matches URLs
-    url_regex = '(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.\=\?]+)'
+    url_regex = "(https?:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9\/]+[a-zA-Z0-9-_&#\/\.\=\?]+)"
 
     # The set is used here to manage a stupid edge case when we have multiple
     # occurrences of a substring.
@@ -48,8 +52,8 @@ def display_urls(desc):
         # which consists of replace() the url by the string 'REPLACEME'.
         # Thanks to this we avoid recursion and we can substitute 'REPLACEME'
         # by hrefs containing `url`
-        desc = desc.replace(url, 'REPLACEME')
-        desc = desc.replace('REPLACEME', href)
+        desc = desc.replace(url, "REPLACEME")
+        desc = desc.replace("REPLACEME", href)
 
     # We need to mark as safe the returned string in order to avoid string escaping
     return mark_safe(desc)

@@ -1,10 +1,12 @@
-from ..factories import TaskFactory, UserFactory
-from http import HTTPStatus
-from ..helpers.routes_validators import task_exists, task_ownership
-from django.http import JsonResponse
 from collections import namedtuple
+from http import HTTPStatus
 
+from django.http import JsonResponse
 from django.test import TestCase
+
+from ..factories import TaskFactory, UserFactory
+from ..helpers.routes_validators import task_exists, task_ownership
+
 
 def dummy_view(request, list_id, task_id, *args, **kwargs):
     return JsonResponse({"foo": "bar"}, status=HTTPStatus.OK)
@@ -37,7 +39,9 @@ class TestTaskOwnershipValidator(TestCase):
     def test_task_being_owned_by_current_user(self):
         request = self.dummy_request_type(self.task.owner)
 
-        res = task_ownership(dummy_view)(request, self.task.parent_list.id, self.task.id)
+        res = task_ownership(dummy_view)(
+            request, self.task.parent_list.id, self.task.id
+        )
 
         assert isinstance(res, JsonResponse)
         assert res.status_code == HTTPStatus.OK
@@ -45,7 +49,9 @@ class TestTaskOwnershipValidator(TestCase):
     def test_task_not_owned_by_current_user(self):
         request = self.dummy_request_type(UserFactory())
 
-        res = task_ownership(dummy_view)(request, self.task.parent_list.id, self.task.id)
+        res = task_ownership(dummy_view)(
+            request, self.task.parent_list.id, self.task.id
+        )
 
         assert isinstance(res, JsonResponse)
         assert res.status_code == HTTPStatus.FORBIDDEN
@@ -62,7 +68,9 @@ class TestTaskExistsValidatorIntegration(TestCase):
         cls.user.save()
 
     def test_get_task(self):
-        self.client.login(username=self.user.username, password="my_super_secret_password")
+        self.client.login(
+            username=self.user.username, password="my_super_secret_password"
+        )
 
         response = self.client.get(
             f"/todo/lists/{str(self.task.parent_list.id)}/{str(self.task.id)}"
@@ -71,7 +79,9 @@ class TestTaskExistsValidatorIntegration(TestCase):
         assert response.status_code == HTTPStatus.OK
 
     def test_get_non_existing_task(self):
-        self.client.login(username=self.user.username, password="my_super_secret_password")
+        self.client.login(
+            username=self.user.username, password="my_super_secret_password"
+        )
 
         response = self.client.get(
             # Tasks PKs are auto incremented ints, here we're chosing an
@@ -80,7 +90,6 @@ class TestTaskExistsValidatorIntegration(TestCase):
         )
 
         assert response.status_code == HTTPStatus.NOT_FOUND
-
 
 
 class TestOwnershipValidatorIntegration(TestCase):
@@ -96,7 +105,9 @@ class TestOwnershipValidatorIntegration(TestCase):
         cls.other_user.save()
 
     def test_get_task_as_owner(self):
-        self.client.login(username=self.user.username, password="my_super_secret_password")
+        self.client.login(
+            username=self.user.username, password="my_super_secret_password"
+        )
 
         response = self.client.get(
             f"/todo/lists/{str(self.task.parent_list.id)}/{str(self.task.id)}"
@@ -105,7 +116,9 @@ class TestOwnershipValidatorIntegration(TestCase):
         assert response.status_code == HTTPStatus.OK
 
     def test_get_task_as_other_user(self):
-        self.client.login(username=self.other_user.username, password="my_super_secret_password_2")
+        self.client.login(
+            username=self.other_user.username, password="my_super_secret_password_2"
+        )
 
         response = self.client.get(
             f"/todo/lists/{str(self.task.parent_list.id)}/{str(self.task.id)}"

@@ -22,19 +22,20 @@ from todo import views as todo_views
 
 urlpatterns = [
     # Django admin urls (TODO: enable/disable it through configuration variables)
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # Urls linked to the todo app
-    path('todo/', include('todo.urls')),
+    path("todo/", include("todo.urls")),
     # Redirection from <url>/ to <url>/login
-    path(r'', RedirectView.as_view(url='/login')),
+    path(r"", RedirectView.as_view(url="/login")),
     # Login page
-    path('login', todo_views.display_login),
+    path("login", todo_views.display_login),
     # Login request
-    path('login/auth', todo_views.user_login),
+    path("login/auth", todo_views.user_login),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns += [
-        path(r'__debug__/', include(debug_toolbar.urls)),
+        path(r"__debug__/", include(debug_toolbar.urls)),
     ]

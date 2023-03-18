@@ -4,15 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0008_auto_20171224_2357'),
+        ("todo", "0008_auto_20171224_2357"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='priority',
-            field=models.IntegerField(choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (5, 'Y a vraiment le temps'), (6, 'A considérer')], default=3),
+            model_name="task",
+            name="priority",
+            field=models.IntegerField(
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (5, "Y a vraiment le temps"),
+                    (6, "A considérer"),
+                ],
+                default=3,
+            ),
         ),
     ]

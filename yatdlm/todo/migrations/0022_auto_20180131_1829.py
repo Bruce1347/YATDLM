@@ -4,25 +4,57 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0021_auto_20180120_1007'),
+        ("todo", "0021_auto_20180120_1007"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followup',
-            name='f_type',
-            field=models.IntegerField(choices=[(1, 'Commentaire'), (2, 'Modification'), (3, "Changement d'État")], default=1),
+            model_name="followup",
+            name="f_type",
+            field=models.IntegerField(
+                choices=[
+                    (1, "Commentaire"),
+                    (2, "Modification"),
+                    (3, "Changement d'État"),
+                ],
+                default=1,
+            ),
         ),
         migrations.AlterField(
-            model_name='followup',
-            name='new_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (5, 'Y a vraiment le temps'), (6, 'A considérer'), (7, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="new_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (5, "Y a vraiment le temps"),
+                    (6, "A considérer"),
+                    (7, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='followup',
-            name='old_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Pressé'), (3, 'Normal'), (4, 'Y a le temps'), (5, 'Y a vraiment le temps'), (6, 'A considérer'), (7, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="old_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Pressé"),
+                    (3, "Normal"),
+                    (4, "Y a le temps"),
+                    (5, "Y a vraiment le temps"),
+                    (6, "A considérer"),
+                    (7, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
     ]

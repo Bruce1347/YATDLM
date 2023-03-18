@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0003_auto_20171218_2046'),
+        ("todo", "0003_auto_20171218_2046"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='todolist',
-            name='description',
+            model_name="todolist",
+            name="description",
             field=models.TextField(blank=True, max_length=600),
         ),
     ]

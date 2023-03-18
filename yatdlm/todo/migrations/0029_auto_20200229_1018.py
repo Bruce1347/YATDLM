@@ -4,25 +4,55 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0028_auto_20200108_2242'),
+        ("todo", "0028_auto_20200108_2242"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followup',
-            name='new_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu'), (5, 'Rejeté')], default=None, null=True),
+            model_name="followup",
+            name="new_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                    (5, "Rejeté"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='followup',
-            name='old_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu'), (5, 'Rejeté')], default=None, null=True),
+            model_name="followup",
+            name="old_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                    (5, "Rejeté"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='priority',
-            field=models.IntegerField(choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu'), (5, 'Rejeté')], default=3),
+            model_name="task",
+            name="priority",
+            field=models.IntegerField(
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                    (5, "Rejeté"),
+                ],
+                default=3,
+            ),
         ),
     ]

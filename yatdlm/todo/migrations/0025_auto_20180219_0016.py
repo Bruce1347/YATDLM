@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0024_todolist_is_public'),
+        ("todo", "0024_todolist_is_public"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='todolist',
-            name='is_public',
+            model_name="todolist",
+            name="is_public",
             field=models.BooleanField(default=False),
         ),
     ]

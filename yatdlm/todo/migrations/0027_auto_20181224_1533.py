@@ -4,25 +4,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('todo', '0026_task_task_no'),
+        ("todo", "0026_task_task_no"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followup',
-            name='new_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="new_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='followup',
-            name='old_priority',
-            field=models.IntegerField(blank=True, choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu')], default=None, null=True),
+            model_name="followup",
+            name="old_priority",
+            field=models.IntegerField(
+                blank=True,
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                ],
+                default=None,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='priority',
-            field=models.IntegerField(choices=[(1, 'Urgent'), (2, 'Normal'), (3, 'A considérer'), (4, 'Résolu')], default=3),
+            model_name="task",
+            name="priority",
+            field=models.IntegerField(
+                choices=[
+                    (1, "Urgent"),
+                    (2, "Normal"),
+                    (3, "A considérer"),
+                    (4, "Résolu"),
+                ],
+                default=3,
+            ),
         ),
     ]
