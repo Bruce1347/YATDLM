@@ -1,9 +1,11 @@
 import json
 from datetime import datetime
+from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import (
     HttpResponse,
@@ -18,8 +20,6 @@ from django.views.decorators.http import require_http_methods
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
 from .utils import yesnojs, yesnopython
-
-from django.contrib.auth.models import User
 
 
 @login_required()
@@ -421,12 +421,18 @@ def add_followup(request, list_id=None, task_id=None):
 
 @login_required
 def add_list(request):
-    list_title = request.POST["title"]
-    list_description = request.POST["description"]
+    list_title = request.POST.get("title")
+    list_description = request.POST.get("description", "")
     # list_deadline = request.POST['end_date']
     list_visibility = (
         "visibility" in request.POST and request.POST["visibility"] == "True"
     )
+
+    if not list_title or list_title == "":
+        return JsonResponse(
+            {"errors": {"name": "This field cannot be null or empty"}},
+            status=HTTPStatus.UNPROCESSABLE_ENTITY,
+        )
 
     new_list = TodoList(
         owner=request.user,
