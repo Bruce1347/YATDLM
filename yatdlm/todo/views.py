@@ -545,7 +545,18 @@ def display_task_public(request, list_id, task_id):
 
 class TaskView(LoginRequiredMixin, View):
     def get(self, request, list_id, task_id, *args, **kwargs):
-        task = Task.objects.get(id=task_id, parent_list_id=list_id)
+        try:
+            task = Task.objects.get(id=task_id, parent_list_id=list_id)
+        except Task.DoesNotExist:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "list_id": "Provided id is invalid",
+                        "task_id": "Provided id is invalid",
+                    }
+                },
+                status=HTTPStatus.NOT_FOUND,
+            )
 
         if "json" in request.GET:
             return JsonResponse(task.as_dict(), status=HTTPStatus.OK)

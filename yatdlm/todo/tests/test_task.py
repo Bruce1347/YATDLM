@@ -116,6 +116,7 @@ class TaskDelete(TestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
+
 class TaskRead(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -166,3 +167,31 @@ class TaskRead(TestCase):
             data,
             expected,
         )
+
+    def test_get_unknown_task(self):
+        self.client.login(username=self.user.username, password=self.users_password)
+
+        response = self.client.get(
+            self.url.format(list_id=self.list_.id, task_id=9999),
+            data={},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_get_task_wrong_list_id(self):
+        self.client.login(username=self.user.username, password=self.users_password)
+
+        response = self.client.get(
+            self.url.format(list_id=9999, task_id=self.task.id),
+            data={},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_get_task_not_logged(self):
+        response = self.client.get(
+            self.url.format(list_id=self.list_.id, task_id=self.task.id),
+            data={},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
