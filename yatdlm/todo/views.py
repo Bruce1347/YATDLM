@@ -5,6 +5,7 @@ from http import HTTPStatus
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import (
@@ -15,6 +16,7 @@ from django.http import (
 )
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
+from django.views import View
 from django.views.decorators.http import require_http_methods
 
 from .helpers.routes_validators import task_exists, task_ownership
@@ -539,3 +541,46 @@ def display_task_public(request, list_id, task_id):
         "followups": task.get_followups(),
     }
     return render(request, "todo/task.html", context)
+
+
+class TaskView(LoginRequiredMixin, View):
+    def get(self, request, list_id, task_id, *args, **kwargs):
+        task = Task.objects.get(id=task_id, parent_list_id=list_id)
+
+        if "json" in request.GET:
+            return JsonResponse(task.as_dict(), status=HTTPStatus.OK)
+
+        context = {
+            "task": task,
+            "public": False,
+            "publicjs": yesnojs(False),
+            "includes": ["single_task", "list_common"],
+            "followups": task.get_followups(),
+        }
+
+        return render(request, "todo/task.html", context)
+
+    def delete(self, request, list_id, task_id, *args, **kwargs):
+        if not task_id or not list_id:
+            return JsonResponse(
+                {
+                    "errors": "Both ``task_id`` and ``list_id`` must be included in the resource URL."
+                },
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        try:
+            task = Task.objects.get(id=task_id, parent_list_id=list_id)
+        except Task.DoesNotExist:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "task_id": "Provided id is invalid.",
+                        "list_id": "Provided id is invalid.",
+                    }
+                },
+                status=HTTPStatus.NOT_FOUND,
+            )
+        else:
+            task.delete()
+            return JsonResponse({}, status=HTTPStatus.OK)
