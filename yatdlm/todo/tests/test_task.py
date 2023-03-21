@@ -5,8 +5,9 @@ from django.contrib.auth import models as auth_models
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
 
+from todo.categories.factories import CategoryFactory
 from todo.factories import TaskFactory, TodoListFactory, UserFactory
-from todo.models import Task, TodoList
+from todo.models import FollowUp, Task, TodoList
 
 
 class TaskRejectTestCase(TestCase):
@@ -59,6 +60,78 @@ class TaskUpdateTestCase(TestCase):
         response_json = response.json()
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response_json["title"], "Mon super titre")
+
+    def test_update_categories(self):
+        task = TaskFactory.create(
+            parent_list=self.list_,
+        )
+        category = CategoryFactory.create(todolist=self.list_)
+
+        data = task.as_dict()
+
+        data["categories"] = [category.id]
+
+        self.client.login(username="test", password="1234")
+
+        response = self.client.patch(
+            self.url.format(self.list_.id, task.id),
+            json.dumps(data),
+        )
+
+        data = response.json()
+
+        self.assertEqual(
+            [category.id for category in task.categories.all()],
+            [category.id],
+        )
+
+    def test_update_categories_wrong_ids(self):
+        task = TaskFactory.create(
+            parent_list=self.list_,
+        )
+
+        data = task.as_dict()
+
+        data["categories"] = [42, 420]
+
+        self.client.login(username="test", password="1234")
+
+        response = self.client.patch(
+            self.url.format(self.list_.id, task.id),
+            json.dumps(data),
+        )
+
+        data = response.json()
+
+        self.assertEqual(
+            list(task.categories.all()),
+            list(),
+        )
+
+        # Task has been updated but categories were untouched
+        self.assertEqual(
+            1,
+            FollowUp.objects.count(),
+        )
+
+        follow_up = FollowUp.objects.first()
+
+        self.assertEqual(
+            follow_up.f_type,
+            FollowUp.MODIFICATION,
+        )
+        self.assertEqual(
+            follow_up.writer,
+            self.user,
+        )
+        self.assertEqual(
+            follow_up.todol,
+            self.list_,
+        )
+        self.assertEqual(
+            follow_up.task,
+            task,
+        )
 
     def test_update_task_wrong_user(self):
         task = Task(title="Title", parent_list=self.list_, owner=self.user)

@@ -259,28 +259,19 @@ def update_task(request, list_id=None, task_id=None):
             if request.user != task.owner:
                 raise Task.IsNotOwner()
             body = json.loads(request.body.decode("utf-8"))
+
             new_priority = int(body.get("priority"))
-            new_state = FollowUp(
-                writer=request.user,
-                task=task,
-                todol_id=list_id,
-                old_priority=task.priority,
-                new_priority=new_priority,
-            )
-            if new_priority is not task.priority:
-                new_state.f_type = FollowUp.STATE_CHANGE
-                task.priority = new_priority
-            else:
-                new_state.f_type = FollowUp.MODIFICATION
-            new_state.save()
             task.title = body.get("title")
             task.description = body.get("description")
+
             if "categories" in body:
                 categories = [int(category) for category in body.get("categories")]
-                task.categories.clear()
-                # Add tasks in bulk through args unpacking
-                task.categories.add(*categories)
+                task.set_categories(categories)
+
             task.save()
+
+            task.add_update_followup(request.user, new_priority)
+
             resp = task.as_dict()
             resp_code = 202
         except TodoList.DoesNotExist:

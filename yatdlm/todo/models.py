@@ -1,12 +1,13 @@
+import typing as T
+from datetime import datetime
+
+from django.contrib import admin
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
-from django.contrib import admin
-from django.contrib.auth.models import User
-from django.utils.timezone import make_aware
-from datetime import datetime
-
 from django.utils.formats import date_format
+from django.utils.timezone import make_aware
 
 from .categories.models import Category
 
@@ -49,17 +50,22 @@ class TaskManager(models.Manager):
     Its previous implementation relied on the subtasks queryset and generated a useless
     SELECT used for counting objects.
     """
+
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().annotate(
-            subtasks_count=models.Count("task"),
-            subtasks_done_count=models.Count(
-                models.Case(
-                    models.When(
-                        task__is_done=True,
-                        then=1,
-                    ),
-                    output_field=models.IntegerField(),
-                )
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                subtasks_count=models.Count("task"),
+                subtasks_done_count=models.Count(
+                    models.Case(
+                        models.When(
+                            task__is_done=True,
+                            then=1,
+                        ),
+                        output_field=models.IntegerField(),
+                    )
+                ),
             )
         )
 
@@ -217,6 +223,22 @@ class Task(models.Model):
         )
         followup.save()
 
+    def add_update_followup(self, writer, new_priority) -> None:
+        if new_priority is self.priority:
+            followup_type = FollowUp.MODIFICATION
+        else:
+            followup_type = FollowUp.STATE_CHANGE
+            self.priority = new_priority
+
+        FollowUp(
+            writer=writer,
+            task=self,
+            todol=self.parent_list,
+            old_priority=self.priority,
+            new_priority=new_priority,
+            f_type=followup_type,
+        ).save()
+
     def change_state(self, comment=None, writer=None):
         """Changes the is_done state of the current Task instance.
         If ``comment`` is not None then the current task will have a
@@ -272,6 +294,14 @@ class Task(models.Model):
         )
 
         return [cat.as_dict() for cat in categories]
+
+    def set_categories(self, categories_ids: T.List[int]) -> None:
+        if not Category.objects.filter(id__in=categories_ids).exists():
+            return
+
+        self.categories.clear()
+
+        self.categories.add(*categories_ids)
 
     def as_dict(self, dates_format="d/m/Y"):
         """Returns a dict representation for the task"""
