@@ -43,7 +43,7 @@ class TaskUpdateTestCase(TestCase):
         cls.other_user = auth_models.User.objects.create_user("test2", password="1234")
         cls.list_ = TodoList(owner=cls.user)
         cls.list_.save()
-        cls.url = "/todo/lists/{}/{}/update/"
+        cls.url = "/todo/beta/lists/{list_id}/tasks/{task_id}"
 
     def test_update_task(self):
         task = Task(title="Title", parent_list=self.list_, owner=self.user)
@@ -54,11 +54,13 @@ class TaskUpdateTestCase(TestCase):
         data = task.as_dict()
         data["title"] = "Mon super titre"
         data["description"] = "Ma super nouvelle description !"
-        response = self.client.patch(
-            self.url.format(self.list_.id, task.id), json.dumps(data)
+        response = self.client.put(
+            self.url.format(list_id=self.list_.id, task_id=task.id),
+            data,
+            content_type="application/json",
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response_json["title"], "Mon super titre")
 
     def test_update_categories(self):
@@ -73,9 +75,10 @@ class TaskUpdateTestCase(TestCase):
 
         self.client.login(username="test", password="1234")
 
-        response = self.client.patch(
-            self.url.format(self.list_.id, task.id),
-            json.dumps(data),
+        response = self.client.put(
+            self.url.format(list_id=self.list_.id, task_id=task.id),
+            data,
+            content_type="application/json",
         )
 
         data = response.json()
@@ -96,9 +99,10 @@ class TaskUpdateTestCase(TestCase):
 
         self.client.login(username="test", password="1234")
 
-        response = self.client.patch(
-            self.url.format(self.list_.id, task.id),
-            json.dumps(data),
+        response = self.client.put(
+            self.url.format(list_id=self.list_.id, task_id=task.id),
+            data,
+            content_type="application/json",
         )
 
         data = response.json()
@@ -141,8 +145,10 @@ class TaskUpdateTestCase(TestCase):
 
         data = task.as_dict()
 
-        response = self.client.patch(
-            self.url.format(self.list_.id, task.id), json.dumps(data)
+        response = self.client.put(
+            self.url.format(list_id=self.list_.id, task_id=task.id),
+            data,
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 403)

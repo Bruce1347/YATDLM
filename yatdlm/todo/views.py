@@ -574,18 +574,39 @@ class TaskView(LoginRequiredMixin, View):
 
         return render(request, "todo/task.html", context)
 
-    def delete(self, request, list_id, task_id, *args, **kwargs):
-        if not task_id or not list_id:
+    def put(self, request, list_id, task_id, *args, **kwargs):
+        task = self.get_task(task_id, list_id)
+
+        if not task:
             return JsonResponse(
                 {
-                    "errors": "Both ``task_id`` and ``list_id`` must be included in the resource URL."
+                    "errors": {
+                        "task_id": "Must be not null",
+                        "list_id": "Must be not null",
+                    },
                 },
                 status=HTTPStatus.BAD_REQUEST,
             )
 
+        body = json.loads(request.body.decode("utf-8"))
+
         try:
-            task = Task.objects.get(id=task_id, parent_list_id=list_id)
-        except Task.DoesNotExist:
+            task.update(body, request.user)
+        except NotOwner:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "owner_id": "Wrong id",
+                    },
+                },
+                status=HTTPStatus.FORBIDDEN,
+            )
+
+        return JsonResponse(
+            task.as_dict(),
+            status=HTTPStatus.OK,
+        )
+
     def delete(self, request, list_id, task_id, *args, **kwargs):
         task = self.get_task(task_id, list_id)
         if not task:

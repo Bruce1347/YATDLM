@@ -333,6 +333,26 @@ class Task(models.Model):
 
         return resp
 
+    def update(self, data: dict, logged_user: User) -> None:
+        if logged_user != self.owner:
+            raise NotOwner()
+
+        priority = data.get("priority")
+        title = data.get("title")
+        description = data.get("description")
+
+        if "categories" in data:
+            categories = [int(category_id) for category_id in data["categories"]]
+            self.set_categories(categories)
+
+        self.priority = priority
+        self.title = title
+        self.description = description
+
+        self.save()
+
+        self.add_update_followup(logged_user, priority)
+
 
 class TaskAdmin(admin.ModelAdmin):
     readonly_fields = ("creation_date",)
