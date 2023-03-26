@@ -1,4 +1,5 @@
 import json
+import typing as T
 from datetime import datetime
 from http import HTTPStatus
 
@@ -535,10 +536,21 @@ def display_task_public(request, list_id, task_id):
 
 
 class TaskView(LoginRequiredMixin, View):
+    def get_task(self, task_id, parent_list_id) -> T.Union[Task, None]:
+        if not task_id or not parent_list_id:
+            return None
+
+        queryset = Task.objects.filter(id=task_id, parent_list_id=parent_list_id)
+
+        if not queryset.exists():
+            return None
+
+        return queryset.first()
+
     def get(self, request, list_id, task_id, *args, **kwargs):
-        try:
-            task = Task.objects.get(id=task_id, parent_list_id=list_id)
-        except Task.DoesNotExist:
+        task = self.get_task(task_id, list_id)
+
+        if not task:
             return JsonResponse(
                 {
                     "errors": {
@@ -574,6 +586,9 @@ class TaskView(LoginRequiredMixin, View):
         try:
             task = Task.objects.get(id=task_id, parent_list_id=list_id)
         except Task.DoesNotExist:
+    def delete(self, request, list_id, task_id, *args, **kwargs):
+        task = self.get_task(task_id, list_id)
+        if not task:
             return JsonResponse(
                 {
                     "errors": {
@@ -583,6 +598,6 @@ class TaskView(LoginRequiredMixin, View):
                 },
                 status=HTTPStatus.NOT_FOUND,
             )
-        else:
-            task.delete()
-            return JsonResponse({}, status=HTTPStatus.OK)
+
+        task.delete()
+        return JsonResponse({}, status=HTTPStatus.OK)
