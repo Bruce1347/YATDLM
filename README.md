@@ -20,4 +20,4 @@ If you'd like to contribute or just launch YATDLM in your own local setup do the
 * At the root of the cloned repository, run `poetry install`
 * After the first install, just run `poetry shell` to spawn a shell inside the virtualenv created by Poetry
 
-If you are a french reader, you can follow the progress of YATDLM [here](http://todo.wormholextreme.net/todo/lists/public/1/).
+If you are a french reader, you can follow the progress of YATDLM [here](http://todo.eros.wormholextreme.net/todo/lists/public/1/).
