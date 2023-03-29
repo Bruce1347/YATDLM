@@ -490,7 +490,7 @@ function createTaskEditTd(node_id, task_id) {
         Object.assign(tasks[currentTaskIdx], updatedTask);
         document.getElementById(td.id).replaceWith(task_td);
         updateDOMTask(updatedTask);
-        updateFollowups(updatedTask.list_id, updatedTask.id);
+        updateFollowups(updatedTask);
     });
     task_td.parentNode.replaceChild(td, task_td);
     // Bind the add_category button
@@ -507,7 +507,8 @@ function createTaskEditTd(node_id, task_id) {
  * @param {Object} task The object that is subject to changes.
  */
 async function updateTask(body, task) {
-    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/update/`, body);
+    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
+    const response = await put(url, body);
     const updatedTask = await response.json();
     return updatedTask;
 }
@@ -531,12 +532,16 @@ function updateDOMTask(task) {
         descriptionCell.querySelector("p").innerText = task.description;
         const category_cell = document.getElementById(`categories_${task.no}`);
         const task_categories = new Array();
-        for (var i = 0; i < task.categories.length; ++i) {
-            var category = categories.find((cat) => {
-                return cat.id === task.categories[i].id;
-            });
-            task_categories.push(category.name);
+
+        if (task.categories !== undefined) {
+            for (var i = 0; i < task.categories.length; ++i) {
+                var category = categories.find((cat) => {
+                    return cat.id === task.categories[i].id;
+                });
+                task_categories.push(category.name);
+            }
         }
+
         category_cell.innerText = task_categories.join(", ");
         // Update the resolution date and due date cells
         const closeBtn = document.getElementById(`close-btn_${task.no}`);

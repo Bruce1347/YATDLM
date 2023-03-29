@@ -25,8 +25,6 @@ urlpatterns = [
     path("lists/<int:list_id>/del_task/<int:task_id>", views.delete_task),
     # Display the details of a task
     path("lists/<int:list_id>/detail/<int:task_id>", views.display_detail),
-    # Update a task
-    path("lists/<int:list_id>/<int:task_id>/update/", views.update_task),
     # Close a task
     path("lists/<int:list_id>/<int:task_id>/close", views.close_task),
     # Add a followup
@@ -37,7 +35,7 @@ urlpatterns = [
     path("lists/<int:list_id>/<int:task_id>", views.display_task),
     path("categories/", include("todo.categories.urls")),
     path(
-        "beta/lists/<int:list_id>/tasks/<int:task_id>",
+        "lists/<int:list_id>/tasks/<int:task_id>",
         views.TaskView.as_view(),
     ),
 ]

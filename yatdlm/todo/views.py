@@ -249,42 +249,6 @@ def add_task(request, list_id=None):
 
 
 @login_required()
-@require_http_methods(["PATCH"])
-def update_task(request, list_id=None, task_id=None):
-    if not list_id or not task_id:
-        resp = {"errors": "No ID given for a task or a list"}
-        resp_code = 500
-    else:
-        try:
-            task = Task.objects.get(id=task_id, parent_list_id=list_id)
-            if request.user != task.owner:
-                raise Task.IsNotOwner()
-            body = json.loads(request.body.decode("utf-8"))
-
-            new_priority = int(body.get("priority"))
-            task.title = body.get("title")
-            task.description = body.get("description")
-
-            if "categories" in body:
-                categories = [int(category) for category in body.get("categories")]
-                task.set_categories(categories)
-
-            task.save()
-
-            task.add_update_followup(request.user, new_priority)
-
-            resp = task.as_dict()
-            resp_code = 202
-        except TodoList.DoesNotExist:
-            resp = {"errors": "Wrong task ID or list ID"}
-            resp_code = 404
-        except Task.IsNotOwner:
-            resp = {"errors": "Unauthorized"}
-            resp_code = 403
-    return JsonResponse(resp, status=resp_code)
-
-
-@login_required()
 @require_http_methods(["DELETE"])
 def delete_task(request, list_id=None, task_id=None):
     """Deletes a task from the database"""
