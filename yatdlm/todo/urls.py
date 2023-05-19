@@ -35,6 +35,10 @@ urlpatterns = [
     path("lists/<int:list_id>/<int:task_id>", views.display_task),
     path("categories/", include("todo.categories.urls")),
     path(
+        "beta/lists/<int:list_id>/tasks",
+        views.TaskListView.as_view(),
+    ),
+    path(
         "lists/<int:list_id>/tasks/<int:task_id>",
         views.TaskView.as_view(),
     ),

@@ -19,9 +19,11 @@ from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views import View
 from django.views.decorators.http import require_http_methods
+from pydantic import ValidationError
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
+from .schemas import TaskSchema
 from .utils import yesnojs, yesnopython
 
 
@@ -497,6 +499,40 @@ def display_task_public(request, list_id, task_id):
         "followups": task.get_followups(),
     }
     return render(request, "todo/task.html", context)
+
+
+class TaskListView(LoginRequiredMixin, View):
+    def post(self, request, list_id, *args, **kwargs):
+        try:
+            schema = TaskSchema(**json.loads(request.body.decode("utf-8")))
+        except ValidationError as e:
+            return JsonResponse(
+                dict(errors=e.errors()),
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        validated_data = schema.dict()
+
+        categories = validated_data.pop("categories")
+
+        task_instance = Task(
+            **validated_data,
+            parent_list_id=list_id,
+        )
+        task_instance.save()
+
+        # Refresh the python object from database
+        # This is needed to set the categories after the task has been created.
+        # The many to many relationship cannot be populated until the newly
+        # created task has an ID that can be used as a foreign key.
+        task_instance.refresh_from_db()
+
+        task_instance.categories.set(categories)
+
+        return JsonResponse(
+            TaskSchema.from_orm(task_instance).dict(),
+            status=HTTPStatus.CREATED,
+        )
 
 
 class TaskView(LoginRequiredMixin, View):

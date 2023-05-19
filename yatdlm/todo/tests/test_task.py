@@ -274,3 +274,129 @@ class TaskRead(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+
+class TaskCreate(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.list_ = TodoListFactory.create(
+            owner=cls.user,
+        )
+        cls.url = "/todo/beta/lists/{list_id}/tasks"
+
+    def login(self):
+        self.client.login(
+            username=self.user.username,
+            password=self.users_password,
+        )
+
+    def test_create_basic_task(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My Task",
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+
+        created_task = response.json()
+
+        self.assertIn("id", created_task)
+
+        task = Task.objects.filter(id=created_task.get("id")).first()
+
+        self.assertNotEqual(task, None)
+
+    def test_create_missing_title(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": None,
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+        recieved_payload = response.json()
+
+        self.assertIn("errors", recieved_payload)
+
+        self.assertEqual(len(recieved_payload["errors"]), 1)
+
+        errors = recieved_payload["errors"][0]
+
+        self.assertEqual(errors["loc"], ["title"])
+
+    def test_create_missing_priority(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My super title",
+                "descr": "My super duper description",
+                "priority": None,
+                "categories": [],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+        recieved_payload = response.json()
+
+        self.assertIn("errors", recieved_payload)
+
+        self.assertEqual(len(recieved_payload["errors"]), 1)
+
+        errors = recieved_payload["errors"][0]
+
+        self.assertEqual(errors["loc"], ["priority"])
+
+    def test_create_multiple_fields_missing(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": None,
+                "descr": "My super duper description",
+                "priority": None,
+                "categories": [],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+        recieved_payload = response.json()
+
+        self.assertIn("errors", recieved_payload)
+
+        self.assertEqual(len(recieved_payload["errors"]), 2)
+
+        # Sort errors alphabetically
+        priority_error, title_error = sorted(
+            recieved_payload["errors"], key=lambda error: error["loc"][0]
+        )
+
+        self.assertEqual(priority_error["loc"], ["priority"])
+        self.assertEqual(title_error["loc"], ["title"])
