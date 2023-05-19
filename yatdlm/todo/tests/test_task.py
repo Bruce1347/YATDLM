@@ -43,7 +43,7 @@ class TaskUpdateTestCase(TestCase):
         cls.other_user = auth_models.User.objects.create_user("test2", password="1234")
         cls.list_ = TodoList(owner=cls.user)
         cls.list_.save()
-        cls.url = "/todo/beta/lists/{list_id}/tasks/{task_id}"
+        cls.url = "/todo/lists/{list_id}/tasks/{task_id}"
 
     def test_update_task(self):
         task = Task(title="Title", parent_list=self.list_, owner=self.user)
@@ -165,7 +165,7 @@ class TaskDelete(TestCase):
         cls.list_ = TodoListFactory.create(
             owner=cls.user,
         )
-        cls.url = "/todo/beta/lists/{list_id}/tasks/{task_id}"
+        cls.url = "/todo/lists/{list_id}/tasks/{task_id}"
 
     def test_delete_task(self):
         task = TaskFactory.create(
@@ -210,7 +210,7 @@ class TaskRead(TestCase):
         cls.task = TaskFactory.create(
             parent_list=cls.list_,
         )
-        cls.url = "/todo/beta/lists/{list_id}/tasks/{task_id}?json=true"
+        cls.url = "/todo/lists/{list_id}/tasks/{task_id}?json=true"
 
     def test_get_task(self):
         self.client.login(username=self.user.username, password=self.users_password)
