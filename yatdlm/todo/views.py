@@ -508,7 +508,7 @@ def reject_task(request, list_id, task_id, **kwargs):
 @task_exists
 @task_ownership
 def display_task(request, list_id, task_id):
-    task = Task.objects.get(id=task_id, parent_list_id=list_id)
+    task = Task.objects.select_related("owner").get(id=task_id, parent_list_id=list_id)
     if "json" in request.GET:
         return JsonResponse(task.as_dict(), status=202)
     context = {
