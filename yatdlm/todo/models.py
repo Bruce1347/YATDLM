@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -40,6 +41,29 @@ class TodoListAdmin(admin.ModelAdmin):
     readonly_fields = ("creation_date",)
 
 
+class TaskManager(models.Manager):
+    """A custom manager dedicated for tasks statistics.
+
+    Using this manager avoids the generation of a N+1 query when the
+    ``subtasks_progress`` property is called.
+    Its previous implementation relied on the subtasks queryset and generated a useless
+    SELECT used for counting objects.
+    """
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().annotate(
+            subtasks_count=models.Count("task"),
+            subtasks_done_count=models.Count(
+                models.Case(
+                    models.When(
+                        task__is_done=True,
+                        then=1,
+                    ),
+                    output_field=models.IntegerField(),
+                )
+            )
+        )
+
+
 class Task(models.Model):
     class Meta:
         indexes = [
@@ -47,6 +71,8 @@ class Task(models.Model):
             models.Index(fields=["parent_list_id"]),
             models.Index(fields=["id"]),
         ]
+
+    objects = TaskManager()
 
     # The user that created the task
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
@@ -142,13 +168,10 @@ class Task(models.Model):
 
     @property
     def subtasks_progress(self):
-        """Return the percentage of done tasks"""
+        if self.subtasks_count == 0:
+            return 0.0
 
-        total_tasks = self.task_set.count()
-        if total_tasks == 0:
-            return 0
-        tasks_done = self.task_set.filter(is_done=True).count()
-        return 100.0 * (tasks_done / total_tasks)
+        return round(100.0 * (self.subtasks_done_count / self.subtasks_count), 2)
 
     @property
     def is_rejected(self):
