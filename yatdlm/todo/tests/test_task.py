@@ -400,3 +400,35 @@ class TaskCreate(TestCase):
 
         self.assertEqual(priority_error["loc"], ["priority"])
         self.assertEqual(title_error["loc"], ["title"])
+
+    def test_create_category_does_not_exists(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My title",
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [42],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+    
+    def test_create_multiple_categories_do_not_exists(self):
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My title",
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [42, 1337],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)

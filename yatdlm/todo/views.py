@@ -7,10 +7,9 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.http import (
-    HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
     JsonResponse,
@@ -20,6 +19,8 @@ from django.utils.timezone import make_aware
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from pydantic import ValidationError
+
+from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
@@ -526,6 +527,18 @@ class TaskListView(LoginRequiredMixin, View):
         # The many to many relationship cannot be populated until the newly
         # created task has an ID that can be used as a foreign key.
         task_instance.refresh_from_db()
+
+        if categories:
+            categories_ids_filter = Q(id=categories[0])
+
+            for category in categories[1:]:
+                categories_ids_filter = categories_ids_filter & Q(id=category)
+
+            if not Category.objects.filter(categories_ids_filter).exists():
+                return JsonResponse(
+                    {"categories": "One or more categories do not exist"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
 
         task_instance.categories.set(categories)
 
