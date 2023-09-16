@@ -223,6 +223,8 @@ class Task(models.Model):
         )
         followup.save()
 
+        return followup
+
     def add_update_followup(self, writer, new_priority) -> None:
         if new_priority is self.priority:
             followup_type = FollowUp.MODIFICATION
@@ -374,6 +376,12 @@ class FollowUp(models.Model):
         (MODIFICATION, "Modification"),
         (STATE_CHANGE, "Changement d'État"),
     )
+
+    choices_dict = {
+        COMMENT: "COMMENT",
+        MODIFICATION: "MODIFICATION",
+        STATE_CHANGE: "STATE_CHANGE",
+    }
 
     # The user that wrote the Follow-up
     writer = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)

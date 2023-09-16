@@ -28,6 +28,7 @@ urlpatterns = [
     # Close a task
     path("lists/<int:list_id>/<int:task_id>/close", views.close_task),
     # Add a followup
+    path("lists/<int:list_id>/tasks/<int:task_id>/followups", views.add_followup),
     path("lists/<int:list_id>/<int:task_id>/add_followup", views.add_followup),
     # Get all followups
     path("lists/<int:list_id>/<int:task_id>/get_followups", views.get_followups),

@@ -1,6 +1,9 @@
 import typing as T
+from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, functional_serializers
+
+from todo.models import FollowUp
 
 
 class TaskSchema(BaseModel):
@@ -47,3 +50,51 @@ class TaskSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FollowUpSchema(BaseModel):
+    id: int = None
+    writer: str
+    f_type: str
+    old_priority: str | None
+    new_priority: str | None
+    task_id: int
+    todol_id: int
+    creation_date: datetime
+    content: str
+
+    class Config:
+        orm_mode = True
+
+    @functional_serializers.field_serializer("creation_date")
+    def serialize_creation_date(self, creation_date: datetime, _info) -> str:
+        return creation_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    @classmethod
+    def _dump_writer(cls: "FollowUpSchema", obj: "FollowUp", data: dict):
+        data["writer"] = obj.writer.username
+
+    @classmethod
+    def _dump_f_type(cls: "FollowUpSchema", obj: "FollowUp", data: dict):
+        data["f_type"] = FollowUp.choices_dict[obj.f_type]
+
+    @classmethod
+    def from_orm(cls: "FollowUpSchema", obj: "FollowUp"):
+        # The following fields cannot be copied "as is" and need a custom dumping method
+        custom_dump_fields = ["writer", "f_type"]
+
+        custom_dump_fields_methods = {
+            "writer": cls._dump_writer,
+            "f_type": cls._dump_f_type,
+        }
+
+        data = {
+            field: getattr(obj, field)
+            for field in cls.__fields__
+            if field not in custom_dump_fields
+        }
+
+        for field in custom_dump_fields:
+            custom_dump_fields_methods[field](obj, data)
+
+        return FollowUpSchema(**data)

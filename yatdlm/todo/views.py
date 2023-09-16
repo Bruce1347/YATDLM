@@ -9,11 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.http import (
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    JsonResponse,
-)
+from django.http import HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views import View
@@ -24,7 +20,7 @@ from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
-from .schemas import TaskSchema
+from .schemas import FollowUpSchema, TaskSchema
 from .utils import yesnojs, yesnopython
 
 
@@ -367,17 +363,19 @@ def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=Fals
 @login_required()
 @require_http_methods(["POST"])
 def add_followup(request, list_id=None, task_id=None):
+    body = json.loads(request.body.decode("utf-8"))
+
     try:
-        task = Task.objects.get(id=task_id, parent_list=list_id)
-        body = json.loads(request.body.decode("utf-8"))
-        followup = body.get("followup")
-        task.add_followup(followup, request.user)
-        status = 200
-        payload = {"status": "OK!"}
+        task: Task = Task.objects.get(id=task_id, parent_list=list_id)
     except Task.DoesNotExist:
-        status = 404
+        status = HTTPStatus.NOT_FOUND
         payload = {"errors": "Wrong Task ID or List ID"}
-    return JsonResponse(payload, status=status)
+    else:
+        followup = task.add_followup(body.get("followup"), request.user)
+        status = HTTPStatus.CREATED
+        payload = FollowUpSchema.from_orm(followup).model_dump()
+    finally:
+        return JsonResponse(payload, status=status)
 
 
 @login_required

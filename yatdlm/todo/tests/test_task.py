@@ -1,6 +1,8 @@
 import json
+from datetime import datetime
 from http import HTTPStatus
 
+import freezegun
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
@@ -416,7 +418,7 @@ class TaskCreate(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-    
+
     def test_create_multiple_categories_do_not_exists(self):
         self.login()
 
@@ -432,3 +434,61 @@ class TaskCreate(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+
+class TaskFollowup(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.list_ = TodoListFactory.create(
+            owner=cls.user,
+        )
+        cls.task: Task = TaskFactory.create(
+            parent_list=cls.list_,
+            owner=cls.user,
+        )
+        cls.url = f"/todo/lists/{cls.list_.id}/tasks/{cls.task.id}/followups"
+
+    def login(self):
+        self.client.login(
+            username=self.user.username,
+            password=self.users_password,
+        )
+
+    @freezegun.freeze_time()
+    def test_create_followup(self):
+        self.login()
+
+        response = self.client.post(
+            self.url,
+            data={"followup": f"I'm a followup comment for task {self.task.id}"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+        self.assertTrue(
+            FollowUp.objects.filter(
+                task_id=self.task.id, todol_id=self.list_.id
+            ).exists()
+        )
+
+        self.assertEqual(
+            response.json(),
+            {
+                "task_id": self.task.id,
+                "todol_id": self.list_.id,
+                "content": f"I'm a followup comment for task {self.task.id}",
+                "new_priority": None,
+                "old_priority": None,
+                "writer": str(self.user),
+                "f_type": "COMMENT",
+                # Ids are autoincremented, there should be only one followup
+                "id": 1,
+                # Time is frozen by freeze gun, no worries about using ``now``
+                "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            },
+        )
