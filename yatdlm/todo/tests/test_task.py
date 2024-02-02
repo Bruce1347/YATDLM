@@ -436,6 +436,67 @@ class TaskCreate(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
 
+class TasksList(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.other_user = UserFactory.create(
+            username="other_user",
+            password=make_password(cls.users_password),
+        )
+        cls.list_ = TodoListFactory.create(
+            owner=cls.user,
+        )
+        cls.url = f"/todo/beta/lists/{cls.list_.id}/tasks"
+        cls.tasks: list[Task] = TaskFactory.create_batch(
+            3,
+            parent_list=cls.list_,
+            owner=cls.user,
+        )
+
+    def login(self, user_to_log):
+        self.client.login(
+            username=user_to_log,
+            password=self.users_password,
+        )
+
+    def test_get_task(self):
+        self.login(self.user)
+
+        response = self.client.get(
+            self.url,
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        data = response.json()
+
+        self.assertIsNotNone(data["tasks"])
+        self.assertIsInstance(data["tasks"], list)
+        self.assertEqual(len(data["tasks"]), 3)
+
+    def test_get_task_no_ownership(self):
+        self.login(self.other_user)
+
+        response = self.client.get(
+            self.url,
+        )
+
+        # The following request might be legitimate since lists have autoincremented int as ids.
+        # However a user that does not have the ownership of the list should not be able to see its tasks.
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        data = response.json()
+
+        self.assertIsNotNone(data["tasks"])
+        self.assertIsInstance(data["tasks"], list)
+        self.assertEqual(len(data["tasks"]), 0)
+
+
 class TaskFollowup(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

@@ -501,6 +501,19 @@ def display_task_public(request, list_id, task_id):
 
 
 class TaskListView(LoginRequiredMixin, View):
+    def get(self, request, list_id, *args, **kwargs):
+        tasks = Task.objects.filter(
+            parent_list_id=list_id,
+            owner=request.user,
+        )
+
+        payload = [TaskSchema.from_orm(task).dict() for task in tasks]
+
+        return JsonResponse(
+            dict(tasks=payload),
+            status=HTTPStatus.OK,
+        )
+
     def post(self, request, list_id, *args, **kwargs):
         try:
             schema = TaskSchema(**json.loads(request.body.decode("utf-8")))
