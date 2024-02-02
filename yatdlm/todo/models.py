@@ -81,7 +81,7 @@ class Task(models.Model):
     objects = TaskManager()
 
     # The user that created the task
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default=1)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
 
     # Priority levels
     URGENT = 1

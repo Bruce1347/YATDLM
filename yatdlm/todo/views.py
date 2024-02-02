@@ -529,6 +529,7 @@ class TaskListView(LoginRequiredMixin, View):
 
         task_instance = Task(
             **validated_data,
+            owner=request.user,  # Default to logged user, might be changed in the future
             parent_list_id=list_id,
         )
         task_instance.save()

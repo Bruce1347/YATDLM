@@ -320,6 +320,7 @@ class TaskCreate(TestCase):
         task = Task.objects.filter(id=created_task.get("id")).first()
 
         self.assertNotEqual(task, None)
+        self.assertEqual(task.owner, self.user)
 
     def test_create_missing_title(self):
         self.login()
