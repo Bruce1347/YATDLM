@@ -10,6 +10,9 @@ lock:
 lock_update:
 	poetry lock
 
+pylint:
+	pylint $$(git diff --name-only --cached)
+
 lint:
 	isort $$(git diff --name-only --cached)
 	black $$(git diff --name-only --cached)
