@@ -1,24 +1,26 @@
 import json
+import typing as T
 from datetime import datetime
 from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import (
-    HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    JsonResponse,
-)
+from django.db.models import Q
+from django.http import HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
+from django.views import View
 from django.views.decorators.http import require_http_methods
+from pydantic import ValidationError
+
+from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
+from .schemas import FollowUpSchema, TaskSchema
 from .utils import yesnojs, yesnopython
 
 
@@ -246,51 +248,6 @@ def add_task(request, list_id=None):
 
 
 @login_required()
-@require_http_methods(["PATCH"])
-def update_task(request, list_id=None, task_id=None):
-    if not list_id or not task_id:
-        resp = {"errors": "No ID given for a task or a list"}
-        resp_code = 500
-    else:
-        try:
-            task = Task.objects.get(id=task_id, parent_list_id=list_id)
-            if request.user != task.owner:
-                raise Task.IsNotOwner()
-            body = json.loads(request.body.decode("utf-8"))
-            new_priority = int(body.get("priority"))
-            new_state = FollowUp(
-                writer=request.user,
-                task=task,
-                todol_id=list_id,
-                old_priority=task.priority,
-                new_priority=new_priority,
-            )
-            if new_priority is not task.priority:
-                new_state.f_type = FollowUp.STATE_CHANGE
-                task.priority = new_priority
-            else:
-                new_state.f_type = FollowUp.MODIFICATION
-            new_state.save()
-            task.title = body.get("title")
-            task.description = body.get("description")
-            if "categories" in body:
-                categories = [int(category) for category in body.get("categories")]
-                task.categories.clear()
-                # Add tasks in bulk through args unpacking
-                task.categories.add(*categories)
-            task.save()
-            resp = task.as_dict()
-            resp_code = 202
-        except TodoList.DoesNotExist:
-            resp = {"errors": "Wrong task ID or list ID"}
-            resp_code = 404
-        except Task.IsNotOwner:
-            resp = {"errors": "Unauthorized"}
-            resp_code = 403
-    return JsonResponse(resp, status=resp_code)
-
-
-@login_required()
 @require_http_methods(["DELETE"])
 def delete_task(request, list_id=None, task_id=None):
     """Deletes a task from the database"""
@@ -406,17 +363,19 @@ def display_detail(request, list_id=-1, task_id=-1, add_followup=False, xhr=Fals
 @login_required()
 @require_http_methods(["POST"])
 def add_followup(request, list_id=None, task_id=None):
+    body = json.loads(request.body.decode("utf-8"))
+
     try:
-        task = Task.objects.get(id=task_id, parent_list=list_id)
-        body = json.loads(request.body.decode("utf-8"))
-        followup = body.get("followup")
-        task.add_followup(followup, request.user)
-        status = 200
-        payload = {"status": "OK!"}
+        task: Task = Task.objects.get(id=task_id, parent_list=list_id)
     except Task.DoesNotExist:
-        status = 404
+        status = HTTPStatus.NOT_FOUND
         payload = {"errors": "Wrong Task ID or List ID"}
-    return JsonResponse(payload, status=status)
+    else:
+        followup = task.add_followup(body.get("followup"), request.user)
+        status = HTTPStatus.CREATED
+        payload = FollowUpSchema.from_orm(followup).model_dump()
+    finally:
+        return JsonResponse(payload, status=status)
 
 
 @login_required
@@ -539,3 +498,152 @@ def display_task_public(request, list_id, task_id):
         "followups": task.get_followups(),
     }
     return render(request, "todo/task.html", context)
+
+
+class TaskListView(LoginRequiredMixin, View):
+    def get(self, request, list_id, *args, **kwargs):
+        tasks = Task.objects.filter(
+            parent_list_id=list_id,
+            owner=request.user,
+        )
+
+        payload = [TaskSchema.from_orm(task).dict() for task in tasks]
+
+        return JsonResponse(
+            dict(tasks=payload),
+            status=HTTPStatus.OK,
+        )
+
+    def post(self, request, list_id, *args, **kwargs):
+        try:
+            schema = TaskSchema(**json.loads(request.body.decode("utf-8")))
+        except ValidationError as e:
+            return JsonResponse(
+                dict(errors=e.errors()),
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        validated_data = schema.dict()
+
+        categories = validated_data.pop("categories")
+
+        task_instance = Task(
+            **validated_data,
+            owner=request.user,  # Default to logged user, might be changed in the future
+            parent_list_id=list_id,
+        )
+        task_instance.save()
+
+        # Refresh the python object from database
+        # This is needed to set the categories after the task has been created.
+        # The many to many relationship cannot be populated until the newly
+        # created task has an ID that can be used as a foreign key.
+        task_instance.refresh_from_db()
+
+        if categories:
+            categories_ids_filter = Q(id=categories[0])
+
+            for category in categories[1:]:
+                categories_ids_filter = categories_ids_filter & Q(id=category)
+
+            if not Category.objects.filter(categories_ids_filter).exists():
+                return JsonResponse(
+                    {"categories": "One or more categories do not exist"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+
+        task_instance.categories.set(categories)
+
+        return JsonResponse(
+            TaskSchema.from_orm(task_instance).dict(),
+            status=HTTPStatus.CREATED,
+        )
+
+
+class TaskView(LoginRequiredMixin, View):
+    def get_task(self, task_id, parent_list_id) -> T.Union[Task, None]:
+        if not task_id or not parent_list_id:
+            return None
+
+        queryset = Task.objects.filter(id=task_id, parent_list_id=parent_list_id)
+
+        if not queryset.exists():
+            return None
+
+        return queryset.first()
+
+    def get(self, request, list_id, task_id, *args, **kwargs):
+        task = self.get_task(task_id, list_id)
+
+        if not task:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "list_id": "Provided id is invalid",
+                        "task_id": "Provided id is invalid",
+                    }
+                },
+                status=HTTPStatus.NOT_FOUND,
+            )
+
+        if "json" in request.GET:
+            return JsonResponse(task.as_dict(), status=HTTPStatus.OK)
+
+        context = {
+            "task": task,
+            "public": False,
+            "publicjs": yesnojs(False),
+            "includes": ["single_task", "list_common"],
+            "followups": task.get_followups(),
+        }
+
+        return render(request, "todo/task.html", context)
+
+    def put(self, request, list_id, task_id, *args, **kwargs):
+        task = self.get_task(task_id, list_id)
+
+        if not task:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "task_id": "Must be not null",
+                        "list_id": "Must be not null",
+                    },
+                },
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        body = json.loads(request.body.decode("utf-8"))
+
+        try:
+            task.update(body, request.user)
+        except NotOwner:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "owner_id": "Wrong id",
+                    },
+                },
+                status=HTTPStatus.FORBIDDEN,
+            )
+
+        return JsonResponse(
+            task.as_dict(),
+            status=HTTPStatus.OK,
+        )
+
+    def delete(self, request, list_id, task_id, *args, **kwargs):
+        task = self.get_task(task_id, list_id)
+        if not task:
+            return JsonResponse(
+                {
+                    "errors": {
+                        "task_id": "Provided id is invalid.",
+                        "list_id": "Provided id is invalid.",
+                    }
+                },
+                status=HTTPStatus.NOT_FOUND,
+            )
+
+        task.delete()
+        return JsonResponse({}, status=HTTPStatus.OK)
