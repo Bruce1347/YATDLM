@@ -7,11 +7,12 @@ from todo.models import FollowUp
 
 
 class TaskSchema(BaseModel):
-    id: T.Union[int, None]
+    id: int = None
     title: str
     description: str = Field(alias="descr")
     priority: int
-    categories: T.List[int]
+    categories: list[int]
+    task_no: int = None
 
     @classmethod
     def _dump_categories(cls: "TaskSchema", obj: T.Any, data: dict) -> None:
