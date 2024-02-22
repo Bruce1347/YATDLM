@@ -322,6 +322,32 @@ class TaskCreate(TestCase):
         self.assertNotEqual(task, None)
         self.assertEqual(task.owner, self.user)
 
+    def test_create_task_correct_task_number(self):
+        TaskFactory(
+            parent_list=self.list_,
+            owner=self.user,
+        )
+
+        self.login()
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My Task",
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [],
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+
+        created_task = response.json()
+
+        # Should be 2nd task in the list
+        self.assertEqual(created_task["task_no"], 2)
+
     def test_create_missing_title(self):
         self.login()
 
