@@ -654,7 +654,7 @@ function createNewDOMDetailTr(data) {
     var spanTitle = document.createElement('span');
     divTitle.classList.add('margint-normal');
     spanTitle.style = 'font-size: 1.8em';
-    spanTitle.innerHTML = `Tâche #${data.no} : ${data.title}`;
+    spanTitle.innerHTML = `Tâche #${data.task_no} : ${data.title}`;
     divTitle.appendChild(spanTitle);
     // Task creation date
     var divCrDate = document.createElement('div');
@@ -716,14 +716,14 @@ function add_task_exp(url) {
 
     // If the user sets a parent task, add it to the body
     if (parent_task !== "-1") {
-        bodyDict.parent_task = parent_task;
+        bodyDict.parent_task_id = parent_task;
     }
 
     const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
         var data = await response.json();
-        if (response.status == 200) {
+        if (response.status == 201) {
             var domTasks = document.querySelectorAll(`tr.priority_${task_priority}`);
             var firstElt = domTasks.item(0);
             var newTr = createNewDOMTasktr(data);

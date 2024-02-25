@@ -174,7 +174,9 @@ class Task(models.Model):
 
     @property
     def subtasks_progress(self):
-        if self.subtasks_count == 0:
+        # If the task is being instantiated, the python object will **NOT** have an
+        # annotation with the count of subtasks linked to that task.
+        if not hasattr(self, "subtasks_count") or self.subtasks_count == 0:
             return 0.0
 
         return round(100.0 * (self.subtasks_done_count / self.subtasks_count), 2)

@@ -1,8 +1,7 @@
 import typing as T
 from datetime import datetime
 
-from pydantic import BaseModel, Field, functional_serializers
-
+from pydantic import BaseModel, Field, computed_field, functional_serializers
 from todo.models import FollowUp
 
 
@@ -13,6 +12,16 @@ class TaskSchema(BaseModel):
     priority: int
     categories: list[int]
     task_no: int = None
+    parent_task_id: int | None = None
+    subtasks_progress: float | None = None
+    subtasks_count: int | None = None
+
+    def model_dump(self, *args, **kwargs):
+        kwargs["exclude"] = [
+            "is_subtask",
+            "subtasks_progress",
+        ]
+        return super().model_dump(*args, **kwargs)
 
     @classmethod
     def _dump_categories(cls: "TaskSchema", obj: T.Any, data: dict) -> None:
@@ -40,8 +49,8 @@ class TaskSchema(BaseModel):
 
         data = {
             field: getattr(obj, field)
-            for field in TaskSchema.__fields__
-            if field not in custom_dump_fields
+            for field in TaskSchema.model_fields
+            if field not in custom_dump_fields and hasattr(obj, field)
         }
 
         for field in custom_dump_fields:

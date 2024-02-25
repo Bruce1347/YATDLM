@@ -15,7 +15,6 @@ from django.utils.timezone import make_aware
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from pydantic import ValidationError
-
 from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
@@ -523,7 +522,7 @@ class TaskListView(LoginRequiredMixin, View):
                 status=HTTPStatus.BAD_REQUEST,
             )
 
-        validated_data = schema.dict()
+        validated_data = schema.model_dump(exclude_none=True)
 
         categories = validated_data.pop("categories")
 

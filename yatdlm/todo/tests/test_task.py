@@ -1,12 +1,12 @@
 import json
 from datetime import datetime
 from http import HTTPStatus
+from typing import Any
 
 import freezegun
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
-
 from todo.categories.factories import CategoryFactory
 from todo.factories import TaskFactory, TodoListFactory, UserFactory
 from todo.models import FollowUp, Task, TodoList
@@ -461,6 +461,41 @@ class TaskCreate(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+    def test_create_subtask(self):
+        self.login()
+
+        parent_task = TaskFactory(
+            parent_list=self.list_,
+            owner=self.user,
+        )
+
+        response = self.client.post(
+            self.url.format(list_id=self.list_.id),
+            data={
+                "title": "My title",
+                "descr": "My super duper description",
+                "priority": Task.NORMAL,
+                "categories": [],
+                "parent_task_id": parent_task.id,
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+
+        self.assertEqual(
+            Task.objects.filter(parent_task_id=parent_task.id).count(),
+            1,
+        )
+
+        data: dict[str, Any] = response.json()
+
+        task = Task.objects.filter(id=data["id"]).first()
+
+        self.assertIsNotNone(task)
+
+        self.assertEqual(task.parent_task, parent_task)
 
 
 class TasksList(TestCase):
