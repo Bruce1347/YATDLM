@@ -1,7 +1,7 @@
 import typing as T
 from datetime import datetime
 
-from pydantic import BaseModel, Field, computed_field, functional_serializers
+from pydantic import BaseModel, Field, functional_serializers
 from todo.models import FollowUp
 
 

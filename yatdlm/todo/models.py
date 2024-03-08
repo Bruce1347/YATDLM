@@ -1,4 +1,3 @@
-import typing as T
 from datetime import datetime
 
 from django.contrib import admin
@@ -299,7 +298,7 @@ class Task(models.Model):
 
         return [cat.as_dict() for cat in categories]
 
-    def set_categories(self, categories_ids: T.List[int]) -> None:
+    def set_categories(self, categories_ids: list[int]) -> None:
         if not Category.objects.filter(id__in=categories_ids).exists():
             return
 

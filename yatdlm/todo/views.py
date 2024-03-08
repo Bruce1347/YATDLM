@@ -1,5 +1,4 @@
 import json
-import typing as T
 from datetime import datetime
 from http import HTTPStatus
 
@@ -560,7 +559,7 @@ class TaskListView(LoginRequiredMixin, View):
 
 
 class TaskView(LoginRequiredMixin, View):
-    def get_task(self, task_id, parent_list_id) -> T.Union[Task, None]:
+    def get_task(self, task_id, parent_list_id) -> Task | None:
         if not task_id or not parent_list_id:
             return None
 
