@@ -539,10 +539,10 @@ class TaskListView(LoginRequiredMixin, View):
         task_instance.refresh_from_db()
 
         if categories:
-            categories_ids_filter = Q(id=categories[0])
+            categories_ids_filter = Q(id=categories[0]["id"])
 
             for category in categories[1:]:
-                categories_ids_filter = categories_ids_filter & Q(id=category)
+                categories_ids_filter = categories_ids_filter & Q(id=category["id"])
 
             if not Category.objects.filter(categories_ids_filter).exists():
                 return JsonResponse(
@@ -550,7 +550,7 @@ class TaskListView(LoginRequiredMixin, View):
                     status=HTTPStatus.BAD_REQUEST,
                 )
 
-        task_instance.categories.set(categories)
+        task_instance.categories.set([category["id"] for category in categories])
 
         return JsonResponse(
             TaskSchema.from_orm(task_instance).dict(),

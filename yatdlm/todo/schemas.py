@@ -5,12 +5,21 @@ from pydantic import BaseModel, Field, functional_serializers
 from todo.models import FollowUp
 
 
+class CategorySchema(BaseModel):
+    id: int = None
+    list_id: int = None
+    name: str = None
+
+    class Config:
+        from_attributes = True
+
+
 class TaskSchema(BaseModel):
     id: int = None
     title: str
-    description: str = Field(alias="descr")
+    description: str = Field(alias="descr", default="")
     priority: int
-    categories: list[int]
+    categories: list[CategorySchema]
     task_no: int = None
     parent_task_id: int | None = None
     subtasks_progress: float | None = None
@@ -30,7 +39,10 @@ class TaskSchema(BaseModel):
         # FIXME: The categories should be a custom schema and this schema should only
         # dump the id using the include keyword argument as detailed here:
         # https://docs.pydantic.dev/latest/usage/exporting_models/
-        data["categories"] = [category.id for category in obj.categories.all()]
+        data["categories"] = [
+            CategorySchema.model_validate(category)
+            for category in obj.categories.all()
+        ]
 
     @classmethod
     def _dump_description(cls: "TaskSchema", obj: T.Any, data: dict) -> None:
