@@ -164,7 +164,7 @@ async function setup_tasks_buttons_events(public = false) {
                 if (dom_followup && dom_followup.value !== '') {
                     followup = dom_followup.value;
                 }
-                reject_task(element.list_id, element.id, followup);
+                reject_task(element, followup);
             });
         }
         // Add the task to the subtasks select
@@ -708,7 +708,11 @@ function add_task_exp(url) {
     if (task_categories_dom.length > 0) {
         for (var i = 0; i < task_categories_dom.length; ++i) {
             if (task_categories_dom[i].value !== '-1') {
-                task_categories.push(task_categories_dom[i].value);
+                task_categories.push(
+                    {
+                        "id": task_categories_dom[i].value,
+                    }
+                );
             }
         }
         bodyDict.categories = task_categories;
@@ -1006,13 +1010,13 @@ function add_new_task_category(container_id=undefined) {
 
 /**
  * Rejects a task and updates the DOM.
- * @param {Number} list_id The current todo list
- * @param {Number} task_id The task that has to be rejected
+ * @param {Object} Task The task that has to be rejected
  * @param {String} followup An eventual reason for the rejection
  */
-async function reject_task(list_id, task_id, followup = null) {
-    let url = `/todo/lists/${list_id}/${task_id}/reject`;
-    let body = '';
+async function reject_task(task, followup = null) {
+    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
+    task.rejected = true;
+    let body = JSON.stringify(task)
     if (followup !== null) {
         body = JSON.stringify({
             'followup': followup

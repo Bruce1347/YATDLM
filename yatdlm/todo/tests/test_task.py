@@ -10,33 +10,7 @@ from django.test import TestCase
 from todo.categories.factories import CategoryFactory
 from todo.factories import TaskFactory, TodoListFactory, UserFactory
 from todo.models import FollowUp, Task, TodoList
-
-
-class TaskRejectTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = auth_models.User.objects.create_user("test", password="1234")
-        cls.other_user = auth_models.User.objects.create_user("test2", password="1234")
-        cls.list_ = TodoList(owner=cls.user)
-        cls.list_.save()
-        cls.url = "/todo/lists/{}/{}/reject"
-
-    def test_reject_task(self):
-        task = Task(parent_list=self.list_, owner=self.user, priority=Task.NORMAL)
-        task.save()
-        self.client.login(username="test", password="1234")
-        response = self.client.patch(self.url.format(self.list_.id, task.id))
-        self.assertEqual(response.status_code, 202)
-        task_dict = json.loads(response.content.decode("utf-8"))
-        self.assertEqual(task_dict["priority"], Task.REJECTED)
-
-    def test_reject_task_not_owner(self):
-        task = Task(parent_list=self.list_, owner=self.user)
-        task.save()
-        self.client.login(username="test2", password="1234")
-        response = self.client.patch(self.url.format(self.list_.id, task.id))
-        self.assertEqual(response.status_code, 403)
-
+from todo.schemas import TaskSchema
 
 class TaskUpdateTestCase(TestCase):
     @classmethod
@@ -557,6 +531,77 @@ class TasksList(TestCase):
         self.assertIsNotNone(data["tasks"])
         self.assertIsInstance(data["tasks"], list)
         self.assertEqual(len(data["tasks"]), 0)
+
+
+class RejectTask(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.user_password),
+        )
+
+        cls.todo_list: TodoList = TodoListFactory.create(
+            owner=cls.user,
+        )
+        cls.task: Task = TaskFactory.create(
+            parent_list=cls.todo_list,
+            owner=cls.user,
+        )
+        cls.url = f"/todo/lists/{cls.todo_list.id}/tasks/{cls.task.id}"
+
+    def login(self, user_to_log):
+        self.client.login(
+            username=user_to_log,
+            password=self.user_password,
+        )
+
+    def test_basic(self):
+        self.login(self.user)
+
+        payload = TaskSchema.from_orm(self.task).model_dump()
+
+        payload["rejected"] = True
+
+        response = self.client.patch(
+            self.url,
+            data=payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        task = Task.objects.filter(id=self.task.id).first()
+
+        self.assertEqual(task.priority, Task.REJECTED)
+        self.assertTrue(
+            FollowUp.objects.filter(
+                old_priority=Task.NORMAL,
+                new_priority=Task.REJECTED,
+                writer=self.user,
+                task=self.task,
+                todol=self.todo_list,
+            )
+        )
+
+    def test_reject_not_owner(self):
+        other_user: auth_models.User = auth_models.User.objects.create_user(
+            "test2",
+            password=self.user_password,
+        )
+
+        self.login(other_user)
+
+        payload = TaskSchema.from_orm(self.task).model_dump()
+
+        response = self.client.patch(
+            self.url,
+            data=payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
 
 class TaskFollowup(TestCase):

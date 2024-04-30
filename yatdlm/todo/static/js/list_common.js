@@ -117,7 +117,7 @@ async function close_task(task) {
  * @param {String} followup An eventual reason for the rejection
  */
 async function reject_task_common(task, followup) {
-    let url = `/todo/lists/${task.list_id}/${task.id}/reject`;
+    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
     let body = null;
     if (followup !== null) {
         body = JSON.stringify({

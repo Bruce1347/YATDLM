@@ -146,6 +146,8 @@ class Task(models.Model):
     # Task's categories
     categories = models.ManyToManyField("todo.Category")
 
+    rejected = models.BooleanField(null=False, default=False)
+
     # Boilerplate exception class
     class IsNotOwner(Exception):
         pass

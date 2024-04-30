@@ -72,7 +72,7 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         Task.objects.filter(parent_list_id=todo_list.id)
         .select_related("owner", "parent_task")
         .prefetch_related("task_set", "categories")
-        .order_by("is_done", "priority", "-resolution_date", "-creation_date")
+        .order_by("rejected", "is_done", "priority", "-resolution_date", "-creation_date")
         .all()
     )
 
@@ -559,7 +559,7 @@ class TaskListView(LoginRequiredMixin, View):
 
 
 class TaskView(LoginRequiredMixin, View):
-    def get_task(self, task_id, parent_list_id) -> Task | None:
+    def get_task(self, task_id, parent_list_id, logged_user) -> Task | None:
         if not task_id or not parent_list_id:
             return None
 
@@ -568,10 +568,15 @@ class TaskView(LoginRequiredMixin, View):
         if not queryset.exists():
             return None
 
+        task = queryset.first()
+
+        if task.owner != logged_user:
+            raise NotOwner()
+
         return queryset.first()
 
     def get(self, request, list_id, task_id, *args, **kwargs):
-        task = self.get_task(task_id, list_id)
+        task = self.get_task(task_id, list_id, request.user)
 
         if not task:
             return JsonResponse(
@@ -598,7 +603,13 @@ class TaskView(LoginRequiredMixin, View):
         return render(request, "todo/task.html", context)
 
     def put(self, request, list_id, task_id, *args, **kwargs):
-        task = self.get_task(task_id, list_id)
+        try:
+            task = self.get_task(task_id, list_id, request.user)
+        except NotOwner:
+            return JsonResponse(
+                {},
+                status=HTTPStatus.FORBIDDEN,
+            )
 
         if not task:
             return JsonResponse(
@@ -613,25 +624,46 @@ class TaskView(LoginRequiredMixin, View):
 
         body = json.loads(request.body.decode("utf-8"))
 
-        try:
-            task.update(body, request.user)
-        except NotOwner:
-            return JsonResponse(
-                {
-                    "errors": {
-                        "owner_id": "Wrong id",
-                    },
-                },
-                status=HTTPStatus.FORBIDDEN,
-            )
+        task.update(body, request.user)
 
         return JsonResponse(
             task.as_dict(),
             status=HTTPStatus.OK,
         )
 
+    def patch(self, request, list_id, task_id, *args, **kwargs):
+        try:
+            task = self.get_task(task_id, list_id, logged_user=request.user)
+        except NotOwner:
+            return JsonResponse(
+                {},
+                status=HTTPStatus.FORBIDDEN,
+            )
+
+        if not task:
+            return JsonResponse(
+                {},
+                status=HTTPStatus.NOT_FOUND,
+            )
+
+        schema: TaskSchema = TaskSchema(
+            **json.loads(
+                request.body.decode("utf-8"),
+            )
+        )
+
+        # Diff between sent data & saved data => rejection
+        if not task.rejected and schema.rejected:
+            task.reject(writer=request.user)
+
+        return JsonResponse(
+            TaskSchema.from_orm(task).model_dump(),
+            status=HTTPStatus.OK,
+        )
+
     def delete(self, request, list_id, task_id, *args, **kwargs):
-        task = self.get_task(task_id, list_id)
+        task = self.get_task(task_id, list_id, request.user)
+
         if not task:
             return JsonResponse(
                 {
