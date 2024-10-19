@@ -117,7 +117,7 @@ async function close_task(task) {
  * @param {String} followup An eventual reason for the rejection
  */
 async function reject_task_common(task, followup) {
-    let url = `/todo/lists/${task.list_id}/${task.id}/reject`;
+    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
     let body = null;
     if (followup !== null) {
         body = JSON.stringify({
@@ -158,8 +158,8 @@ function add_new_category_to_task(container_id, categories) {
  * @param {Object} task The Task that will be updated.
  */
 async function update_task(body, task_list_id, task_id) {
-    let url = `/todo/lists/${task_list_id}/${task_id}/update/`;
-    const response = await patch(url, body);
+    let url = `/todo/lists/${task_list_id}/tasks/${task_id}`;
+    const response = await put(url, body);
     const updated_task = await response.json();
     return updated_task;
 }
