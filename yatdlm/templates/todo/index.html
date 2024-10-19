@@ -33,7 +33,7 @@
     {% endif %}
 
     <div class="margint-normal" id="lists_container">
-    {% if lists %}
+    {% if lists_ids %}
         <table class="table-resp fullwidth pure-table pure-table-bordered" style="max-width: 45em; margin: auto;">
             <thead>
                 <tr>
@@ -45,17 +45,17 @@
                 </tr>
             </thead>
             <tbody>
-                {% for list in lists %}
+                {% for list_id in lists_ids %}
                     <tr>
                         <td>
-                            <a href="/todo/lists/{{ context|get_value:list|get_value:'id' }}">
-                                {{ context|get_value:list|get_value:'title' }}
+                            <a href="/todo/lists/{{ context|get_value:list_id|get_value:'id' }}">
+                                {{ context|get_value:list_id|get_value:'title' }}
                             </a>
                         </td>
-                        <td class="td-list-open-tasks-count">{{ context|get_value:list|get_value:'opened_tasks' }}</td>
-                        <td>{{ context|get_value:list|get_value:'completion' }} %</td>
-                        <td class="td-list-creation-date">{{ context|get_value:list|get_value:'creation_date'|date:"d/m/Y à H:i" }}</td>
-                        <td><img class="pointer icon" src="{% static 'img/icons/garbage_red.svg' %}" alt="Delete" onclick="delete_list(`/todo/lists/delete/{{ context|get_value:list|get_value:'id' }}`, '{{ list }}', true, 'lists_container');"></td>
+                        <td class="td-list-open-tasks-count">{{ context|get_value:list_id|get_value:'opened_tasks' }}</td>
+                        <td>{{ context|get_value:list_id|get_value:'completion' }} %</td>
+                        <td class="td-list-creation-date">{{ context|get_value:list_id|get_value:'creation_date'|date:"d/m/Y à H:i" }}</td>
+                        <td><img class="pointer icon" src="{% static 'img/icons/garbage_red.svg' %}" alt="Delete" onclick="delete_list(`/todo/lists/delete/{{ context|get_value:list_id|get_value:'id' }}`, '{{ list }}', true, 'lists_container');"></td>
                     </tr>
                 {% endfor %}
             </tbody>

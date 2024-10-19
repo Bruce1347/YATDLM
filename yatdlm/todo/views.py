@@ -39,7 +39,7 @@ def index(request, xhr):
         completion = done_tasks / (total_tasks) * 100.0 if total_tasks is not 0 else 0
         completion = round(completion, 2)
 
-        table_context[todo.title] = {
+        table_context[todo.id] = {
             "title": todo.title,
             "id": todo.id,
             "opened_tasks": opened_tasks,
@@ -48,7 +48,7 @@ def index(request, xhr):
         }
 
     context = {
-        "lists": [todo.title for todo in todo_lists],
+        "lists_ids": [todo.id for todo in todo_lists],
         "page_title": "Mes listes",
         "isdev": "DEV - " if settings.DEBUG else "",
         "context": table_context,
