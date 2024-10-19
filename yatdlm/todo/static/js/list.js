@@ -118,7 +118,7 @@ function setup_sublines_togglers() {
                 child.addEventListener('click', () => {
                     //TODO: Also use a Map for tasks and avoid linear search time.
                     fetch_task_followups_then_toggle(tasks.find((elt) => {
-                        return elt.no === parseInt(element.id);
+                        return elt.task_no === parseInt(element.id);
                     }));
                 });
             });
@@ -209,11 +209,11 @@ async function fetch_task_followups_then_toggle(data) {
     //createDOMFollowup
     var curr_followups = followups.get(data.id);
     if (curr_followups === undefined) {
-        let resp = await getFollowups(data.list_id, data.id);
+        let resp = await getFollowups(data.parent_list_id, data.id);
         curr_followups = resp.followups;
         followups.set(data.id, curr_followups);
     }
-    if (toggle(`task_subline_${data.no}`)) {
+    if (toggle(`task_subline_${data.task_no}`)) {
         const followupsContainer = document.getElementById(`followups_${data.no}`);
         // Remove current children to avoid content duplication
         while (followupsContainer.firstChild) {

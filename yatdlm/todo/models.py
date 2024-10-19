@@ -76,6 +76,12 @@ class Task(models.Model):
             models.Index(fields=["parent_list_id"]),
             models.Index(fields=["id"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["parent_list_id", "task_no"],
+                name="unique_task_no_in_list",
+            )
+        ]
 
     objects = TaskManager()
 
