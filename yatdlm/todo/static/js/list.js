@@ -369,7 +369,7 @@ function edit_task_experimental(node_id, id) {
 function createTaskEditTd(node_id, task_id) {
     /** EDIT FORM */
     var currentTask = tasks.find((elt) => {
-        return elt.no === parseInt(task_id);
+        return elt.task_no === parseInt(task_id);
     });
     var td = document.createElement('td');
     td.id = `task_edit_${task_id}`;
