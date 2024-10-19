@@ -761,7 +761,7 @@ function add_task_exp(url) {
 async function fetch_tasks(arr) {
     var listId = document.getElementById('dom_list_id').value;
 
-    const response = await get(`/todo/lists/${listId}/tasks?meta_tasks=true`);
+    const response = await get(`/todo/beta/lists/${listId}/tasks?meta_tasks=true`);
     var data = await response.json();
     data.tasks.forEach(element => {
         arr.unshift(element);
