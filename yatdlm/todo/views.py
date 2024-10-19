@@ -500,10 +500,19 @@ def display_task_public(request, list_id, task_id):
 
 class TaskListView(LoginRequiredMixin, View):
     def get(self, request, list_id, *args, **kwargs):
-        tasks = Task.objects.filter(
-            parent_list_id=list_id,
-            owner=request.user,
-        )
+        # Use ``meta_tasks`` to customize the query, if the value is truthy
+        # then we'll only fetch tasks without a parent task
+        meta_tasks_param = yesnopython(request.GET.get("meta_tasks", "false"))
+
+        filters = {
+            "parent_list_id": list_id,
+            "owner": request.user,
+        }
+
+        if meta_tasks_param:
+            filters["parent_task_id"] = None
+
+        tasks = Task.objects.filter(**filters)
 
         payload = [TaskSchema.from_orm(task).dict() for task in tasks]
 

@@ -515,6 +515,25 @@ class TasksList(TestCase):
         self.assertIsInstance(data["tasks"], list)
         self.assertEqual(len(data["tasks"]), 3)
 
+    def test_get_only_meta_tasks(self):
+        self.login(self.user)
+
+        subtask = TaskFactory(parent_list=self.list_, parent_task=self.tasks[0])
+
+        self.assertIsNotNone(subtask.parent_task_id)
+        self.assertEqual(subtask.parent_task, self.tasks[0])
+
+        response = self.client.get(self.url + "?meta_tasks=true")
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        data = response.json()
+
+        self.assertEqual(len(self.tasks), len(data["tasks"]))
+
+        for task in data["tasks"]:
+            self.assertNotEqual(subtask.id, task["id"])
+
     def test_get_task_no_ownership(self):
         self.login(self.other_user)
 
