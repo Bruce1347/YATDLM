@@ -73,7 +73,7 @@ class TaskSchema(BaseModel):
         return TaskSchema(**data)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class FollowUpSchema(BaseModel):
@@ -88,7 +88,7 @@ class FollowUpSchema(BaseModel):
     content: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
     @functional_serializers.field_serializer("creation_date")
     def serialize_creation_date(self, creation_date: datetime, _info) -> str:
