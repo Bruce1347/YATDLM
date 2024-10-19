@@ -268,7 +268,7 @@ async function addFollowup(task) {
     const requestBody = JSON.stringify({
         'followup': document.getElementById(`followup_${task.no}`).value,
     });
-    const response = await post(`/todo/lists/${task.list_id}/${task.id}/add_followup`, requestBody);
+    const response = await post(`/todo/lists/${task.parent_list_id}/${task.id}/add_followup`, requestBody);
     const data = await response.json();
     await updateFollowups(task);
 }
@@ -279,7 +279,7 @@ async function addFollowup(task) {
  * @param {Object} task the task that needs its followups to be updated
  */
 async function updateFollowups(task) {
-    const followups = await getFollowups(task.list_id, task.id);
+    const followups = await getFollowups(task.parent_list_id, task.id);
     const followupsContainer = document.getElementById(`followups_${task.no}`);
     // Remove all children
     followupsContainer.innerHTML = '';
@@ -339,7 +339,7 @@ async function closeTask(task) {
     if (close_followup) {
         requestBody.followup = close_followup.value;
     }
-    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/close`, JSON.stringify(requestBody));
+    const response = await patch(`/todo/lists/${task.parent_list_id}/${task.id}/close`, JSON.stringify(requestBody));
     const updatedTask = await response.json();
     const currentTaskIdx = tasks.findIndex((t) => {
         return t.id === updatedTask.id;
@@ -507,7 +507,7 @@ function createTaskEditTd(node_id, task_id) {
  * @param {Object} task The object that is subject to changes.
  */
 async function updateTask(body, task) {
-    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
+    let url = `/todo/lists/${task.parent_list_id}/tasks/${task.id}`;
     const response = await put(url, body);
     const updatedTask = await response.json();
     return updatedTask;
@@ -623,7 +623,7 @@ function createNewDOMTasktr(data) {
     tdImg.height = 24;
     tdImg.src = '/static/img/icons/garbage_red.svg';
     tdImg.addEventListener('click', () => {
-        del_task(`/beta/todo/lists/${data.list_id}/tasks/${data.id}`, data.no);
+        del_task(`/beta/todo/lists/${data.parent_list_id}/tasks/${data.id}`, data.no);
     });
     tdDelete.appendChild(tdImg);
 
@@ -1014,7 +1014,7 @@ function add_new_task_category(container_id=undefined) {
  * @param {String} followup An eventual reason for the rejection
  */
 async function reject_task(task, followup = null) {
-    let url = `/todo/lists/${task.list_id}/tasks/${task.id}`;
+    let url = `/todo/lists/${task.parent_list_id}/tasks/${task.id}`;
     task.rejected = true;
     let body = JSON.stringify(task)
     if (followup !== null) {
