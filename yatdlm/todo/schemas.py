@@ -22,6 +22,7 @@ class TaskSchema(BaseModel):
     categories: list[CategorySchema]
     task_no: int = None
     parent_task_id: int | None = None
+    parent_list_id: int | None = None
     subtasks_progress: float | None = None
     subtasks_count: int | None = None
     rejected: bool | None = False
