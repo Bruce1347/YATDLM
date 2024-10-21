@@ -1,7 +1,9 @@
+import typing as T
 from datetime import datetime
 
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -235,7 +237,7 @@ class Task(models.Model):
         return followup
 
     def add_update_followup(self, writer, new_priority) -> None:
-        if new_priority is self.priority:
+        if new_priority == self.priority:
             followup_type = FollowUp.MODIFICATION
         else:
             followup_type = FollowUp.STATE_CHANGE
@@ -344,13 +346,27 @@ class Task(models.Model):
 
         return resp
 
-    def update(self, data: dict, logged_user: User) -> None:
+    def update(self, data: dict[str, T.Any], logged_user: User) -> None:
         if logged_user != self.owner:
             raise NotOwner()
 
-        priority = data.get("priority")
-        title = data.get("title")
-        description = data.get("description")
+        priority = data.get("priority", None)
+        title = data.get("title", None)
+        # Description can be empty, it's OK
+        description = data.get("description", "")
+
+        errors = {}
+
+        if not priority:
+            errors["priority"] = "Priority must be set"
+
+        if not title:
+            # If no title is provided or if it's an empty string (counting on
+            # if its truthy or not) then we raise an error
+            errors["title"] = "Title must not be empty"
+
+        if errors:
+            raise ValidationError(errors)
 
         if "categories" in data:
             categories = [int(category_id) for category_id in data["categories"]]
