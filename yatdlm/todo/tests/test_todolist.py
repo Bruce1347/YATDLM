@@ -97,6 +97,36 @@ class TodoListCreate(TestCase):
             title="Todolist", description="", is_public=False
         ).exists()
 
+class TodoListRead(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test", password=make_password(cls.users_password)
+        )
+        cls.todolist = TodoListFactory.create(owner=cls.user)
+        cls.url = "/todo/lists/{list_id}/"
+        cls.public_url = "/todo/lists/public/{list_id}/"
+
+    def test_get_todolist(self):
+        self.client.login(username="test", password=self.users_password)
+        response = self.client.get(self.url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_get_private_todolist_not_logged(self):
+        response = self.client.get(self.public_url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+
+    def test_get_todolist_wrong_owner(self):
+        UserFactory.create(username="test2", password=make_password("1234"))
+        self.client.login(username="test2", password=self.users_password)
+
+        response = self.client.get(self.url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
 
 class TodoListDelete(TestCase):
     @classmethod

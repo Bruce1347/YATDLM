@@ -58,13 +58,19 @@ def index(request, xhr):
 
     return render(request, "todo/index.html", context)
 
-
+@require_http_methods(["GET"])
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
-    todo_list = TodoList.objects.select_related("owner").get(id=list_id)
+    todo_list = TodoList.objects.select_related("owner").filter(id=list_id).first()
 
-    # If the list is not public then we throw a 403
-    if not todo_list.is_public and public:
+    if not public:
+        # Compare by value instead by object:
+        # ``request.user`` is a ``SimpleLazyObject``whereas ``todo_list.owner``
+        # is a ``User``
+        if not todo_list or todo_list.owner != request.user:
+            return HttpResponseNotFound()
+    elif not todo_list.is_public:
+        # If the list is not public then we throw a 403
         return HttpResponseForbidden()
 
     # Retrieve the subsequent tasks
