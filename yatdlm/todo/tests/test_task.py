@@ -12,11 +12,14 @@ from todo.factories import TaskFactory, TodoListFactory, UserFactory
 from todo.models import FollowUp, Task, TodoList
 from todo.schemas import TaskSchema
 
+
 class TaskUpdateTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = auth_models.User.objects.create_user("test", password="1234")
-        cls.other_user = auth_models.User.objects.create_user("test2", password="1234")
+        cls.user: auth_models.User = UserFactory(username="test", set_password="1234")
+        cls.other_user: auth_models.User = UserFactory(
+            username="test2", password="1234"
+        )
         cls.list_ = TodoList(owner=cls.user)
         cls.list_.save()
         cls.url = "/todo/lists/{list_id}/tasks/{task_id}"
@@ -605,9 +608,9 @@ class RejectTask(TestCase):
         )
 
     def test_reject_not_owner(self):
-        other_user: auth_models.User = auth_models.User.objects.create_user(
-            "test2",
-            password=self.user_password,
+        other_user: auth_models.User = UserFactory(
+            username="test2",
+            set_password=self.user_password,
         )
 
         self.login(other_user)

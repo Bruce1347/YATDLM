@@ -1,6 +1,8 @@
-from factory import LazyAttribute, SubFactory
+from factory import LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
+
+from django.contrib.auth.hashers import make_password
 
 from .models import Task, TodoList, User
 
@@ -11,6 +13,17 @@ class UserFactory(DjangoModelFactory):
 
     username = Faker("email")
     email = Faker("email")
+
+    @post_generation
+    def set_password(obj: User, create, extracted, **kwargs):
+        if not create:
+            # Object hasn't been persisted to db, skip
+            return
+
+        password = extracted or "1234"
+
+        obj.password = make_password(password)
+        obj.save()
 
 
 class TodoListFactory(DjangoModelFactory):
