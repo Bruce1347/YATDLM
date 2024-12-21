@@ -28,15 +28,10 @@ def create_category(request, list_id):
 @login_required()
 @require_http_methods(["GET"])
 def list_categories(request, list_id):
-    try:
-        todo = TodoList.objects.get(id=list_id)
-        categories = [category.as_dict() for category in todo.category_set.all()]
-        status_code = 200
-        response = {"categories": categories}
-    except:
-        status_code = 500
-        response = {}
-    return JsonResponse(response, status=status_code)
+    categories = Category.objects.filter(
+        todolist_id=list_id, todolist__owner=request.user
+    )
+    return JsonResponse({"categories": [cat.as_dict() for cat in categories]})
 
 
 class CategoryView(View):
