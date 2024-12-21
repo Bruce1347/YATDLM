@@ -36,7 +36,7 @@ def index(request, xhr):
         done_tasks = len(Task.objects.filter(parent_list=todo, is_done=True))
         total_tasks = done_tasks + opened_tasks
 
-        completion = done_tasks / (total_tasks) * 100.0 if total_tasks is not 0 else 0
+        completion = done_tasks / (total_tasks) * 100.0 if total_tasks > 0 else 0
         completion = round(completion, 2)
 
         table_context[todo.id] = {
