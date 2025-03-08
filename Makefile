@@ -7,6 +7,10 @@ test_debug:
 test_fast:
 	python yatdlm/manage.py test --keepdb yatdlm
 
+coverage:
+	coverage run
+	coverage html
+
 dev:
 	python yatdlm/manage.py runserver
 
