@@ -14,11 +14,12 @@ from django.utils.timezone import make_aware
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from pydantic import ValidationError
+
 from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
-from .schemas import FollowUpSchema, TaskSchema
+from .schemas import EditionTaskSchema, FollowUpSchema, TaskSchema
 from .utils import yesnojs, yesnopython
 
 
@@ -58,6 +59,7 @@ def index(request, xhr):
 
     return render(request, "todo/index.html", context)
 
+
 @require_http_methods(["GET"])
 def display_list(request, list_id=-1, xhr=False, public=False):
     # Retrieve the list
@@ -78,7 +80,9 @@ def display_list(request, list_id=-1, xhr=False, public=False):
         Task.objects.filter(parent_list_id=todo_list.id)
         .select_related("owner", "parent_task")
         .prefetch_related("task_set", "categories")
-        .order_by("rejected", "is_done", "priority", "-resolution_date", "-creation_date")
+        .order_by(
+            "rejected", "is_done", "priority", "-resolution_date", "-creation_date"
+        )
         .all()
     )
 
@@ -463,7 +467,7 @@ def reject_task(request, list_id, task_id, **kwargs):
         if "followup" in body:
             followup = body["followup"]
     task.reject(request.user, followup)
-    return JsonResponse(task.as_dict(), status=202)
+    return JsonResponse(task.as_dict(), status=HTTPStatus.OK)
 
 
 @require_http_methods(["GET"])
@@ -661,18 +665,18 @@ class TaskView(LoginRequiredMixin, View):
                 status=HTTPStatus.NOT_FOUND,
             )
 
-        schema: TaskSchema = TaskSchema(
+        schema: EditionTaskSchema = EditionTaskSchema(
             **json.loads(
                 request.body.decode("utf-8"),
-            )
+            ),
         )
 
         # Diff between sent data & saved data => rejection
         if not task.rejected and schema.rejected:
-            task.reject(writer=request.user)
+            task.reject(writer=request.user, followup=schema.comment)
 
         return JsonResponse(
-            TaskSchema.from_orm(task).model_dump(),
+            EditionTaskSchema.from_orm(task).model_dump(),
             status=HTTPStatus.OK,
         )
 

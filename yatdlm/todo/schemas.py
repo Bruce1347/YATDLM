@@ -2,6 +2,7 @@ import typing as T
 from datetime import datetime
 
 from pydantic import BaseModel, Field, functional_serializers
+
 from todo.models import FollowUp
 
 
@@ -41,8 +42,7 @@ class TaskSchema(BaseModel):
         # dump the id using the include keyword argument as detailed here:
         # https://docs.pydantic.dev/latest/usage/exporting_models/
         data["categories"] = [
-            CategorySchema.model_validate(category)
-            for category in obj.categories.all()
+            CategorySchema.model_validate(category) for category in obj.categories.all()
         ]
 
     @classmethod
@@ -74,6 +74,10 @@ class TaskSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class EditionTaskSchema(TaskSchema):
+    comment: str | None = Field(alias="followup", exclude=True, default="")
 
 
 class FollowUpSchema(BaseModel):
