@@ -701,6 +701,42 @@ class RejectTask(TestCase):
             )
 
 
+class EditTask(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.user_password),
+        )
+
+        cls.todo_list: TodoList = TodoListFactory.create(
+            owner=cls.user,
+        )
+        cls.task: Task = TaskFactory.create(
+            parent_list=cls.todo_list,
+            owner=cls.user,
+        )
+
+    def login(self):
+        self.client.login(
+            username=self.user.username,
+            password=self.user_password,
+        )
+
+    def test_edit_task_not_exists(self):
+        self.login()
+
+        response = self.client.put(
+            # Use a high int that won't be in the tasks table since the ids
+            # are autoincremented ints.
+            f"/todo/lists/{self.todo_list.id}/tasks/192819281",
+            data={},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
 class TaskFollowup(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

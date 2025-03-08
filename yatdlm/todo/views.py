@@ -633,12 +633,9 @@ class TaskView(LoginRequiredMixin, View):
         if not task:
             return JsonResponse(
                 {
-                    "errors": {
-                        "task_id": "Must be not null",
-                        "list_id": "Must be not null",
-                    },
+                    "errors": [{"task_id": "Task not found"}],
                 },
-                status=HTTPStatus.BAD_REQUEST,
+                status=HTTPStatus.NOT_FOUND,
             )
 
         body = json.loads(request.body.decode("utf-8"))
