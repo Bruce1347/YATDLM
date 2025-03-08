@@ -21,6 +21,7 @@ black = "^23.1.0"
 flake8 = "^6.0.0"
 freezegun = "^1.4.0"
 coverage = "^7.6.9"
+ruff = "^0.9.10"
 
 [flake8]
 max-line-length = 90
