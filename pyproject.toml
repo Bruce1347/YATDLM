@@ -38,6 +38,7 @@ omit = [
     "yatdlm/todo/migrations/*",
     "yatdlm/manage.py",
     "yatdlm/yatdlm/wsgi.py",
+    "yatdlm/todo/tests/**/*.py",
 ]
 source = ["yatdlm"]
 command_line = "yatdlm/manage.py test todo"
