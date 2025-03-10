@@ -1,8 +1,7 @@
+from django.contrib.auth.hashers import make_password
 from factory import LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 from factory.faker import Faker
-
-from django.contrib.auth.hashers import make_password
 
 from .models import Task, TodoList, User
 

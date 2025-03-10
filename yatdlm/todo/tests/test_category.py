@@ -1,14 +1,13 @@
 import json
+from http import HTTPStatus
 
 from django.contrib.auth import models as auth_models
 from django.test import TestCase
 
-from todo.categories.models import Category
-from todo.models import TodoList
-
-from http import HTTPStatus
 from todo.categories.factories import CategoryFactory
+from todo.categories.models import Category
 from todo.factories import UserFactory
+from todo.models import TodoList
 
 
 class CategoryTestCase(TestCase):
