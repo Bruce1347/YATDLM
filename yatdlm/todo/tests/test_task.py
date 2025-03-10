@@ -231,6 +231,16 @@ class TaskRead(TestCase):
         self.client.login(username=self.user.username, password=self.users_password)
 
         response = self.client.get(
+            f"/todo/beta/lists/{self.list_.id}/tasks/99999",
+            data={},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_get_unknown_task_deprecated(self):
+        self.client.login(username=self.user.username, password=self.users_password)
+
+        response = self.client.get(
             self.url.format(list_id=self.list_.id, task_id=9999),
             data={},
         )
@@ -626,6 +636,21 @@ class RejectTask(TestCase):
                 ).exists()
             )
 
+    def test_reject_unknown(self):
+        self.login(self.user)
+
+        payload = TaskSchema.from_orm(self.task).model_dump()
+
+        payload["rejected"] = True
+
+        response = self.client.patch(
+            f"/todo/lists/{self.todo_list.id}/tasks/9999999",
+            data=payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
     def test_reject_not_owner(self):
         other_user: auth_models.User = UserFactory(
             username="test2",
@@ -736,6 +761,7 @@ class EditTask(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
 
 class TaskFollowup(TestCase):
     @classmethod

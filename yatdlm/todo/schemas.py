@@ -1,5 +1,6 @@
 import typing as T
-from datetime import datetime
+from datetime import UTC, datetime
+from functools import partial
 
 from pydantic import BaseModel, Field, functional_serializers
 
@@ -126,3 +127,16 @@ class FollowUpSchema(BaseModel):
             custom_dump_fields_methods[field](obj, data)
 
         return FollowUpSchema(**data)
+
+
+class TodoListSchema(BaseModel):
+    id: int | None = None
+    owner_id: int | None = None
+    title: str = Field(min_length=1, max_length=100)
+    description: str = Field(min_length=1, max_length=600)
+    creation_date: datetime | None = Field(default_factory=partial(datetime.now, UTC))
+    due_date: datetime | None = None
+    is_public: bool = False
+
+    class Config:
+        from_attributes = True

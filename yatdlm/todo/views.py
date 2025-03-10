@@ -19,7 +19,7 @@ from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
-from .schemas import EditionTaskSchema, FollowUpSchema, TaskSchema
+from .schemas import EditionTaskSchema, FollowUpSchema, TaskSchema, TodoListSchema
 from .utils import yesnojs, yesnopython
 
 
@@ -693,3 +693,26 @@ class TaskView(LoginRequiredMixin, View):
 
         task.delete()
         return JsonResponse({}, status=HTTPStatus.OK)
+
+
+class TodoListListView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            schema = TodoListSchema(**json.loads(request.body.decode("utf-8")))
+        except ValidationError as e:
+            return JsonResponse(
+                dict(errors=e.errors()),
+                status=HTTPStatus.UNPROCESSABLE_ENTITY,
+            )
+
+        validated_data = schema.model_dump(exclude_none=True)
+
+        todo_list_instance = TodoList.objects.create(
+            **validated_data,
+            owner=request.user,  # Default to logged user, might be changed in the future
+        )
+
+        return JsonResponse(
+            TodoListSchema.from_orm(todo_list_instance).dict(),
+            status=HTTPStatus.CREATED,
+        )
