@@ -569,10 +569,10 @@ class TasksList(TestCase):
 class RejectTask(TestCase):
     # XXX: Remove the parametrization of the tests once the old route is
     # removed from the source.
-    URLS = [
-        "/todo/lists/{list_id}/{task_id}/reject",
-        "/todo/lists/{list_id}/tasks/{task_id}",
-    ]
+    URLS = {
+        "deprecated": "/todo/lists/{list_id}/{task_id}/reject",
+        "current": "/todo/lists/{list_id}/tasks/{task_id}",
+    }
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -597,46 +597,7 @@ class RejectTask(TestCase):
             password=self.user_password,
         )
 
-    def test_basic(self):
-        self.login(self.user)
-
-        payload = TaskSchema.from_orm(self.task).model_dump()
-
-        payload["rejected"] = True
-
-        for url in self.URLS:
-            # Force task reset by saving the local copy that is linked to the
-            # current test case: unless `refresh_from_db` is called the current
-            # object will hold the initial values that were defined in the setup.
-            self.task.save()
-            # Remove the eventual followups due to the multi url testing
-            FollowUp.objects.all().delete()
-
-            response = self.client.patch(
-                url.format(
-                    list_id=self.todo_list.id,
-                    task_id=self.task.id,
-                ),
-                data=payload,
-                content_type="application/json",
-            )
-
-            self.assertEqual(response.status_code, HTTPStatus.OK)
-
-            task = Task.objects.filter(id=self.task.id).first()
-
-            self.assertEqual(task.priority, Task.REJECTED)
-            self.assertTrue(
-                FollowUp.objects.filter(
-                    old_priority=Task.NORMAL,
-                    new_priority=Task.REJECTED,
-                    writer=self.user,
-                    task=self.task,
-                    todol=self.todo_list,
-                ).exists()
-            )
-
-    def test_reject_unknown(self):
+    def _assert_basic_rejection(self, url):
         self.login(self.user)
 
         payload = TaskSchema.from_orm(self.task).model_dump()
@@ -644,42 +605,94 @@ class RejectTask(TestCase):
         payload["rejected"] = True
 
         response = self.client.patch(
-            f"/todo/lists/{self.todo_list.id}/tasks/9999999",
+            url.format(
+                list_id=self.todo_list.id,
+                task_id=self.task.id,
+            ),
+            data=payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        task = Task.objects.filter(id=self.task.id).first()
+
+        self.assertEqual(task.priority, Task.REJECTED)
+        self.assertTrue(
+            FollowUp.objects.filter(
+                old_priority=Task.NORMAL,
+                new_priority=Task.REJECTED,
+                writer=self.user,
+                task=self.task,
+                todol=self.todo_list,
+            ).exists()
+        )
+
+    def test_basic_current(self):
+        self._assert_basic_rejection(self.URLS["current"])
+
+    def test_basic_deprecated(self):
+        self._assert_basic_rejection(self.URLS["deprecated"])
+
+    def _assert_reject_unknown(self, url):
+        self.login(self.user)
+
+        payload = TaskSchema.from_orm(self.task).model_dump()
+
+        payload["rejected"] = True
+
+        response = self.client.patch(
+            url,
             data=payload,
             content_type="application/json",
         )
 
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    def test_reject_not_owner(self):
+    def test_reject_unknown_current(self):
+        self._assert_reject_unknown(
+            self.URLS["current"].format(
+                list_id=self.todo_list.id,
+                task_id=9_999_999,
+            ),
+        )
+
+    def test_reject_unknown_deprecated(self):
+        self._assert_reject_unknown(
+            self.URLS["deprecated"].format(
+                list_id=self.todo_list.id,
+                task_id=9_999_999,
+            ),
+        )
+
+    def _assert_not_owner(self, url):
         other_user: auth_models.User = UserFactory(
             username="test2",
             set_password=self.user_password,
         )
 
         self.login(other_user)
-
         payload = TaskSchema.from_orm(self.task).model_dump()
 
-        for url in self.URLS:
-            response = self.client.patch(
-                url.format(
-                    list_id=self.todo_list.id,
-                    task_id=self.task.id,
-                ),
-                data=payload,
-                content_type="application/json",
-            )
+        response = self.client.patch(
+            url.format(
+                list_id=self.todo_list.id,
+                task_id=self.task.id,
+            ),
+            data=payload,
+            content_type="application/json",
+        )
 
-            self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
-    def test_reject_with_comment(self):
+    def test_reject_not_owner(self):
+        self._assert_not_owner(self.URLS["current"])
+
+    def test_reject_not_owner_deprecated(self):
+        self._assert_not_owner(self.URLS["deprecated"])
+
+    def _assert_reject_with_comment(self, url):
         self.login(self.user)
-
-        payload = TaskSchema.from_orm(self.task).model_dump()
-
-        payload["followup"] = "Rejecting this task."
-        payload["rejected"] = True
 
         # Preflight check
         self.assertEqual(
@@ -691,39 +704,53 @@ class RejectTask(TestCase):
             1,
         )
 
-        for url in self.URLS:
-            # Force task reset by saving the local copy that is linked to the
-            # current test case: unless `refresh_from_db` is called the current
-            # object will hold the initial values that were defined in the setup.
-            self.task.save()
+        payload = TaskSchema.from_orm(self.task).model_dump()
 
-            # Remove the eventual followups due to the multi url testing
-            FollowUp.objects.all().delete()
+        payload["followup"] = "Rejecting this task."
+        payload["rejected"] = True
 
-            response = self.client.patch(
-                url.format(
-                    list_id=self.todo_list.id,
-                    task_id=self.task.id,
-                ),
-                data=payload,
-                content_type="application/json",
-            )
+        response = self.client.patch(
+            url.format(
+                list_id=self.todo_list.id,
+                task_id=self.task.id,
+            ),
+            data=payload,
+            content_type="application/json",
+        )
 
-            self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-            task = Task.objects.filter(id=self.task.id).first()
+        task = Task.objects.filter(id=self.task.id).first()
 
-            self.assertEqual(task.priority, Task.REJECTED)
-            self.assertTrue(
-                FollowUp.objects.filter(
-                    old_priority=Task.NORMAL,
-                    new_priority=Task.REJECTED,
-                    writer=self.user,
-                    task=self.task,
-                    todol=self.todo_list,
-                    content="Rejecting this task.",
-                ).exists()
-            )
+        self.assertEqual(task.priority, Task.REJECTED)
+        self.assertTrue(
+            FollowUp.objects.filter(
+                old_priority=Task.NORMAL,
+                new_priority=Task.REJECTED,
+                writer=self.user,
+                task=self.task,
+                todol=self.todo_list,
+                content="Rejecting this task.",
+            ).exists()
+        )
+
+    def test_reject_with_comment_current(self):
+        self.login(self.user)
+
+        # Preflight check
+        self.assertEqual(
+            Task.objects.filter(
+                priority=Task.NORMAL,
+                rejected=False,
+                id=self.task.id,
+            ).count(),
+            1,
+        )
+
+        self._assert_reject_with_comment(self.URLS["current"])
+
+    def test_reject_with_comment_deprecated(self):
+        self._assert_reject_with_comment(self.URLS["deprecated"])
 
 
 class EditTask(TestCase):
