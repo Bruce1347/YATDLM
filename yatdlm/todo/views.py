@@ -527,7 +527,10 @@ class TaskListView(LoginRequiredMixin, View):
         payload = [TaskSchema.from_orm(task).dict() for task in tasks]
 
         return JsonResponse(
-            dict(tasks=payload),
+            dict(
+                tasks=payload,
+                priorities={name: value for name, value in Task.priority_levels},
+            ),
             status=HTTPStatus.OK,
         )
 
@@ -643,7 +646,7 @@ class TaskView(LoginRequiredMixin, View):
         task.update(body, request.user)
 
         return JsonResponse(
-            task.as_dict(),
+            TaskSchema.from_orm(task).dict(),
             status=HTTPStatus.OK,
         )
 

@@ -28,6 +28,7 @@ class TaskSchema(BaseModel):
     subtasks_progress: float | None = None
     subtasks_count: int | None = None
     rejected: bool | None = False
+    is_done: bool | None = False
 
     def model_dump(self, *args, **kwargs):
         kwargs["exclude"] = [
