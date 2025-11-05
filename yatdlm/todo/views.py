@@ -14,7 +14,6 @@ from django.utils.timezone import make_aware
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from pydantic import ValidationError
-
 from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
@@ -698,7 +697,26 @@ class TaskView(LoginRequiredMixin, View):
         return JsonResponse({}, status=HTTPStatus.OK)
 
 
-class TodoListListView(View):
+class TodoListListView(View, LoginRequiredMixin):
+    """ListView for TodoList
+
+    Lists should only be visible and created by a logged user.
+    """
+
+    def get(self, request, **kwargs):
+        """GET route that returns a list of the lists owned or visible by the logged user
+
+        If no lists are found, an empty list is returned.
+        """
+        todo_lists = TodoList.objects.filter(owner=request.user)
+
+        return JsonResponse(
+            [TodoListSchema.from_orm(todo_list).dict() for todo_list in todo_lists],
+            status=HTTPStatus.OK,
+            # Needed for non dict objects
+            safe=False,
+        )
+
     def post(self, request, *args, **kwargs):
         try:
             schema = TodoListSchema(**json.loads(request.body.decode("utf-8")))

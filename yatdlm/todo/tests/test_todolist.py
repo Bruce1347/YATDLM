@@ -3,7 +3,6 @@ from typing import Any, NamedTuple
 
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
-
 from todo.factories import TodoListFactory, UserFactory
 from todo.models import TodoList
 
@@ -238,3 +237,61 @@ class TodoListDelete(TestCase):
         # Expect a Method not allowed
         self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
         self.assertEqual(TodoList.objects.filter(id=self.list_.id).exists(), True)
+
+
+class TodoListsList(TestCase):
+    urls_and_expected_status: dict[str, TestCaseConfig] = {
+        "deprecated": TestCaseConfig("/todo/lists", HTTPStatus.OK),
+        "current": TestCaseConfig(
+            "/todo/beta/lists", HTTPStatus.OK, "application/json"
+        ),
+    }
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.lists: TodoList = TodoListFactory.create_batch(2, owner=cls.user)
+
+    def _assert_list_todolists(self, version: str):
+        url, expected_status, _ = self.urls_and_expected_status[version]
+
+        self.client.login(username="test", password=self.users_password)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, expected_status)
+
+        if version == "current":
+            recieved_data = response.json()
+
+            self.assertEqual(
+                recieved_data,
+                [
+                    {
+                        "creation_date": todo_list.creation_date.isoformat(),
+                        "description": todo_list.description,
+                        "due_date": todo_list.due_date.isoformat(),
+                        "id": todo_list.id,
+                        "is_public": todo_list.is_public,
+                        "title": todo_list.title,
+                        "owner_id": todo_list.owner.id,
+                    }
+                    for todo_list in self.lists
+                ],
+            )
+        else:
+            recieved_page = response.content.decode("utf-8")
+            for todo_list in self.lists:
+                self.assertInHTML(todo_list.title, recieved_page)
+                self.assertInHTML(
+                    todo_list.creation_date.strftime("%d/%m/%Y à %H:%M"), recieved_page
+                )
+
+    def test_list_todolists(self):
+        self._assert_list_todolists("current")
+
+    def test_list_todolists_deprecated(self):
+        self._assert_list_todolists("deprecated")

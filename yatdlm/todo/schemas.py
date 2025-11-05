@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 from functools import partial
 
 from pydantic import BaseModel, Field, functional_serializers
-
 from todo.models import FollowUp
 
 
@@ -43,15 +42,22 @@ class TaskSchema(BaseModel):
         # FIXME: The categories should be a custom schema and this schema should only
         # dump the id using the include keyword argument as detailed here:
         # https://docs.pydantic.dev/latest/usage/exporting_models/
-        data["categories"] = [
-            CategorySchema.model_validate(category) for category in obj.categories.all()
-        ]
+        return {
+            **data,
+            "categories": [
+                CategorySchema.model_validate(category)
+                for category in obj.categories.all()
+            ],
+        }
 
     @classmethod
-    def _dump_description(cls: "TaskSchema", obj: T.Any, data: dict) -> None:
+    def _dump_description(cls: "TaskSchema", obj: T.Any, data: dict) -> dict:
         # The input and output data key for that field is `descr`
         # FIXME: replace `descr` by `description`
-        data["descr"] = obj.description
+        return {
+            **data,
+            "descr": obj.description,
+        }
 
     @classmethod
     def from_orm(cls: "TaskSchema", obj: T.Any):
@@ -70,7 +76,7 @@ class TaskSchema(BaseModel):
         }
 
         for field in custom_dump_fields:
-            custom_dump_fields_methods[field](obj, data)
+            data = {**data, **custom_dump_fields_methods[field](obj, data)}
 
         return TaskSchema(**data)
 
@@ -141,3 +147,8 @@ class TodoListSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @functional_serializers.field_serializer("creation_date", "due_date")
+    def isoformat_serialize(self, date: datetime) -> str:
+        """Serializes a given datetime to the ISO 8601 standard."""
+        return date.isoformat()
