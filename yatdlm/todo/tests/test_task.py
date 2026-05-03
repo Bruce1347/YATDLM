@@ -7,10 +7,9 @@ import freezegun
 from django.contrib.auth import models as auth_models
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
-
 from todo.categories.factories import CategoryFactory
 from todo.factories import TaskFactory, TodoListFactory, UserFactory
-from todo.models import FollowUp, Task, TodoList, Category
+from todo.models import Category, FollowUp, Task, TodoList
 from todo.schemas import TaskSchema
 
 
@@ -24,7 +23,6 @@ class TaskUpdateTestCase(TestCase):
         cls.list_ = TodoListFactory(owner=cls.user)
         cls.task = TaskFactory(parent_list=cls.list_)
         cls.category = CategoryFactory.create(todolist=cls.list_)
-
 
         cls.url = "/todo/lists/{list_id}/tasks/{task_id}"
 

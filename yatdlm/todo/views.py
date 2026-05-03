@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.http import HttpResponseForbidden, HttpResponseNotFound, JsonResponse
+from django.http import (HttpResponseForbidden, HttpResponseNotFound,
+                         JsonResponse)
 from django.shortcuts import redirect, render
 from django.utils.timezone import make_aware
 from django.views import View
@@ -18,7 +19,8 @@ from todo.categories.models import Category
 
 from .helpers.routes_validators import task_exists, task_ownership
 from .models import FollowUp, NotOwner, Task, TodoList
-from .schemas import EditionTaskSchema, FollowUpSchema, TaskSchema, TodoListSchema
+from .schemas import (EditionTaskSchema, FollowUpSchema, TaskSchema,
+                      TodoListSchema)
 from .utils import yesnojs, yesnopython
 
 

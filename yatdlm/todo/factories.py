@@ -9,6 +9,7 @@ from .models import Task, TodoList, User
 def debug(x):
     breakpoint()
 
+
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
@@ -18,8 +19,11 @@ class UserFactory(DjangoModelFactory):
 
     username = Faker("email")
     email = Faker("email")
-    password = LazyAttribute(lambda obj: make_password(obj.plain_password) if obj.plain_password else make_password("1234"))
-
+    password = LazyAttribute(
+        lambda obj: make_password(obj.plain_password)
+        if obj.plain_password
+        else make_password("1234")
+    )
 
 
 class TodoListFactory(DjangoModelFactory):
