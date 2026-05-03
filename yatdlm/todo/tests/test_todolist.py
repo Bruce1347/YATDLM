@@ -140,10 +140,10 @@ class TodoListCreate(TestCase):
         assert todolist.description == ""
         assert todolist.is_public
 
-    def create_list_null_description(self):
+    def test_create_list_null_description(self):
         self._assert_create_list_null_description("current")
 
-    def create_list_null_description_deprecated(self):
+    def test_create_list_null_description_deprecated(self):
         self._assert_create_list_null_description("deprecated")
 
     def test_create_list_no_visibility(self):
