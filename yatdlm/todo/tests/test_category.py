@@ -3,12 +3,11 @@ from http import HTTPStatus
 
 from django.contrib.auth import models as auth_models
 from django.test import TestCase
-
+from factory import Iterator
 from todo.categories.factories import CategoryFactory
 from todo.categories.models import Category
 from todo.factories import UserFactory
 from todo.models import TodoList
-from factory import Iterator
 
 
 class CategoryTestCase(TestCase):
@@ -41,21 +40,6 @@ class CategoryTestCase(TestCase):
     def test_patch_non_existent_category(self):
         response = self.client.patch("/todo/categories/1337", json.dumps({}))
         self.assertEqual(response.status_code, 404)
-
-    def test_delete_category(self):
-        # Save the ID
-        cat_id = self.category.id
-
-        # Confirm that the category is in database
-        self.assertIsNotNone(Category.objects.get(id=cat_id))
-
-        # Do the call
-        response = self.client.delete("/todo/categories/{}".format(cat_id))
-        self.assertEqual(response.status_code, 200)
-
-        # Check that the category was deleted
-        with self.assertRaises(Category.DoesNotExist):
-            Category.objects.get(id=cat_id)
 
 
 class CategoryList(TestCase):
@@ -124,3 +108,68 @@ class CategoryList(TestCase):
             # The app redirects to a login page instead.
             self.assertEqual(response.status_code, HTTPStatus.OK)
             self.assertEqual(response.json(), {"categories": []})
+
+
+class CategoryDelete(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user: auth_models.User = UserFactory(username="test", plain_password="1234")
+        cls.other_user: auth_models.User = UserFactory(
+            username="test2", plain_password="1234"
+        )
+        cls.todolist = TodoList(owner=cls.user)
+        cls.todolist.save()
+
+    def setUp(self):
+        self.category = Category(name="test_category", todolist=self.todolist)
+        self.category.save()
+
+    def test_delete_category(self):
+        self.client.login(username="test", password="1234")
+        # Save the ID
+        cat_id = self.category.id
+
+        # Confirm that the category is in database
+        self.assertIsNotNone(Category.objects.get(id=cat_id))
+
+        # Do the call
+        response = self.client.delete("/todo/categories/{}".format(cat_id))
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the category was deleted
+        with self.assertRaises(Category.DoesNotExist):
+            Category.objects.get(id=cat_id)
+
+    def test_delete_category_other_owner(self):
+        self.client.login(username="test2", password="1234")
+
+        # Save the ID
+        cat_id = self.category.id
+
+        # Confirm that the category is in database
+        self.assertIsNotNone(Category.objects.get(id=cat_id))
+
+        # Do the call
+        response = self.client.delete("/todo/categories/{}".format(cat_id))
+
+        # Category should be deletable only by their owner, mask this as not found to avoid ids bruteforcing
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+        # Check that the category was not deleted
+        self.assertIsNotNone(Category.objects.get(id=cat_id))
+
+    def test_delete_category_not_logged(self):
+        # Save the ID
+        cat_id = self.category.id
+
+        # Confirm that the category is in database
+        self.assertIsNotNone(Category.objects.get(id=cat_id))
+
+        # Do the call
+        response = self.client.delete("/todo/categories/{}".format(cat_id))
+
+        # Category should be deletable a logged user, user should be redirected to login
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+        # Check that the category was not deleted
+        self.assertIsNotNone(Category.objects.get(id=cat_id))

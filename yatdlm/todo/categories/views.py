@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -36,14 +37,18 @@ def list_categories(request, list_id):
 
 class CategoryView(View):
     def delete(self, request, category_id, *args, **kwargs):
-        try:
-            category = Category.objects.get(id=category_id)
-            category.delete()
-            status_code = 200
-            response = {"status": "Category deleted"}
-        except Category.DoesNotExist:
+        qs = Category.objects.filter(id=category_id, todolist__owner_id=request.user.id)
+
+        if not qs.exists():
             status_code = 404
             response = {"errors": "Wrong Category ID"}
+        else:
+            Category.objects.filter(
+                id=category_id, todolist__owner_id=request.user.id
+            ).delete()
+            status_code = 200
+            response = {}
+
         return JsonResponse(response, status=status_code)
 
     def patch(self, request, category_id, *args, **kwargs):
