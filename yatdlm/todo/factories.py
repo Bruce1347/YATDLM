@@ -6,23 +6,20 @@ from factory.faker import Faker
 from .models import Task, TodoList, User
 
 
+def debug(x):
+    breakpoint()
+
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
 
+    class Params:
+        plain_password: str | None = None
+
     username = Faker("email")
     email = Faker("email")
+    password = LazyAttribute(lambda obj: make_password(obj.plain_password) if obj.plain_password else make_password("1234"))
 
-    @post_generation
-    def set_password(obj: User, create, extracted, **kwargs):
-        if not create:
-            # Object hasn't been persisted to db, skip
-            return
-
-        password = extracted or "1234"
-
-        obj.password = make_password(password)
-        obj.save()
 
 
 class TodoListFactory(DjangoModelFactory):

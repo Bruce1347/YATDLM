@@ -8,12 +8,13 @@ from todo.categories.factories import CategoryFactory
 from todo.categories.models import Category
 from todo.factories import UserFactory
 from todo.models import TodoList
+from factory import Iterator
 
 
 class CategoryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user: auth_models.User = UserFactory(username="test", set_password="1234")
+        cls.user: auth_models.User = UserFactory(username="test", plain_password="1234")
         cls.todolist = TodoList(owner=cls.user)
         cls.todolist.save()
 
@@ -60,7 +61,11 @@ class CategoryTestCase(TestCase):
 class CategoryList(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = auth_models.User.objects.create_user("test", password="1234")
+        cls.user, cls.other = UserFactory.create_batch(
+            2,
+            username=Iterator(["test", "other"]),
+            plain_password="1234",
+        )
         cls.category: Category = CategoryFactory(
             todolist__owner=cls.user,
             name="Science Fiction",
@@ -105,8 +110,7 @@ class CategoryList(TestCase):
             self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_list_categories_other_user(self):
-        auth_models.User = UserFactory.create(username="other", set_password="1234")
-        self.client.login(username="other", password="1234")
+        self.client.login(username=self.other.username, password="1234")
 
         urls = [
             f"/todo/categories/beta/{self.category.todolist.id}",

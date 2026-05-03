@@ -10,53 +10,48 @@ from django.test import TestCase
 
 from todo.categories.factories import CategoryFactory
 from todo.factories import TaskFactory, TodoListFactory, UserFactory
-from todo.models import FollowUp, Task, TodoList
+from todo.models import FollowUp, Task, TodoList, Category
 from todo.schemas import TaskSchema
 
 
 class TaskUpdateTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user: auth_models.User = UserFactory(username="test", set_password="1234")
+        cls.user: auth_models.User = UserFactory(username="test", plain_password="1234")
         cls.other_user: auth_models.User = UserFactory(
-            username="test2", password="1234"
+            username="test2", plain_password="1234"
         )
-        cls.list_ = TodoList(owner=cls.user)
-        cls.list_.save()
+        cls.list_ = TodoListFactory(owner=cls.user)
+        cls.task = TaskFactory(parent_list=cls.list_)
+        cls.category = CategoryFactory.create(todolist=cls.list_)
+
+
         cls.url = "/todo/lists/{list_id}/tasks/{task_id}"
 
     def test_update_task(self):
-        task = Task(title="Title", parent_list=self.list_, owner=self.user)
-        task.save()
-
         self.client.login(username="test", password="1234")
 
-        data = task.as_dict()
+        data = self.task.as_dict()
         data["title"] = "Mon super titre"
         data["description"] = "Ma super nouvelle description !"
         response = self.client.put(
-            self.url.format(list_id=self.list_.id, task_id=task.id),
+            self.url.format(list_id=self.list_.id, task_id=self.task.id),
             data,
             content_type="application/json",
         )
         response_json = response.json()
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response_json["title"], "Mon super titre")
 
     def test_update_categories(self):
-        task = TaskFactory.create(
-            parent_list=self.list_,
-        )
-        category = CategoryFactory.create(todolist=self.list_)
-
-        data = task.as_dict()
-
-        data["categories"] = [category.id]
+        data = self.task.as_dict()
+        data["categories"] = [self.category.id]
 
         self.client.login(username="test", password="1234")
 
         response = self.client.put(
-            self.url.format(list_id=self.list_.id, task_id=task.id),
+            self.url.format(list_id=self.list_.id, task_id=self.task.id),
             data,
             content_type="application/json",
         )
@@ -64,23 +59,27 @@ class TaskUpdateTestCase(TestCase):
         data = response.json()
 
         self.assertEqual(
-            [category.id for category in task.categories.all()],
-            [category.id],
+            [category.id for category in self.task.categories.all()],
+            [self.category.id],
         )
 
     def test_update_categories_wrong_ids(self):
-        task = TaskFactory.create(
-            parent_list=self.list_,
-        )
+        data = self.task.as_dict()
 
-        data = task.as_dict()
-
+        # Category's PK is an autoincremented integer, ids 42 and 420 should
+        # not exist with only one category in DB with no provided PK at creation
+        # in setUpTestData
         data["categories"] = [42, 420]
+
+        self.assertQuerySetEqual(
+            Category.objects.filter(id__in=[42, 420]),
+            [],
+        )
 
         self.client.login(username="test", password="1234")
 
         response = self.client.put(
-            self.url.format(list_id=self.list_.id, task_id=task.id),
+            self.url.format(list_id=self.list_.id, task_id=self.task.id),
             data,
             content_type="application/json",
         )
@@ -88,8 +87,8 @@ class TaskUpdateTestCase(TestCase):
         data = response.json()
 
         self.assertEqual(
-            list(task.categories.all()),
-            list(),
+            list(self.task.categories.all()),
+            [],
         )
 
         # Task has been updated but categories were untouched
@@ -114,7 +113,7 @@ class TaskUpdateTestCase(TestCase):
         )
         self.assertEqual(
             follow_up.task,
-            task,
+            self.task,
         )
 
     def test_update_task_wrong_user(self):
@@ -581,6 +580,10 @@ class RejectTask(TestCase):
             username="test",
             password=make_password(cls.user_password),
         )
+        cls.other_user: auth_models.User = UserFactory(
+            username="test2",
+            plain_password=cls.user_password,
+        )
 
         cls.todo_list: TodoList = TodoListFactory.create(
             owner=cls.user,
@@ -666,12 +669,7 @@ class RejectTask(TestCase):
         )
 
     def _assert_not_owner(self, url):
-        other_user: auth_models.User = UserFactory(
-            username="test2",
-            set_password=self.user_password,
-        )
-
-        self.login(other_user)
+        self.login(self.other_user)
         payload = TaskSchema.from_orm(self.task).model_dump()
 
         response = self.client.patch(

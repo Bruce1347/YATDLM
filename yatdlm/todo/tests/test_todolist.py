@@ -186,7 +186,7 @@ class TodoListRead(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
     def test_get_todolist_wrong_owner(self):
-        UserFactory.create(username="test2", password=make_password("1234"))
+        UserFactory.create(username="test2", plain_password="1234")
         self.client.login(username="test2", password=self.users_password)
 
         response = self.client.get(self.url.format(list_id=self.todolist.id))
