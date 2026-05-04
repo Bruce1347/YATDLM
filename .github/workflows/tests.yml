@@ -12,22 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install poetry
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
+        run: pipx install poetry
+
+      - name: Cache virtualenv
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
 
       - name: Install dependencies
-        run: |
-          poetry install
+        run: poetry install
 
       - name: Test
-        run: |
-          PYTHONPATH=yatdlm poetry run python yatdlm/manage.py test --settings=yatdlm.test_settings yatdlm
+        run: poetry run python yatdlm/manage.py test --settings=yatdlm.test_settings todo
