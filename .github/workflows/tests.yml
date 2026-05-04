@@ -30,4 +30,4 @@ jobs:
 
       - name: Test
         run: |
-          poetry run python yatdlm/manage.py test --settings=yatdlm.test_settings yatdlm
+          PYTHONPATH=yatdlm poetry run python yatdlm/manage.py test --settings=yatdlm.test_settings yatdlm
