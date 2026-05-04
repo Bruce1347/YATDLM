@@ -35,6 +35,16 @@ function post(url, body) {
 }
 
 /**
+ * Wrapper function for PUT requests.
+ * @param {String} url The URL that needs to be POST-ed upon
+ * @param {String} body The stringified body that will be sent to the server
+ * @returns 
+ */
+function put(url, body) {
+    return fetchWrapper(url, 'PUT', body);
+}
+
+/**
  * Wrapper function for PATCH requests.
  * @param {String} url The URL where we will PATCH a resource.
  * @param {String} body The stringified body that will be send through PATCH at

@@ -1,10 +1,19 @@
 from http import HTTPStatus
+from typing import Any, NamedTuple
 
 from django.contrib.auth.hashers import make_password
 from django.test import TestCase
-
 from todo.factories import TodoListFactory, UserFactory
 from todo.models import TodoList
+
+
+# XXX: Remove once test parametrization is not needed anymore
+class TestCaseConfig(NamedTuple):
+    url: str
+    status_code: HTTPStatus
+    # Default to Django's default content type for cases where we don't need
+    # to overload the content type.
+    content_type: str | None = None
 
 
 class TodoListCreate(TestCase):
@@ -17,20 +26,39 @@ class TodoListCreate(TestCase):
         )
         cls.url = "/todo/lists/add"
 
-    def test_create_list(self):
+    urls_and_expected_status: dict[str, TestCaseConfig] = {
+        "deprecated": TestCaseConfig("/todo/lists/add", HTTPStatus.OK),
+        "current": TestCaseConfig(
+            "/todo/beta/lists", HTTPStatus.CREATED, "application/json"
+        ),
+    }
+
+    def _assert_create_list(self, version: str) -> None:
         payload = {
             "title": "A todo list",
             "description": "A description for the said todo list.",
             "visibility": True,
         }
 
-        self.client.login(username="test", password=self.users_password),
+        self.client.login(username="test", password=self.users_password)
 
-        response = self.client.post(self.url, data=payload)
+        url, status_code, content_type = self.urls_and_expected_status[version]
 
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        post_kwargs = {"data": payload}
+        if content_type:
+            post_kwargs["content_type"] = content_type
 
-    def test_create_list_empty_name(self):
+        response = self.client.post(url, **post_kwargs)
+
+        self.assertEqual(response.status_code, status_code)
+
+    def test_create_list(self):
+        self._assert_create_list("current")
+
+    def test_create_list_deprecated(self):
+        self._assert_create_list("deprecated")
+
+    def _assert_create_list_empty_name(self, version: str) -> None:
         payload = {
             "title": "",
             "description": "A description for the said todo list",
@@ -39,14 +67,25 @@ class TodoListCreate(TestCase):
 
         self.client.login(username="test", password=self.users_password)
 
-        response = self.client.post(self.url, data=payload)
+        url, _, content_type = self.urls_and_expected_status[version]
+
+        post_kwargs: dict[str, dict[str | Any] | str] = {"data": payload}
+
+        if content_type:
+            post_kwargs["content_type"] = content_type
+
+        response = self.client.post(url, **post_kwargs)
 
         self.assertEqual(response.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
+        self.assertEqual(TodoList.objects.count(), 0)
 
-        # Todolist should not be created
-        assert TodoList.objects.count() == 0
+    def test_create_list_empty_name(self):
+        self._assert_create_list_empty_name("current")
 
-    def test_create_list_null_name(self):
+    def test_create_list_empty_name_deprecated(self):
+        self._assert_create_list_empty_name("deprecated")
+
+    def _assert_create_list_null_name(self, version: str) -> None:
         payload = {
             "description": "A description for the said todo list",
             "visibility": True,
@@ -54,20 +93,40 @@ class TodoListCreate(TestCase):
 
         self.client.login(username="test", password=self.users_password)
 
-        response = self.client.post(self.url, data=payload)
+        url, _, content_type = self.urls_and_expected_status[version]
+
+        post_kwargs: dict[str, dict[str | Any] | str] = {"data": payload}
+
+        if content_type:
+            post_kwargs["content_type"] = content_type
+
+        response = self.client.post(url, **post_kwargs)
 
         self.assertEqual(response.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
 
         # Todolist should not be created
         assert TodoList.objects.count() == 0
 
-    def test_create_list_null_description(self):
+    def test_create_list_null_name(self):
+        self._assert_create_list("current")
+
+    def test_create_list_null_name_deprecated(self):
+        self._assert_create_list("deprecated")
+
+    def _assert_create_list_null_description(self, version: str) -> None:
         payload = {
             "title": "Todolist",
             "visibility": True,
         }
 
         self.client.login(username="test", password=self.users_password)
+
+        url, _, content_type = self.urls_and_expected_status[version]
+
+        post_kwargs: dict[str, dict[str | Any] | str] = {"data": payload}
+
+        if content_type:
+            post_kwargs["content_type"] = content_type
 
         response = self.client.post(self.url, data=payload)
 
@@ -80,6 +139,12 @@ class TodoListCreate(TestCase):
         assert todolist.title == "Todolist"
         assert todolist.description == ""
         assert todolist.is_public
+
+    def test_create_list_null_description(self):
+        self._assert_create_list_null_description("current")
+
+    def test_create_list_null_description_deprecated(self):
+        self._assert_create_list_null_description("deprecated")
 
     def test_create_list_no_visibility(self):
         payload = {
@@ -96,6 +161,37 @@ class TodoListCreate(TestCase):
         assert TodoList.objects.filter(
             title="Todolist", description="", is_public=False
         ).exists()
+
+
+class TodoListRead(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test", password=make_password(cls.users_password)
+        )
+        cls.todolist = TodoListFactory.create(owner=cls.user)
+        cls.url = "/todo/lists/{list_id}/"
+        cls.public_url = "/todo/lists/public/{list_id}/"
+
+    def test_get_todolist(self):
+        self.client.login(username="test", password=self.users_password)
+        response = self.client.get(self.url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_get_private_todolist_not_logged(self):
+        response = self.client.get(self.public_url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+
+    def test_get_todolist_wrong_owner(self):
+        UserFactory.create(username="test2", plain_password="1234")
+        self.client.login(username="test2", password=self.users_password)
+
+        response = self.client.get(self.url.format(list_id=self.todolist.id))
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
 
 class TodoListDelete(TestCase):
@@ -141,3 +237,61 @@ class TodoListDelete(TestCase):
         # Expect a Method not allowed
         self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
         self.assertEqual(TodoList.objects.filter(id=self.list_.id).exists(), True)
+
+
+class TodoListsList(TestCase):
+    urls_and_expected_status: dict[str, TestCaseConfig] = {
+        "deprecated": TestCaseConfig("/todo/lists", HTTPStatus.OK),
+        "current": TestCaseConfig(
+            "/todo/beta/lists", HTTPStatus.OK, "application/json"
+        ),
+    }
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.users_password = "1234"
+        cls.user = UserFactory.create(
+            username="test",
+            password=make_password(cls.users_password),
+        )
+        cls.lists: TodoList = TodoListFactory.create_batch(2, owner=cls.user)
+
+    def _assert_list_todolists(self, version: str):
+        url, expected_status, _ = self.urls_and_expected_status[version]
+
+        self.client.login(username="test", password=self.users_password)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, expected_status)
+
+        if version == "current":
+            recieved_data = response.json()
+
+            self.assertEqual(
+                recieved_data,
+                [
+                    {
+                        "creation_date": todo_list.creation_date.isoformat(),
+                        "description": todo_list.description,
+                        "due_date": todo_list.due_date.isoformat(),
+                        "id": todo_list.id,
+                        "is_public": todo_list.is_public,
+                        "title": todo_list.title,
+                        "owner_id": todo_list.owner.id,
+                    }
+                    for todo_list in self.lists
+                ],
+            )
+        else:
+            recieved_page = response.content.decode("utf-8")
+            for todo_list in self.lists:
+                self.assertInHTML(todo_list.title, recieved_page)
+                self.assertInHTML(
+                    todo_list.creation_date.strftime("%d/%m/%Y à %H:%M"), recieved_page
+                )
+
+    def test_list_todolists(self):
+        self._assert_list_todolists("current")
+
+    def test_list_todolists_deprecated(self):
+        self._assert_list_todolists("deprecated")

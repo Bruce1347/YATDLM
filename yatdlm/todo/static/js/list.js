@@ -65,7 +65,7 @@ function setup_event_listeners_buttons(public) {
             return idx !== -1;
         });
         tasks_to_update.forEach((task) => {
-            var td = document.getElementById(`categories_${task.no}`);
+            var td = document.getElementById(`categories_${task.task_no}`);
             td.innerText = updated_category.name;
         });
     });
@@ -118,7 +118,7 @@ function setup_sublines_togglers() {
                 child.addEventListener('click', () => {
                     //TODO: Also use a Map for tasks and avoid linear search time.
                     fetch_task_followups_then_toggle(tasks.find((elt) => {
-                        return elt.no === parseInt(element.id);
+                        return elt.task_no === parseInt(element.id);
                     }));
                 });
             });
@@ -144,11 +144,11 @@ async function setup_tasks_buttons_events(public = false) {
     for (var i = 0; i < tasks.length; ++i) {
         const element = tasks[i];
         // Get the task id from the tr id
-        const editBtn = document.getElementById(`edit-btn_${element.no}`);
-        const closeBtn = document.getElementById(`close-btn_${element.no}`);
-        const addCommentBtn = document.getElementById(`add_followup-btn_${element.no}`);
+        const editBtn = document.getElementById(`edit-btn_${element.task_no}`);
+        const closeBtn = document.getElementById(`close-btn_${element.task_no}`);
+        const addCommentBtn = document.getElementById(`add_followup-btn_${element.task_no}`);
         editBtn.addEventListener('click', () => {
-            edit_task_experimental(`task_detail_${element.no}`, element.no);
+            edit_task_experimental(`task_detail_${element.task_no}`, element.task_no);
         });
         closeBtn.addEventListener('click', () => {
             closeTask(element);
@@ -156,21 +156,32 @@ async function setup_tasks_buttons_events(public = false) {
         addCommentBtn.addEventListener('click', () => {
             addFollowup(element);
         });
-        if (element.is_done !== true && element.is_rejected !== true) {
-            const reject_task_btn = document.getElementById(`reject_task-btn_${element.no}`);
+
+        const task_is_done = element.is_done !== undefined && element.is_done === true;
+        const task_is_rejected = element.rejected !== undefined && element.rejected === true;
+
+        if (task_is_done == false && task_is_rejected == false) {
+            const reject_task_btn = document.getElementById(`reject_task-btn_${element.task_no}`);
+
+            if (reject_task_btn === null) {
+                // Task may have already been closed or rejected
+                continue;
+            }
+
             reject_task_btn.addEventListener('click', () => {
-                let dom_followup = document.getElementById(`followup_${element.no}`);
+                let dom_followup = document.getElementById(`followup_${element.task_no}`);
                 let followup = null;
                 if (dom_followup && dom_followup.value !== '') {
                     followup = dom_followup.value;
                 }
-                reject_task(element.list_id, element.id, followup);
+                reject_task(element, followup);
             });
         }
+
         // Add the task to the subtasks select
         var parent_tasks_option = new Option(`#${element.no}: ${element.title}`, `${element.id}`);
         parent_tasks_container.add(parent_tasks_option);
-        if (element.subtasks !== null) {
+        if (element.subtasks !== null && element.subtasks !== undefined) {
             for (let subtask of element.subtasks) {
                 // Attach a callback to its corresponding checkbox
                 var checkbox_btn = document.getElementById(`subtask_${subtask.id}_btn`);
@@ -209,12 +220,12 @@ async function fetch_task_followups_then_toggle(data) {
     //createDOMFollowup
     var curr_followups = followups.get(data.id);
     if (curr_followups === undefined) {
-        let resp = await getFollowups(data.list_id, data.id);
+        let resp = await getFollowups(data.parent_list_id, data.id);
         curr_followups = resp.followups;
         followups.set(data.id, curr_followups);
     }
-    if (toggle(`task_subline_${data.no}`)) {
-        const followupsContainer = document.getElementById(`followups_${data.no}`);
+    if (toggle(`task_subline_${data.task_no}`)) {
+        const followupsContainer = document.getElementById(`followups_${data.task_no}`);
         // Remove current children to avoid content duplication
         while (followupsContainer.firstChild) {
             followupsContainer.removeChild(followupsContainer.firstChild);
@@ -266,9 +277,9 @@ function reset_task_add_form() {
  */
 async function addFollowup(task) {
     const requestBody = JSON.stringify({
-        'followup': document.getElementById(`followup_${task.no}`).value,
+        'followup': document.getElementById(`followup_${task.task_no}`).value,
     });
-    const response = await post(`/todo/lists/${task.list_id}/${task.id}/add_followup`, requestBody);
+    const response = await post(`/todo/lists/${task.parent_list_id}/${task.id}/add_followup`, requestBody);
     const data = await response.json();
     await updateFollowups(task);
 }
@@ -279,12 +290,11 @@ async function addFollowup(task) {
  * @param {Object} task the task that needs its followups to be updated
  */
 async function updateFollowups(task) {
-    const followups = await getFollowups(task.list_id, task.id);
-    const followupsContainer = document.getElementById(`followups_${task.no}`);
+    const followups = await getFollowups(task.parent_list_id, task.id);
+    const followupsContainer = document.getElementById(`followups_${task.task_no}`);
     // Remove all children
     followupsContainer.innerHTML = '';
     for (let followup of followups.followups) {
-        console.log(followup);
         let dom_followup = createDOMFollowup(followup);
         followupsContainer.appendChild(dom_followup);
     }
@@ -334,12 +344,12 @@ function createDOMFollowup(followup) {
  * @param {Object} task The task that has to be closed or re-opened
  */
 async function closeTask(task) {
-    let close_followup = document.getElementById(`followup_${task.no}`);
+    let close_followup = document.getElementById(`followup_${task.task_no}`);
     const requestBody = new Object();
     if (close_followup) {
         requestBody.followup = close_followup.value;
     }
-    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/close`, JSON.stringify(requestBody));
+    const response = await patch(`/todo/lists/${task.parent_list_id}/${task.id}/close`, JSON.stringify(requestBody));
     const updatedTask = await response.json();
     const currentTaskIdx = tasks.findIndex((t) => {
         return t.id === updatedTask.id;
@@ -369,7 +379,7 @@ function edit_task_experimental(node_id, id) {
 function createTaskEditTd(node_id, task_id) {
     /** EDIT FORM */
     var currentTask = tasks.find((elt) => {
-        return elt.no === parseInt(task_id);
+        return elt.task_no === parseInt(task_id);
     });
     var td = document.createElement('td');
     td.id = `task_edit_${task_id}`;
@@ -490,7 +500,7 @@ function createTaskEditTd(node_id, task_id) {
         Object.assign(tasks[currentTaskIdx], updatedTask);
         document.getElementById(td.id).replaceWith(task_td);
         updateDOMTask(updatedTask);
-        updateFollowups(updatedTask.list_id, updatedTask.id);
+        updateFollowups(updatedTask);
     });
     task_td.parentNode.replaceChild(td, task_td);
     // Bind the add_category button
@@ -507,7 +517,8 @@ function createTaskEditTd(node_id, task_id) {
  * @param {Object} task The object that is subject to changes.
  */
 async function updateTask(body, task) {
-    const response = await patch(`/todo/lists/${task.list_id}/${task.id}/update/`, body);
+    let url = `/todo/lists/${task.parent_list_id}/tasks/${task.id}`;
+    const response = await put(url, body);
     const updatedTask = await response.json();
     return updatedTask;
 }
@@ -518,41 +529,50 @@ async function updateTask(body, task) {
  */
 function updateDOMTask(task) {
     if (!task.is_subtask) {
-        const tr = document.getElementById(`${task.no}`);
+        const tr = document.getElementById(`${task.task_no}`);
         // Remove all the previous classes from the <tr>
         tr.classList.remove(...tr.classList);
         tr.classList.add("nowrap", `priority_${task.priority}`);
         // Replace all the visible text by their updated versions
-        const priorityCell = document.getElementById(`priority_${task.no}`);
+        const priorityCell = document.getElementById(`priority_${task.task_no}`);
         priorityCell.innerText = task.priority_str;
-        const titleCell = document.getElementById(`title_${task.no}`);
-        titleCell.innerText = task.title_cropped;
-        const descriptionCell = document.getElementById(`description_${task.no}`);
+        const titleCell = document.getElementById(`title_${task.task_no}`);
+        titleCell.innerText = task.title;
+        const descriptionCell = document.getElementById(`description_${task.task_no}`);
         descriptionCell.querySelector("p").innerText = task.description;
-        const category_cell = document.getElementById(`categories_${task.no}`);
+        const category_cell = document.getElementById(`categories_${task.task_no}`);
         const task_categories = new Array();
-        for (var i = 0; i < task.categories.length; ++i) {
-            var category = categories.find((cat) => {
-                return cat.id === task.categories[i].id;
-            });
-            task_categories.push(category.name);
+
+        if (task.categories !== undefined) {
+            for (var i = 0; i < task.categories.length; ++i) {
+                var category = categories.find((cat) => {
+                    return cat.id === task.categories[i].id;
+                });
+                task_categories.push(category.name);
+            }
         }
+
         category_cell.innerText = task_categories.join(", ");
         // Update the resolution date and due date cells
-        const closeBtn = document.getElementById(`close-btn_${task.no}`);
+        const closeBtn = document.getElementById(`close-btn_${task.task_no}`);
         if (task.is_done) {
-            const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
-            resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
-            resolutionDateCell.colSpan = 2;
-            const dueDateCell = document.getElementById(`dued_${task.no}`);
+            const resolutionDateCell = document.getElementById(`resolutiond_${task.task_no}`);
+
+            if (resolutionDateCell !== null) {
+                resolutionDateCell.innerText = `Résolu le ${task.resolution_date} à ${task.resolution_hour}`;
+                resolutionDateCell.colSpan = 2;
+            }
+            const dueDateCell = document.getElementById(`dued_${task.task_no}`);
             dueDateCell.remove();
             closeBtn.innerText = "ROUVRIR LA TÂCHE";
         } else {
-            const resolutionDateCell = document.getElementById(`resolutiond_${task.no}`);
-            resolutionDateCell.innerText = "";
-            resolutionDateCell.colSpan = 1;
-            const dueDateCell = document.getElementById(`dued_${task.no}`);
-            resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
+            const resolutionDateCell = document.getElementById(`resolutiond_${task.task_no}`);
+            if (resolutionDateCell !== null) {
+                resolutionDateCell.innerText = "";
+                resolutionDateCell.colSpan = 1;
+                const dueDateCell = document.getElementById(`dued_${task.task_no}`);
+                resolutionDateCell.parentNode.insertBefore(dueDateCell, resolutionDateCell);
+            }
             closeBtn.innerText = "FERMER LA TÂCHE";
         }
     } else {
@@ -618,7 +638,7 @@ function createNewDOMTasktr(data) {
     tdImg.height = 24;
     tdImg.src = '/static/img/icons/garbage_red.svg';
     tdImg.addEventListener('click', () => {
-        del_task(`/todo/lists/${data.list_id}/del_task/${data.id}`, data.no);
+        del_task(`/beta/todo/lists/${data.parent_list_id}/tasks/${data.id}`, data.no);
     });
     tdDelete.appendChild(tdImg);
 
@@ -649,7 +669,7 @@ function createNewDOMDetailTr(data) {
     var spanTitle = document.createElement('span');
     divTitle.classList.add('margint-normal');
     spanTitle.style = 'font-size: 1.8em';
-    spanTitle.innerHTML = `Tâche #${data.no} : ${data.title}`;
+    spanTitle.innerHTML = `Tâche #${data.task_no} : ${data.title}`;
     divTitle.appendChild(spanTitle);
     // Task creation date
     var divCrDate = document.createElement('div');
@@ -703,7 +723,11 @@ function add_task_exp(url) {
     if (task_categories_dom.length > 0) {
         for (var i = 0; i < task_categories_dom.length; ++i) {
             if (task_categories_dom[i].value !== '-1') {
-                task_categories.push(task_categories_dom[i].value);
+                task_categories.push(
+                    {
+                        "id": task_categories_dom[i].value,
+                    }
+                );
             }
         }
         bodyDict.categories = task_categories;
@@ -711,14 +735,14 @@ function add_task_exp(url) {
 
     // If the user sets a parent task, add it to the body
     if (parent_task !== "-1") {
-        bodyDict.parent_task = parent_task;
+        bodyDict.parent_task_id = parent_task;
     }
 
     const body = JSON.stringify(bodyDict);
 
     const callback = async function (response) {
         var data = await response.json();
-        if (response.status == 200) {
+        if (response.status == 201) {
             var domTasks = document.querySelectorAll(`tr.priority_${task_priority}`);
             var firstElt = domTasks.item(0);
             var newTr = createNewDOMTasktr(data);
@@ -752,7 +776,7 @@ function add_task_exp(url) {
 async function fetch_tasks(arr) {
     var listId = document.getElementById('dom_list_id').value;
 
-    const response = await get(`/todo/lists/${listId}/tasks?meta_tasks=true`);
+    const response = await get(`/todo/beta/lists/${listId}/tasks?meta_tasks=true`);
     var data = await response.json();
     data.tasks.forEach(element => {
         arr.unshift(element);
@@ -1001,13 +1025,13 @@ function add_new_task_category(container_id=undefined) {
 
 /**
  * Rejects a task and updates the DOM.
- * @param {Number} list_id The current todo list
- * @param {Number} task_id The task that has to be rejected
+ * @param {Object} Task The task that has to be rejected
  * @param {String} followup An eventual reason for the rejection
  */
-async function reject_task(list_id, task_id, followup = null) {
-    let url = `/todo/lists/${list_id}/${task_id}/reject`;
-    let body = '';
+async function reject_task(task, followup = null) {
+    let url = `/todo/lists/${task.parent_list_id}/tasks/${task.id}`;
+    task.rejected = true;
+    let body = JSON.stringify(task)
     if (followup !== null) {
         body = JSON.stringify({
             'followup': followup
@@ -1018,7 +1042,7 @@ async function reject_task(list_id, task_id, followup = null) {
     // Update the DOM
     updateDOMTask(updated_task);
     updateFollowups(updated_task);
-    let reject_button = document.getElementById(`reject_task-btn_${updated_task.no}`);
+    let reject_button = document.getElementById(`reject_task-btn_${updated_task.task_no}`);
     if (reject_button) {
         reject_button.remove();
     }

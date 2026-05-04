@@ -1,0 +1,146 @@
+import typing as T
+from datetime import UTC, datetime
+from functools import partial
+
+from pydantic import BaseModel, Field, functional_serializers
+from todo.categories.schemas import CategorySchema
+from todo.models import FollowUp
+
+
+class TaskSchema(BaseModel):
+    id: int = None
+    title: str
+    description: str = Field(alias="descr", default="")
+    priority: int
+    categories: list[CategorySchema]
+    task_no: int = None
+    parent_task_id: int | None = None
+    parent_list_id: int | None = None
+    subtasks_progress: float | None = None
+    subtasks_count: int | None = None
+    rejected: bool | None = False
+    is_done: bool | None = False
+
+    def model_dump(self, *args, **kwargs):
+        kwargs["exclude"] = [
+            "is_subtask",
+            "subtasks_progress",
+        ]
+        return super().model_dump(*args, **kwargs)
+
+    @classmethod
+    def _dump_categories(cls: "TaskSchema", obj: T.Any, data: dict) -> None:
+        # Pydantic does not have a native compatbility with Django's many to many fields.
+        # FIXME: The categories should be a custom schema and this schema should only
+        # dump the id using the include keyword argument as detailed here:
+        # https://docs.pydantic.dev/latest/usage/exporting_models/
+        return {
+            **data,
+            "categories": [
+                CategorySchema.model_validate(category)
+                for category in obj.categories.all()
+            ],
+        }
+
+    @classmethod
+    def _dump_description(cls: "TaskSchema", obj: T.Any, data: dict) -> dict:
+        # The input and output data key for that field is `descr`
+        # FIXME: replace `descr` by `description`
+        return {
+            **data,
+            "descr": obj.description,
+        }
+
+    @classmethod
+    def from_orm(cls: "TaskSchema", obj: T.Any):
+        # The following fields cannot be copied "as is" and need a custom dumping method
+        custom_dump_fields = ["categories", "description"]
+
+        custom_dump_fields_methods = {
+            "categories": cls._dump_categories,
+            "description": cls._dump_description,
+        }
+
+        data = {
+            field: getattr(obj, field)
+            for field in TaskSchema.model_fields
+            if field not in custom_dump_fields and hasattr(obj, field)
+        }
+
+        for field in custom_dump_fields:
+            data = {**data, **custom_dump_fields_methods[field](obj, data)}
+
+        return TaskSchema(**data)
+
+    class Config:
+        from_attributes = True
+
+
+class EditionTaskSchema(TaskSchema):
+    comment: str | None = Field(alias="followup", exclude=True, default="")
+
+
+class FollowUpSchema(BaseModel):
+    id: int = None
+    writer: str
+    f_type: str
+    old_priority: str | None
+    new_priority: str | None
+    task_id: int
+    todol_id: int
+    creation_date: datetime
+    content: str
+
+    class Config:
+        from_attributes = True
+
+    @functional_serializers.field_serializer("creation_date")
+    def serialize_creation_date(self, creation_date: datetime, _info) -> str:
+        return creation_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    @classmethod
+    def _dump_writer(cls: "FollowUpSchema", obj: "FollowUp", data: dict):
+        data["writer"] = obj.writer.username
+
+    @classmethod
+    def _dump_f_type(cls: "FollowUpSchema", obj: "FollowUp", data: dict):
+        data["f_type"] = FollowUp.choices_dict[obj.f_type]
+
+    @classmethod
+    def from_orm(cls: "FollowUpSchema", obj: "FollowUp"):
+        # The following fields cannot be copied "as is" and need a custom dumping method
+        custom_dump_fields = ["writer", "f_type"]
+
+        custom_dump_fields_methods = {
+            "writer": cls._dump_writer,
+            "f_type": cls._dump_f_type,
+        }
+
+        data = {
+            field: getattr(obj, field)
+            for field in cls.__fields__
+            if field not in custom_dump_fields
+        }
+
+        for field in custom_dump_fields:
+            custom_dump_fields_methods[field](obj, data)
+
+        return FollowUpSchema(**data)
+
+
+class TodoListSchema(BaseModel):
+    id: int | None = None
+    owner_id: int | None = None
+    title: str = Field(min_length=1, max_length=100)
+    description: str = Field(min_length=1, max_length=600)
+    creation_date: datetime | None = Field(default_factory=partial(datetime.now, UTC))
+    due_date: datetime | None = None
+    is_public: bool = False
+
+    class Config:
+        from_attributes = True
+
+    @functional_serializers.field_serializer("creation_date", "due_date")
+    def isoformat_serialize(self, date: datetime) -> str:
+        """Serializes a given datetime to the ISO 8601 standard."""
+        return date.isoformat()
