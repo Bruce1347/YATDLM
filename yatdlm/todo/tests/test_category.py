@@ -6,11 +6,11 @@ from django.test import TestCase
 from factory import Iterator
 from todo.categories.factories import CategoryFactory
 from todo.categories.models import Category
-from todo.factories import UserFactory
+from todo.factories import TodoListFactory, UserFactory
 from todo.models import TodoList
 
 
-class CategoryTestCase(TestCase):
+class CategoryUpdate(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user: auth_models.User = UserFactory(username="test", plain_password="1234")
@@ -36,6 +36,32 @@ class CategoryTestCase(TestCase):
             },
             json.loads(response.content),
         )
+
+    def test_patch_category_empty_body(self):
+        name_before = self.category.name
+
+        response = self.client.patch(
+            "/todo/categories/{}".format(self.category.id),
+            json.dumps({}),
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.name, name_before)
+
+    def test_patch_category_list_ownership_cannot_change(self):
+        other_todolist = TodoListFactory(owner=self.user)
+
+        original_todolist_id = self.category.todolist_id
+
+        self.client.patch(
+            "/todo/categories/{}".format(self.category.id),
+            json.dumps({"list_id": other_todolist.id}),
+        )
+
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.todolist_id, original_todolist_id)
 
     def test_patch_non_existent_category(self):
         response = self.client.patch("/todo/categories/1337", json.dumps({}))

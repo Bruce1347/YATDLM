@@ -3,16 +3,8 @@ from datetime import UTC, datetime
 from functools import partial
 
 from pydantic import BaseModel, Field, functional_serializers
+from todo.categories.schemas import CategorySchema
 from todo.models import FollowUp
-
-
-class CategorySchema(BaseModel):
-    id: int = None
-    list_id: int = None
-    name: str = None
-
-    class Config:
-        from_attributes = True
 
 
 class TaskSchema(BaseModel):

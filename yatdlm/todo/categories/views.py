@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 
 from ..models import TodoList
 from .models import Category
+from .schemas import CategoryPatchSchema, CategorySchema
 
 
 @login_required()
@@ -19,7 +20,7 @@ def create_category(request, list_id):
         category = Category(name=body.get("name"), todolist_id=list_id)
         category.save()
         status_code = 201
-        response = category.as_dict()
+        response = CategorySchema.model_validate(category).model_dump()
     except IntegrityError:
         status_code = 400
         response = {"error": "The List ID refers to a non existing list."}
@@ -32,7 +33,13 @@ def list_categories(request, list_id):
     categories = Category.objects.filter(
         todolist_id=list_id, todolist__owner=request.user
     )
-    return JsonResponse({"categories": [cat.as_dict() for cat in categories]})
+    return JsonResponse(
+        {
+            "categories": [
+                CategorySchema.model_validate(cat).model_dump() for cat in categories
+            ]
+        }
+    )
 
 
 class CategoryView(View):
@@ -40,30 +47,30 @@ class CategoryView(View):
         qs = Category.objects.filter(id=category_id, todolist__owner_id=request.user.id)
 
         if not qs.exists():
-            status_code = 404
-            response = {"errors": "Wrong Category ID"}
-        else:
-            Category.objects.filter(
-                id=category_id, todolist__owner_id=request.user.id
-            ).delete()
-            status_code = 200
-            response = {}
+            return JsonResponse(
+                {"errors": "Wrong Category ID"}, status=HTTPStatus.NOT_FOUND
+            )
 
-        return JsonResponse(response, status=status_code)
+        qs.delete()
+        return JsonResponse({}, status=HTTPStatus.OK)
 
     def patch(self, request, category_id, *args, **kwargs):
         try:
             body = json.loads(request.body.decode("utf-8"))
+            schema = CategoryPatchSchema(**body)
+
             category = Category.objects.get(id=category_id)
-            new_name = body.get("name")
-            category.name = new_name
+
+            for field, value in schema.model_dump(exclude_unset=True).items():
+                setattr(category, field, value)
+
             category.save()
-            status_code = 200
-            response = category.as_dict()
+
+            return JsonResponse(
+                CategorySchema.model_validate(category).model_dump(),
+                status=HTTPStatus.OK,
+            )
         except Category.DoesNotExist:
-            status_code = 404
-            response = {"errors": "Wrong Category ID"}
-        except Exception:
-            status_code = 500
-            response = {"errors": "Unhandled exception"}
-        return JsonResponse(response, status=status_code)
+            return JsonResponse(
+                {"errors": "Wrong Category ID"}, status=HTTPStatus.NOT_FOUND
+            )
